@@ -1,0 +1,577 @@
+"franchise_name","player_id","player_name","vbd_true_avg","true_position","pick_value_raw","comp_pick"
+"Dortmund Cardinals",12688,"Buckner, DeForest",1.187333333,"DL",1.1678,23
+"Dortmund Cardinals",12701,"Smith, Jaylon",4.112666667,"LB",3.4684,1
+"Dortmund Cardinals",13813,"Oluokun, Foyesade",4.404,"LB",3.4684,1
+"Dortmund Cardinals",12736,"Neal, Keanu",-0.9266666667,"LB",-0.9129,50
+"Dortmund Cardinals",12218,"Armstead, Arik",-1.229,"DL",-1.2161,55
+"Dortmund Cardinals",13221,"Davis, Jarrad",-2.258,"LB",-2.2599,80
+"Dortmund Cardinals",14164,"Jones, Dre'Mont",-2.807666667,"DL",-2.7981,101
+"Dortmund Cardinals",15352,"Collins, Zaven",-6.712,"LB",-6.5081,252
+"Dortmund Cardinals",13216,"Cunningham, Zach",5.456666667,"LB",3.4684,1
+"Dortmund Cardinals",14947,"Wonnum, D.J.",-2.5805,"DL",-2.5915,94
+"Dortmund Cardinals",15379,"Tryon, Joe",-4.313,"DL",-4.3264,146
+"Dortmund Cardinals",14923,"Taylor, Darrell",-2.538,"DL",-2.5361,92
+"Dortmund Cardinals",10272,"Watt, J.J.",-0.53,"DL",-0.5206,44
+"Dortmund Cardinals",15443,"Wallow, Garret",-7.088,"LB",-6.5081,252
+"Wolftown Rocketeers",12756,"Ngakoue, Yannick",-0.8366666667,"DL",-0.8498,49
+"Wolftown Rocketeers",13765,"Young, Kenny",-2.988666667,"LB",-2.9945,108
+"Wolftown Rocketeers",14225,"Crosby, Maxx",-0.854,"DL",-0.8498,49
+"Wolftown Rocketeers",13284,"Hendrickson, Trey",-1.982666667,"DL",-1.9762,70
+"Wolftown Rocketeers",15352,"Collins, Zaven",-6.712,"LB",-6.5081,252
+"Wolftown Rocketeers",15351,"Owusu-Koramoah, Jeremiah",1.292,"LB",1.2614,22
+"Wolftown Rocketeers",15346,"Rousseau, Gregory",-1,"DL",-0.9751,51
+"Wolftown Rocketeers",14590,"Al-Shaair, Azeez",-2.568333333,"LB",-2.5631,93
+"Wolftown Rocketeers",12753,"Nassib, Carl",-3.228333333,"DL",-3.2197,116
+"Wolftown Rocketeers",14249,"Van Ginkel, Andrew",-1.625333333,"DL",-1.6113,62
+"Wolftown Rocketeers",12795,"Judon, Matt",0.646,"DL",0.6308,29
+"Wolftown Rocketeers",13330,"Muhammad, Al-Quadin",-3.729666667,"DL",-3.7457,132
+"Wolftown Rocketeers",13293,"Reeves-Maybin, Jalen",-5.161666667,"LB",-5.1579,175
+"Wolftown Rocketeers",10653,"Bynes, Josh",-0.1236666667,"LB",-0.0921,38
+"Wolftown Rocketeers",13267,"Smoot, Dawuane",-3.593333333,"DL",-3.5958,128
+"Wolftown Rocketeers",14943,"Davis-Gaither, Akeem",-4.546,"LB",-4.5594,152
+"Wolftown Rocketeers",13202,"Lawson, Carl",-4.771,"DL",-4.7832,159
+"Wolftown Rocketeers",11299,"Bostic, Jon",0.8396666667,"LB",0.8051,27
+"Wolftown Rocketeers",13426,"Morrow, Nicholas",1.158,"LB",1.1678,23
+"Wolftown Rocketeers",14941,"Taylor, Davion",-5.0665,"LB",-5.0738,171
+"Wolftown Rocketeers",14217,"Barton, Cody",-7.394666667,"LB",-6.5081,252
+"Wolftown Rocketeers",15353,"Surratt, Chazz",-9.4,"LB",-6.5081,252
+"CTU Los Angeles",13775,"Bentley, Ja'Whaun",-0.2826666667,"LB",-0.3113,41
+"CTU Los Angeles",14168,"White, Devin",7.109333333,"LB",3.4684,1
+"CTU Los Angeles",14163,"Simmons, Jeffery",-0.7333333333,"DL",-0.7209,47
+"CTU Los Angeles",12756,"Ngakoue, Yannick",-0.8366666667,"DL",-0.8498,49
+"CTU Los Angeles",12239,"Kendricks, Eric",7.166,"LB",3.4684,1
+"CTU Los Angeles",12231,"Thompson, Shaq",4.464666667,"LB",3.4684,1
+"CTU Los Angeles",12768,"Schobert, Joe",6.320666667,"LB",3.4684,1
+"CTU Los Angeles",14169,"Wilson, Mack",-2.766333333,"LB",-2.7694,100
+"CTU Los Angeles",13787,"Carter, Jermaine",-4.447666667,"LB",-4.4463,149
+"CTU Los Angeles",12739,"Clark, Kenny",-1.537666667,"DL",-1.5566,61
+"CTU Los Angeles",14947,"Wonnum, D.J.",-2.5805,"DL",-2.5915,94
+"CTU Los Angeles",15543,"Griffith, Jonas",-4.4,"LB",-4.407,148
+"CTU Los Angeles",13447,"Wilson, Eric",-0.449,"LB",-0.4519,43
+"CTU Los Angeles",15376,"Turner, Payton",-2.938,"DL",-2.9389,106
+"Cleve Crusader",10266,"Heyward, Cameron",2.298333333,"DL",2.2569,12
+"Cleve Crusader",12779,"Campbell, De'Vondre",5.531333333,"LB",3.4684,1
+"Cleve Crusader",13733,"Leonard, Darius",9.141333333,"LB",3.4684,1
+"Cleve Crusader",14896,"Queen, Patrick",2.7665,"LB",2.7934,7
+"Cleve Crusader",14169,"Wilson, Mack",-2.766333333,"LB",-2.7694,100
+"Cleve Crusader",14147,"Bosa, Nick",-0.08333333333,"DL",-0.0921,38
+"Cleve Crusader",11728,"Mosley, C.J.",7.0395,"LB",3.4684,1
+"Cleve Crusader",15373,"Davis, Jamin",-1.467,"LB",-1.4456,59
+"Cleve Crusader",14928,"Wilson, Logan",0.51,"LB",0.5455,30
+"Cleve Crusader",11723,"Van Noy, Kyle",1.418333333,"LB",1.4518,20
+"Cleve Crusader",12948,"Okwara, Romeo",-3.035666667,"DL",-3.0223,109
+"Cleve Crusader",13330,"Muhammad, Al-Quadin",-3.729666667,"DL",-3.7457,132
+"Cleve Crusader",15349,"Phillips, Jaelan",-1.813,"DL",-1.814,66
+"G-Town Pandas",12241,"Johnson, A.J.",2.079,"LB",2.0493,14
+"G-Town Pandas",12241,"Johnson, Alexander",3.079,"LB",3.1268,4
+"G-Town Pandas",14225,"Crosby, Maxx",-0.854,"DL",-0.8498,49
+"G-Town Pandas",12736,"Neal, Keanu",-0.9266666667,"LB",-0.9129,50
+"G-Town Pandas",13787,"Carter, Jermaine",-4.447666667,"LB",-4.4463,149
+"G-Town Pandas",12221,"Hunter, Danielle",3.665,"DL",3.4684,1
+"G-Town Pandas",11728,"Mosley, C.J.",7.0395,"LB",3.4684,1
+"G-Town Pandas",13307,"Milano, Matt",2.137,"LB",2.1526,13
+"G-Town Pandas",15351,"Owusu-Koramoah, Jeremiah",1.292,"LB",1.2614,22
+"G-Town Pandas",14926,"Gay, Willie",-2.964,"LB",-2.9667,107
+"G-Town Pandas",14940,"Highsmith, Alex",-0.5525,"DL",-0.5206,44
+"G-Town Pandas",11769,"Lawrence, Demarcus",0.465,"DL",0.4614,31
+"G-Town Pandas",14941,"Taylor, Davion",-5.0665,"LB",-5.0738,171
+"G-Town Pandas",15443,"Wallow, Garret",-7.088,"LB",-6.5081,252
+"G-Town Pandas",14877,"Young, Chase",-0.2315,"DL",-0.2393,40
+"G-Town Pandas",15410,"Cox, Jabril",-9.114,"LB",-6.5081,252
+"G-Town Pandas",15367,"Nasirildeen, Hamsah",-9.036,"LB",-6.5081,252
+"G-Town Pandas",14890,"Phillips, Jacob",-4.289,"LB",-4.2853,145
+"G-Town Pandas",15424,"Johnson, Buddy",-9.4,"LB",-6.5081,252
+"Dexter Wolves",12741,"Jones, Chris",-0.5303333333,"DL",-0.5206,44
+"Dexter Wolves",11349,"Collins, Jamie",1.309,"LB",1.356,21
+"Dexter Wolves",10816,"Davis, Demario",4.609333333,"LB",3.4684,1
+"Dexter Wolves",10775,"Wagner, Bobby",7.719333333,"LB",3.4684,1
+"Dexter Wolves",14158,"Oliver, Ed",-2.854333333,"DL",-2.8549,103
+"Dexter Wolves",11772,"Kirksey, Christian",2.514,"LB",2.4685,10
+"Dexter Wolves",12736,"Neal, Keanu",-0.9266666667,"LB",-0.9129,50
+"Dexter Wolves",13727,"Vander Esch, Leighton",1.29,"LB",1.2614,22
+"Dexter Wolves",15373,"Davis, Jamin",-1.467,"LB",-1.4456,59
+"Dexter Wolves",15349,"Phillips, Jaelan",-1.813,"DL",-1.814,66
+"Dexter Wolves",15378,"Oweh, Jayson",-1.738,"DL",-1.7178,64
+"Dexter Wolves",13839,"Sieler, Zach",-2.732333333,"DL",-2.7405,99
+"Dexter Wolves",13746,"Green, Rasheem",-3.400333333,"DL",-3.3988,122
+"Dexter Wolves",14889,"Murray, Kenneth",-1.4025,"LB",-1.3892,58
+"Dexter Wolves",14251,"Cashman, Blake",-5.250333333,"LB",-5.2595,180
+"Dexter Wolves",15428,"Sherwood, Jamien",-5.4,"LB",-5.4031,187
+"Dexter Wolves",14893,"Baun, Zack",-7.6795,"LB",-6.5081,252
+"Dexter Wolves",14925,"Uche, Josh",-6.6225,"LB",-6.5081,252
+"Jena Dragons",12686,"Bosa, Joey",1.2,"DL",1.1678,23
+"Jena Dragons",13696,"Smith, Roquan",7.392666667,"LB",3.4684,1
+"Jena Dragons",13307,"Milano, Matt",2.137,"LB",2.1526,13
+"Jena Dragons",14147,"Bosa, Nick",-0.08333333333,"DL",-0.0921,38
+"Jena Dragons",14235,"Tranquill, Drue",-2.999666667,"LB",-2.9945,108
+"Jena Dragons",13447,"Wilson, Eric",-0.449,"LB",-0.4519,43
+"Jena Dragons",14268,"Long, David",-1.636333333,"LB",-1.6113,62
+"Jena Dragons",12828,"Grugier-Hill, Kamu",-1.884333333,"LB",-1.8997,68
+"Jena Dragons",14221,"Williams, Quincy",-1.661,"LB",-1.6654,63
+"Jena Dragons",15029,"Crowder, Tae",1.789,"LB",1.7458,17
+"Jena Dragons",14926,"Gay, Willie",-2.964,"LB",-2.9667,107
+"Jena Dragons",13306,"Walker, Anthony",4.094333333,"LB",3.4684,1
+"Jena Dragons",13221,"Davis, Jarrad",-2.258,"LB",-2.2599,80
+"Jena Dragons",14322,"Edwards, T.J.",-0.8783333333,"LB",-0.8498,49
+"Jena Dragons",13304,"Brown, Jayon",3.962666667,"LB",3.4684,1
+"Jena Dragons",14891,"Harrison, Malik",-6.274,"LB",-6.2751,235
+"Jena Dragons",13702,"Jewell, Josey",-0.7543333333,"LB",-0.7858,48
+"Jena Dragons",12241,"Johnson, A.J.",2.079,"LB",2.0493,14
+"Jena Dragons",12241,"Johnson, Alexander",3.079,"LB",3.1268,4
+"Jena Dragons",13330,"Muhammad, Al-Quadin",-3.729666667,"DL",-3.7457,132
+"Jena Dragons",14888,"Chaisson, K'Lavon",-4.792,"DL",-4.7832,159
+"Jena Dragons",15348,"Basham, Carlos",-3.224,"DL",-3.2197,116
+"Dortmund Packers",12702,"Jack, Myles",3.526333333,"LB",3.4684,1
+"Dortmund Packers",12701,"Smith, Jaylon",4.112666667,"LB",3.4684,1
+"Dortmund Packers",13765,"Young, Kenny",-2.988666667,"LB",-2.9945,108
+"Dortmund Packers",12075,"Barrett, Shaq",2.855333333,"DL",2.9036,6
+"Dortmund Packers",12218,"Armstead, Arik",-1.229,"DL",-1.2161,55
+"Dortmund Packers",13684,"Hubbard, Sam",1.309,"DL",1.356,21
+"Dortmund Packers",11720,"Barr, Anthony",-0.016,"LB",-0.0167,37
+"Dortmund Packers",15352,"Collins, Zaven",-6.712,"LB",-6.5081,252
+"Dortmund Packers",10267,"Miller, Von",-1.782,"LB",-1.7672,65
+"Dortmund Packers",12753,"Nassib, Carl",-3.228333333,"DL",-3.2197,116
+"Dortmund Packers",13204,"Harris, Charles",-3.508333333,"DL",-3.4941,125
+"Dortmund Packers",13296,"Wise, Deatrich",-2.920666667,"DL",-2.911,105
+"Dortmund Packers",14940,"Highsmith, Alex",-0.5525,"DL",-0.5206,44
+"Dortmund Packers",12301,"Smith, Za'Darius",-1.423666667,"DL",-1.4456,59
+"Dortmund Packers",15356,"Browning, Baron",-3.015,"LB",-3.0223,109
+"Dortmund Packers",15399,"Rice, Monty",-4.7,"LB",-4.6952,156
+"Dortmund Packers",14948,"Walker, Mykal",-5.265,"LB",-5.2595,180
+"Syke Steelers",12231,"Thompson, Shaq",4.464666667,"LB",3.4684,1
+"Syke Steelers",13699,"Evans, Rashaan",1.469333333,"LB",1.4518,20
+"Syke Steelers",14928,"Wilson, Logan",0.51,"LB",0.5455,30
+"Syke Steelers",15082,"Barnes, Krys",0.5435,"LB",0.5455,30
+"Syke Steelers",10266,"Heyward, Cameron",2.298333333,"DL",2.2569,12
+"Syke Steelers",14167,"Allen, Josh",-0.9166666667,"DL",-0.9129,50
+"Syke Steelers",14943,"Davis-Gaither, Akeem",-4.546,"LB",-4.5594,152
+"Syke Steelers",12762,"Vigil, Nick",-0.249,"LB",-0.2393,40
+"Syke Steelers",14268,"Long, David",-1.636333333,"LB",-1.6113,62
+"Syke Steelers",12831,"Roberts, Elandon",-2.140333333,"LB",-2.1344,75
+"Syke Steelers",13787,"Carter, Jermaine",-4.447666667,"LB",-4.4463,149
+"Syke Steelers",13284,"Hendrickson, Trey",-1.982666667,"DL",-1.9762,70
+"Syke Steelers",13222,"McMillan, Raekwon",-3.6225,"LB",-3.6318,129
+"Syke Steelers",14958,"Quarterman, Shaquille",-8.046,"LB",-6.5081,252
+"Syke Steelers",15351,"Owusu-Koramoah, Jeremiah",1.292,"LB",1.2614,22
+"Güstrow Racoons",14171,"Burns, Brian",-0.464,"DL",-0.4519,43
+"Güstrow Racoons",14672,"Reeder, Troy",-1.426333333,"LB",-1.4456,59
+"Güstrow Racoons",12985,"Littleton, Cory",2.865,"LB",2.9036,6
+"Güstrow Racoons",13447,"Wilson, Eric",-0.449,"LB",-0.4519,43
+"Güstrow Racoons",15387,"Werner, Pete",-2.614,"LB",-2.6213,95
+"Güstrow Racoons",14979,"Strnad, Justin",-6,"LB",-6.0029,218
+"Güstrow Racoons",12703,"Ragland, Reggie",-3.387666667,"LB",-3.3988,122
+"Güstrow Racoons",13746,"Green, Rasheem",-3.400333333,"DL",-3.3988,122
+"Güstrow Racoons",15348,"Basham, Carlos",-3.224,"DL",-3.2197,116
+"Güstrow Racoons",14896,"Queen, Patrick",2.7665,"LB",2.7934,7
+"Güstrow Racoons",13704,"Nwosu, Uchenna",-3.314333333,"DL",-3.3076,119
+"Güstrow Racoons",13212,"Wormley, Chris",-4.127333333,"DL",-4.1177,141
+"Güstrow Racoons",13426,"Morrow, Nicholas",1.158,"LB",1.1678,23
+"Güstrow Racoons",14164,"Jones, Dre'Mont",-2.807666667,"DL",-2.7981,101
+"Güstrow Racoons",14412,"Singleton, Alex",-0.07233333333,"LB",-0.0921,38
+"Güstrow Racoons",14929,"Okwara, Julian",-4.8645,"DL",-4.8632,162
+"Güstrow Racoons",14149,"Gary, Rashan",-2.875333333,"DL",-2.883,104
+"Güstrow Racoons",14161,"Tillery, Jerry",-3.827666667,"DL",-3.8255,134
+"Güstrow Racoons",15519,"Hilliard, Justin",-9.4,"LB",-6.5081,252
+"Güstrow Racoons",14241,"Burr-Kirven, Ben",-8.846,"LB",-6.5081,252
+"Güstrow Racoons",14962,"Gipson, Trevis",-4.091,"DL",-4.0754,140
+"Güstrow Racoons",10653,"Bynes, Josh",-0.1236666667,"LB",-0.0921,38
+"Güstrow Racoons",15586,"Johnson, Caleb",-9.309,"LB",-6.5081,252
+"Flens Pirates ",11757,"Donald, Aaron",1.562333333,"DL",1.5487,19
+"Flens Pirates ",10768,"David, Lavonte",5.328,"LB",3.4684,1
+"Flens Pirates ",12745,"Jones, Deion",5.006333333,"LB",3.4684,1
+"Flens Pirates ",12305,"Jarrett, Grady",-0.9583333333,"DL",-0.9751,51
+"Flens Pirates ",14168,"White, Devin",7.109333333,"LB",3.4684,1
+"Flens Pirates ",12302,"Wilson, Damien",0.349,"LB",0.3785,32
+"Flens Pirates ",9833,"Pierre-Paul, Jason",0.458,"DL",0.4614,31
+"Flens Pirates ",12734,"Floyd, Leonard",-0.25,"DL",-0.2393,40
+"Flens Pirates ",14170,"Bush, Devin",2.129666667,"LB",2.1526,13
+"Flens Pirates ",14897,"Brown, Derrick",-2.696,"DL",-2.6816,97
+"Flens Pirates ",12795,"Judon, Matt",0.646,"DL",0.6308,29
+"Flens Pirates ",13746,"Green, Rasheem",-3.400333333,"DL",-3.3988,122
+"Flens Pirates ",13702,"Jewell, Josey",-0.7543333333,"LB",-0.7858,48
+"Flens Pirates ",12788,"Martinez, Blake",5.955333333,"LB",3.4684,1
+"Flens Pirates ",10269,"Quinn, Robert",-1.326666667,"LB",-1.3322,57
+"Flens Pirates ",13690,"Sweat, Josh",-2.610333333,"DL",-2.6213,95
+"Wüterich Packers",10292,"Jordan, Cameron",1.213666667,"DL",1.1678,23
+"Wüterich Packers",10753,"Jones, Chandler",1.012333333,"DL",0.9841,25
+"Wüterich Packers",12768,"Schobert, Joe",6.320666667,"LB",3.4684,1
+"Wüterich Packers",13765,"Young, Kenny",-2.988666667,"LB",-2.9945,108
+"Wüterich Packers",9825,"Dunlap, Carlos",-0.557,"DL",-0.5884,45
+"Wüterich Packers",11293,"Ogletree, Alec",-1.179,"LB",-1.157,54
+"Wüterich Packers",12764,"Hargrave, Javon",-1.456,"DL",-1.4456,59
+"Wüterich Packers",14221,"Williams, Quincy",-1.661,"LB",-1.6654,63
+"Wüterich Packers",13293,"Reeves-Maybin, Jalen",-5.161666667,"LB",-5.1579,175
+"Wüterich Packers",12272,"McKinney, Benardrick",1.291333333,"LB",1.2614,22
+"Wüterich Packers",12481,"Hewitt, Neville",1.365,"LB",1.356,21
+"Wüterich Packers",10266,"Heyward, Cameron",2.298333333,"DL",2.2569,12
+"Wüterich Packers",14928,"Wilson, Logan",0.51,"LB",0.5455,30
+"Wüterich Packers",15049,"Bachie, Joe",-6.2475,"LB",-6.245,233
+"Wüterich Packers",12700,"Johnson, Austin",-4.187666667,"DL",-4.202,143
+"Wüterich Packers",10768,"David, Lavonte",5.328,"LB",3.4684,1
+"Wüterich Packers",14941,"Taylor, Davion",-5.0665,"LB",-5.0738,171
+"Wüterich Packers",15431,"Fields, Tony",-9.4,"LB",-6.5081,252
+"Wüterich Packers",15399,"Rice, Monty",-4.7,"LB",-4.6952,156
+"Cologne Thunderkittens",14260,"Holcomb, Cole",4.036666667,"LB",3.4684,1
+"Cologne Thunderkittens",12238,"Perryman, Denzel",1.955666667,"LB",1.9471,15
+"Cologne Thunderkittens",12287,"Hicks, Jordan",5.677333333,"LB",3.4684,1
+"Cologne Thunderkittens",14887,"Simmons, Isaiah",0.2035,"LB",0.2166,34
+"Cologne Thunderkittens",14167,"Allen, Josh",-0.9166666667,"DL",-0.9129,50
+"Cologne Thunderkittens",15379,"Tryon, Joe",-4.313,"DL",-4.3264,146
+"Cologne Thunderkittens",15349,"Phillips, Jaelan",-1.813,"DL",-1.814,66
+"Cologne Thunderkittens",14162,"Wilkins, Christian",-0.3293333333,"DL",-0.3113,41
+"Cologne Thunderkittens",14882,"Greenard, Jonathan",-2.597,"DL",-2.5915,94
+"Cologne Thunderkittens",14153,"Allen, Zach",-2.805333333,"DL",-2.7981,101
+"Cologne Thunderkittens",11723,"Van Noy, Kyle",1.418333333,"LB",1.4518,20
+"Cologne Thunderkittens",14148,"Sweat, Montez",-0.917,"DL",-0.9129,50
+"Cologne Thunderkittens",13810,"Joseph-Day, Sebastian",-0.8776666667,"DL",-0.8498,49
+"Cologne Thunderkittens",15404,"Jones, Ernest",-2,"LB",-2.0113,71
+"Cologne Thunderkittens",15428,"Sherwood, Jamien",-5.4,"LB",-5.4031,187
+"Cologne Thunderkittens",10267,"Miller, Von",-1.782,"LB",-1.7672,65
+"Deevillage Moonwalkers",10775,"Wagner, Bobby",7.719333333,"LB",3.4684,1
+"Deevillage Moonwalkers",14168,"White, Devin",7.109333333,"LB",3.4684,1
+"Deevillage Moonwalkers",9833,"Pierre-Paul, Jason",0.458,"DL",0.4614,31
+"Deevillage Moonwalkers",13813,"Oluokun, Foyesade",4.404,"LB",3.4684,1
+"Deevillage Moonwalkers",12239,"Kendricks, Eric",7.166,"LB",3.4684,1
+"Deevillage Moonwalkers",15082,"Barnes, Krys",0.5435,"LB",0.5455,30
+"Deevillage Moonwalkers",15409,"Barnes, Derrick",-3.025,"LB",-3.0223,109
+"Deevillage Moonwalkers",14221,"Williams, Quincy",-1.661,"LB",-1.6654,63
+"Deevillage Moonwalkers",12831,"Roberts, Elandon",-2.140333333,"LB",-2.1344,75
+"Deevillage Moonwalkers",14162,"Wilkins, Christian",-0.3293333333,"DL",-0.3113,41
+"Deevillage Moonwalkers",11772,"Kirksey, Christian",2.514,"LB",2.4685,10
+"Deevillage Moonwalkers",14148,"Sweat, Montez",-0.917,"DL",-0.9129,50
+"Deevillage Moonwalkers",15543,"Griffith, Jonas",-4.4,"LB",-4.407,148
+"Deevillage Moonwalkers",11706,"Clowney, Jadeveon",-1.287,"DL",-1.2745,56
+"Deevillage Moonwalkers",14891,"Harrison, Malik",-6.274,"LB",-6.2751,235
+"Deevillage Moonwalkers",15376,"Turner, Payton",-2.938,"DL",-2.9389,106
+"Deevillage Moonwalkers",15386,"Odeyingbo, Dayo",-6.16,"DL",-6.1674,228
+"Las Vegas Saints",11757,"Donald, Aaron",1.562333333,"DL",1.5487,19
+"Las Vegas Saints",13198,"Garrett, Myles",1.849333333,"DL",1.8459,16
+"Las Vegas Saints",12779,"Campbell, De'Vondre",5.531333333,"LB",3.4684,1
+"Las Vegas Saints",10768,"David, Lavonte",5.328,"LB",3.4684,1
+"Las Vegas Saints",13245,"Reddick, Haason",1.902333333,"DL",1.9471,15
+"Las Vegas Saints",14892,"Brooks, Jordyn",2.726,"LB",2.6841,8
+"Las Vegas Saints",13727,"Vander Esch, Leighton",1.29,"LB",1.2614,22
+"Las Vegas Saints",14167,"Allen, Josh",-0.9166666667,"DL",-0.9129,50
+"Las Vegas Saints",14235,"Tranquill, Drue",-2.999666667,"LB",-2.9945,108
+"Las Vegas Saints",15355,"Bolton, Nick",2.467,"LB",2.4685,10
+"Las Vegas Saints",15385,"Ojulari, Azeez",-0.876,"DL",-0.8498,49
+"Las Vegas Saints",13306,"Walker, Anthony",4.094333333,"LB",3.4684,1
+"Las Vegas Saints",12233,"Alexander, Kwon",0.3686666667,"LB",0.3785,32
+"Las Vegas Saints",13688,"Davenport, Marcus",-1.550666667,"DL",-1.5566,61
+"Las Vegas Saints",10272,"Watt, J.J.",-0.53,"DL",-0.5206,44
+"Las Vegas Saints",14161,"Tillery, Jerry",-3.827666667,"DL",-3.8255,134
+"Wichita´s Hall of Fame Squad",12745,"Jones, Deion",5.006333333,"LB",3.4684,1
+"Wichita´s Hall of Fame Squad",13733,"Leonard, Darius",9.141333333,"LB",3.4684,1
+"Wichita´s Hall of Fame Squad",13696,"Smith, Roquan",7.392666667,"LB",3.4684,1
+"Wichita´s Hall of Fame Squad",13198,"Garrett, Myles",1.849333333,"DL",1.8459,16
+"Wichita´s Hall of Fame Squad",14147,"Bosa, Nick",-0.08333333333,"DL",-0.0921,38
+"Wichita´s Hall of Fame Squad",14882,"Greenard, Jonathan",-2.597,"DL",-2.5915,94
+"Wichita´s Hall of Fame Squad",10272,"Watt, J.J.",-0.53,"DL",-0.5206,44
+"Nordic Wolves",10775,"Wagner, Bobby",7.719333333,"LB",3.4684,1
+"Nordic Wolves",12287,"Hicks, Jordan",5.677333333,"LB",3.4684,1
+"Nordic Wolves",13733,"Leonard, Darius",9.141333333,"LB",3.4684,1
+"Nordic Wolves",13743,"Warner, Fred",6.008,"LB",3.4684,1
+"Nordic Wolves",14171,"Burns, Brian",-0.464,"DL",-0.4519,43
+"Nordic Wolves",13684,"Hubbard, Sam",1.309,"DL",1.356,21
+"Nordic Wolves",13307,"Milano, Matt",2.137,"LB",2.1526,13
+"Nordic Wolves",11728,"Mosley, C.J.",7.0395,"LB",3.4684,1
+"Nordic Wolves",13204,"Harris, Charles",-3.508333333,"DL",-3.4941,125
+"Nordic Wolves",13304,"Brown, Jayon",3.962666667,"LB",3.4684,1
+"Nordic Wolves",11769,"Lawrence, Demarcus",0.465,"DL",0.4614,31
+"Nordic Wolves",13987,"Spillane, Robert",-4.543333333,"LB",-4.5594,152
+"Nordic Wolves",13268,"Anzalone, Alex",-1.4,"LB",-1.3892,58
+"Hintertupfingen Griffins",12688,"Buckner, DeForest",1.187333333,"DL",1.1678,23
+"Hintertupfingen Griffins",12233,"Alexander, Kwon",0.3686666667,"LB",0.3785,32
+"Hintertupfingen Griffins",14218,"Okereke, Bobby",1.617666667,"LB",1.6467,18
+"Hintertupfingen Griffins",14171,"Burns, Brian",-0.464,"DL",-0.4519,43
+"Hintertupfingen Griffins",14247,"Greenlaw, Dre",2.264,"LB",2.2569,12
+"Hintertupfingen Griffins",14225,"Crosby, Maxx",-0.854,"DL",-0.8498,49
+"Hintertupfingen Griffins",11772,"Kirksey, Christian",2.514,"LB",2.4685,10
+"Hintertupfingen Griffins",13762,"White, Kyzir",1.580666667,"LB",1.5487,19
+"Hintertupfingen Griffins",14672,"Reeder, Troy",-1.426333333,"LB",-1.4456,59
+"Hintertupfingen Griffins",15431,"Fields, Tony",-9.4,"LB",-6.5081,252
+"Hintertupfingen Griffins",15348,"Basham, Carlos",-3.224,"DL",-3.2197,116
+"Hintertupfingen Griffins",13426,"Morrow, Nicholas",1.158,"LB",1.1678,23
+"Hintertupfingen Griffins",15410,"Cox, Jabril",-9.114,"LB",-6.5081,252
+"Dresden Jaguars",11721,"Mack, Khalil",0.7796666667,"DL",0.8051,27
+"Dresden Jaguars",13706,"Baker, Jerome",3.99,"LB",3.4684,1
+"Dresden Jaguars",13208,"Allen, Jonathan",-0.005666666667,"DL",-0.0167,37
+"Dresden Jaguars",14218,"Okereke, Bobby",1.617666667,"LB",1.6467,18
+"Dresden Jaguars",14948,"Walker, Mykal",-5.265,"LB",-5.2595,180
+"Dresden Jaguars",14923,"Taylor, Darrell",-2.538,"DL",-2.5361,92
+"Dresden Jaguars",14249,"Van Ginkel, Andrew",-1.625333333,"DL",-1.6113,62
+"Dresden Jaguars",15350,"Parsons, Micah",4.038,"LB",3.4684,1
+"Dresden Jaguars",13700,"Landry, Harold",1.895666667,"DL",1.8459,16
+"Dresden Jaguars",13306,"Walker, Anthony",4.094333333,"LB",3.4684,1
+"Dresden Jaguars",14882,"Greenard, Jonathan",-2.597,"DL",-2.5915,94
+"Dresden Jaguars",13704,"Nwosu, Uchenna",-3.314333333,"DL",-3.3076,119
+"Dresden Jaguars",12948,"Okwara, Romeo",-3.035666667,"DL",-3.0223,109
+"Dresden Jaguars",14958,"Quarterman, Shaquille",-8.046,"LB",-6.5081,252
+"Dresden Jaguars",15353,"Surratt, Chazz",-9.4,"LB",-6.5081,252
+"Dresden Jaguars",15376,"Turner, Payton",-2.938,"DL",-2.9389,106
+"Wandsbek Hogs",12280,"Clark, Frank",-2.084333333,"DL",-2.076,73
+"Wandsbek Hogs",11706,"Clowney, Jadeveon",-1.287,"DL",-1.2745,56
+"Wandsbek Hogs",13700,"Landry, Harold",1.895666667,"DL",1.8459,16
+"Wandsbek Hogs",13775,"Bentley, Ja'Whaun",-0.2826666667,"LB",-0.3113,41
+"Wandsbek Hogs",12762,"Vigil, Nick",-0.249,"LB",-0.2393,40
+"Wandsbek Hogs",13697,"Edmunds, Tremaine",4.106333333,"LB",3.4684,1
+"Wandsbek Hogs",12734,"Floyd, Leonard",-0.25,"DL",-0.2393,40
+"Wandsbek Hogs",14200,"Tavai, Jahlani",-4.396,"LB",-4.407,148
+"Wandsbek Hogs",13684,"Hubbard, Sam",1.309,"DL",1.356,21
+"Wandsbek Hogs",14217,"Barton, Cody",-7.394666667,"LB",-6.5081,252
+"Wandsbek Hogs",15385,"Ojulari, Azeez",-0.876,"DL",-0.8498,49
+"Wandsbek Hogs",10465,"Smith, Malcolm",-2.973666667,"LB",-2.9667,107
+"Wandsbek Hogs",14891,"Harrison, Malik",-6.274,"LB",-6.2751,235
+"Wandsbek Hogs",11299,"Bostic, Jon",0.8396666667,"LB",0.8051,27
+"Wandsbek Hogs",14948,"Walker, Mykal",-5.265,"LB",-5.2595,180
+"Wandsbek Hogs",13702,"Jewell, Josey",-0.7543333333,"LB",-0.7858,48
+"Wandsbek Hogs",14979,"Strnad, Justin",-6,"LB",-6.0029,218
+"Wandsbek Hogs",15387,"Werner, Pete",-2.614,"LB",-2.6213,95
+"Munich Lions",12691,"Ogbah, Emmanuel",-0.09166666667,"DL",-0.0921,38
+"Munich Lions",11795,"Hitchens, Anthony",0.04033333333,"LB",0.0598,36
+"Munich Lions",12238,"Perryman, Denzel",1.955666667,"LB",1.9471,15
+"Munich Lions",13697,"Edmunds, Tremaine",4.106333333,"LB",3.4684,1
+"Munich Lions",12218,"Armstead, Arik",-1.229,"DL",-1.2161,55
+"Munich Lions",13304,"Brown, Jayon",3.962666667,"LB",3.4684,1
+"Munich Lions",12287,"Hicks, Jordan",5.677333333,"LB",3.4684,1
+"Munich Lions",15355,"Bolton, Nick",2.467,"LB",2.4685,10
+"Munich Lions",12828,"Grugier-Hill, Kamu",-1.884333333,"LB",-1.8997,68
+"Munich Lions",11769,"Lawrence, Demarcus",0.465,"DL",0.4614,31
+"Munich Lions",10269,"Quinn, Robert",-1.326666667,"LB",-1.3322,57
+"Munich Lions",12481,"Hewitt, Neville",1.365,"LB",1.356,21
+"Munich Lions",10292,"Jordan, Cameron",1.213666667,"DL",1.1678,23
+"Munich Lions",12215,"Gregory, Randy",-1.459,"DL",-1.4456,59
+"Munich Lions",12788,"Martinez, Blake",5.955333333,"LB",3.4684,1
+"Munich Lions",15357,"Barmore, Christian",-3.563,"DL",-3.5608,127
+"Munich Lions",15356,"Browning, Baron",-3.015,"LB",-3.0223,109
+"M-V Lightning",12686,"Bosa, Joey",1.2,"DL",1.1678,23
+"M-V Lightning",13245,"Reddick, Haason",1.902333333,"DL",1.9471,15
+"M-V Lightning",13706,"Baker, Jerome",3.99,"LB",3.4684,1
+"M-V Lightning",13208,"Allen, Jonathan",-0.005666666667,"DL",-0.0167,37
+"M-V Lightning",14260,"Holcomb, Cole",4.036666667,"LB",3.4684,1
+"M-V Lightning",12985,"Littleton, Cory",2.865,"LB",2.9036,6
+"M-V Lightning",12734,"Floyd, Leonard",-0.25,"DL",-0.2393,40
+"M-V Lightning",14889,"Murray, Kenneth",-1.4025,"LB",-1.3892,58
+"M-V Lightning",12225,"Williams, Leonard",-0.538,"DL",-0.5206,44
+"M-V Lightning",13833,"Howard, Travin",-7.109,"LB",-6.5081,252
+"M-V Lightning",14249,"Van Ginkel, Andrew",-1.625333333,"DL",-1.6113,62
+"M-V Lightning",12215,"Gregory, Randy",-1.459,"DL",-1.4456,59
+"M-V Lightning",13703,"Carter, Lorenzo",-1.204333333,"DL",-1.2161,55
+"M-V Lightning",15350,"Parsons, Micah",4.038,"LB",3.4684,1
+"M-V Lightning",13222,"McMillan, Raekwon",-3.6225,"LB",-3.6318,129
+"M-V Lightning",13839,"Sieler, Zach",-2.732333333,"DL",-2.7405,99
+"M-V Lightning",13696,"Smith, Roquan",7.392666667,"LB",3.4684,1
+"M-V Lightning",14899,"Kinlaw, Javon",-3.835,"DL",-3.8255,134
+"Berlin Bears",12701,"Smith, Jaylon",4.112666667,"LB",3.4684,1
+"Berlin Bears",10816,"Davis, Demario",4.609333333,"LB",3.4684,1
+"Berlin Bears",12231,"Thompson, Shaq",4.464666667,"LB",3.4684,1
+"Berlin Bears",9833,"Pierre-Paul, Jason",0.458,"DL",0.4614,31
+"Berlin Bears",14247,"Greenlaw, Dre",2.264,"LB",2.2569,12
+"Berlin Bears",13690,"Sweat, Josh",-2.610333333,"DL",-2.6213,95
+"Berlin Bears",12302,"Wilson, Damien",0.349,"LB",0.3785,32
+"Berlin Bears",13762,"White, Kyzir",1.580666667,"LB",1.5487,19
+"Berlin Bears",11293,"Ogletree, Alec",-1.179,"LB",-1.157,54
+"Berlin Bears",12764,"Hargrave, Javon",-1.456,"DL",-1.4456,59
+"Berlin Bears",13688,"Davenport, Marcus",-1.550666667,"DL",-1.5566,61
+"Berlin Bears",11795,"Hitchens, Anthony",0.04033333333,"LB",0.0598,36
+"Berlin Bears",14405,"Granderson, Carl",-4.825333333,"DL",-4.8372,161
+"Berlin Bears",14893,"Baun, Zack",-7.6795,"LB",-6.5081,252
+"Berlin Bears",13202,"Lawson, Carl",-4.771,"DL",-4.7832,159
+"Berlin Bears",15409,"Barnes, Derrick",-3.025,"LB",-3.0223,109
+"Berlin Bears",15387,"Werner, Pete",-2.614,"LB",-2.6213,95
+"Milano Raptors",13198,"Garrett, Myles",1.849333333,"DL",1.8459,16
+"Milano Raptors",12239,"Kendricks, Eric",7.166,"LB",3.4684,1
+"Milano Raptors",13214,"Watt, T.J.",5.519333333,"DL",3.4684,1
+"Milano Raptors",12691,"Ogbah, Emmanuel",-0.09166666667,"DL",-0.0921,38
+"Milano Raptors",11720,"Barr, Anthony",-0.016,"LB",-0.0167,37
+"Milano Raptors",14157,"Williams, Quinnen",-0.7593333333,"DL",-0.7858,48
+"Milano Raptors",12221,"Hunter, Danielle",3.665,"DL",3.4684,1
+"Milano Raptors",10269,"Quinn, Robert",-1.326666667,"LB",-1.3322,57
+"Milano Raptors",11721,"Mack, Khalil",0.7796666667,"DL",0.8051,27
+"Milano Raptors",10267,"Miller, Von",-1.782,"LB",-1.7672,65
+"Milano Raptors",14322,"Edwards, T.J.",-0.8783333333,"LB",-0.8498,49
+"Milano Raptors",12985,"Littleton, Cory",2.865,"LB",2.9036,6
+"Milano Raptors",15379,"Tryon, Joe",-4.313,"DL",-4.3264,146
+"Hannover Eagles",13697,"Edmunds, Tremaine",4.106333333,"LB",3.4684,1
+"Hannover Eagles",15367,"Nasirildeen, Hamsah",-9.036,"LB",-6.5081,252
+"Hannover Eagles",14893,"Baun, Zack",-7.6795,"LB",-6.5081,252
+"Hannover Eagles",14590,"Al-Shaair, Azeez",-2.568333333,"LB",-2.5631,93
+"Hannover Eagles",13690,"Sweat, Josh",-2.610333333,"DL",-2.6213,95
+"Hannover Eagles",13293,"Reeves-Maybin, Jalen",-5.161666667,"LB",-5.1579,175
+"Hannover Eagles",12233,"Alexander, Kwon",0.3686666667,"LB",0.3785,32
+"Hannover Eagles",14322,"Edwards, T.J.",-0.8783333333,"LB",-0.8498,49
+"Hannover Eagles",11349,"Collins, Jamie",1.309,"LB",1.356,21
+"Hannover Eagles",15450,"McGrone, Cameron",-9.4,"LB",-6.5081,252
+"Hannover Eagles",14877,"Young, Chase",-0.2315,"DL",-0.2393,40
+"Hannover Eagles",15424,"Johnson, Buddy",-9.4,"LB",-6.5081,252
+"Hannover Eagles",15428,"Sherwood, Jamien",-5.4,"LB",-5.4031,187
+"Red Raiders",11795,"Hitchens, Anthony",0.04033333333,"LB",0.0598,36
+"Red Raiders",12702,"Jack, Myles",3.526333333,"LB",3.4684,1
+"Red Raiders",13201,"Barnett, Derek",-2.483333333,"DL",-2.4853,90
+"Red Raiders",14210,"Pratt, Germaine",-0.02933333333,"LB",-0.0167,37
+"Red Raiders",14892,"Brooks, Jordyn",2.726,"LB",2.6841,8
+"Red Raiders",12302,"Wilson, Damien",0.349,"LB",0.3785,32
+"Red Raiders",14412,"Singleton, Alex",-0.07233333333,"LB",-0.0921,38
+"Red Raiders",12221,"Hunter, Danielle",3.665,"DL",3.4684,1
+"Red Raiders",10753,"Jones, Chandler",1.012333333,"DL",0.9841,25
+"Red Raiders",15346,"Rousseau, Gregory",-1,"DL",-0.9751,51
+"Red Raiders",13204,"Harris, Charles",-3.508333333,"DL",-3.4941,125
+"Red Raiders",13688,"Davenport, Marcus",-1.550666667,"DL",-1.5566,61
+"Red Raiders",15386,"Odeyingbo, Dayo",-6.16,"DL",-6.1674,228
+"Red Raiders",14890,"Phillips, Jacob",-4.289,"LB",-4.2853,145
+"Red Raiders",12241,"Johnson, A.J.",2.079,"LB",2.0493,14
+"Red Raiders",12241,"Johnson, Alexander",3.079,"LB",3.1268,4
+"Red Raiders",14979,"Strnad, Justin",-6,"LB",-6.0029,218
+"Red Raiders",13200,"Charlton, Taco",-4.031666667,"DL",-4.0331,139
+"Red Raiders",15353,"Surratt, Chazz",-9.4,"LB",-6.5081,252
+"Golden Skulls Göttingen",12688,"Buckner, DeForest",1.187333333,"DL",1.1678,23
+"Golden Skulls Göttingen",12779,"Campbell, De'Vondre",5.531333333,"LB",3.4684,1
+"Golden Skulls Göttingen",11721,"Mack, Khalil",0.7796666667,"DL",0.8051,27
+"Golden Skulls Göttingen",13723,"Payne, Da'Ron",-1.257,"DL",-1.2745,56
+"Golden Skulls Göttingen",12305,"Jarrett, Grady",-0.9583333333,"DL",-0.9751,51
+"Golden Skulls Göttingen",12217,"Fowler, Dante",-1.372666667,"DL",-1.3892,58
+"Golden Skulls Göttingen",12234,"Dupree, Bud",0.059,"DL",0.0598,36
+"Golden Skulls Göttingen",12278,"Golden, Markus",0.006666666667,"DL",-0.0167,37
+"Golden Skulls Göttingen",12225,"Williams, Leonard",-0.538,"DL",-0.5206,44
+"Golden Skulls Göttingen",14170,"Bush, Devin",2.129666667,"LB",2.1526,13
+"Golden Skulls Göttingen",13245,"Reddick, Haason",1.902333333,"DL",1.9471,15
+"Golden Skulls Göttingen",13813,"Oluokun, Foyesade",4.404,"LB",3.4684,1
+"Golden Skulls Göttingen",15385,"Ojulari, Azeez",-0.876,"DL",-0.8498,49
+"Golden Skulls Göttingen",10753,"Jones, Chandler",1.012333333,"DL",0.9841,25
+"Golden Skulls Göttingen",14148,"Sweat, Montez",-0.917,"DL",-0.9129,50
+"Golden Skulls Göttingen",15410,"Cox, Jabril",-9.114,"LB",-6.5081,252
+"German Cats",11293,"Ogletree, Alec",-1.179,"LB",-1.157,54
+"German Cats",13699,"Evans, Rashaan",1.469333333,"LB",1.4518,20
+"German Cats",12741,"Jones, Chris",-0.5303333333,"DL",-0.5206,44
+"German Cats",12753,"Nassib, Carl",-3.228333333,"DL",-3.2197,116
+"German Cats",12691,"Ogbah, Emmanuel",-0.09166666667,"DL",-0.0921,38
+"German Cats",13268,"Anzalone, Alex",-1.4,"LB",-1.3892,58
+"German Cats",14169,"Wilson, Mack",-2.766333333,"LB",-2.7694,100
+"German Cats",12222,"Flowers, Trey",-0.5713333333,"DL",-0.5884,45
+"German Cats",12238,"Perryman, Denzel",1.955666667,"LB",1.9471,15
+"German Cats",14163,"Simmons, Jeffery",-0.7333333333,"DL",-0.7209,47
+"German Cats",12828,"Grugier-Hill, Kamu",-1.884333333,"LB",-1.8997,68
+"German Cats",10653,"Bynes, Josh",-0.1236666667,"LB",-0.0921,38
+"German Cats",11349,"Collins, Jamie",1.309,"LB",1.356,21
+"German Cats",13222,"McMillan, Raekwon",-3.6225,"LB",-3.6318,129
+"German Cats",15404,"Jones, Ernest",-2,"LB",-2.0113,71
+"D-Block Busters",11299,"Bostic, Jon",0.8396666667,"LB",0.8051,27
+"D-Block Busters",12768,"Schobert, Joe",6.320666667,"LB",3.4684,1
+"D-Block Busters",12278,"Golden, Markus",0.006666666667,"DL",-0.0167,37
+"D-Block Busters",15367,"Nasirildeen, Hamsah",-9.036,"LB",-6.5081,252
+"D-Block Busters",12703,"Ragland, Reggie",-3.387666667,"LB",-3.3988,122
+"D-Block Busters",15386,"Odeyingbo, Dayo",-6.16,"DL",-6.1674,228
+"D-Block Busters",13216,"Cunningham, Zach",5.456666667,"LB",3.4684,1
+"D-Block Busters",14164,"Jones, Dre'Mont",-2.807666667,"DL",-2.7981,101
+"D-Block Busters",14940,"Highsmith, Alex",-0.5525,"DL",-0.5206,44
+"D-Block Busters",13202,"Lawson, Carl",-4.771,"DL",-4.7832,159
+"D-Block Busters",12788,"Martinez, Blake",5.955333333,"LB",3.4684,1
+"D-Block Busters",12225,"Williams, Leonard",-0.538,"DL",-0.5206,44
+"D-Block Busters",12745,"Jones, Deion",5.006333333,"LB",3.4684,1
+"D-Block Busters",14412,"Singleton, Alex",-0.07233333333,"LB",-0.0921,38
+"D-Block Busters",15356,"Browning, Baron",-3.015,"LB",-3.0223,109
+"Higglystadt Patriots",11723,"Van Noy, Kyle",1.418333333,"LB",1.4518,20
+"Higglystadt Patriots",13700,"Landry, Harold",1.895666667,"DL",1.8459,16
+"Higglystadt Patriots",13723,"Payne, Da'Ron",-1.257,"DL",-1.2745,56
+"Higglystadt Patriots",12278,"Golden, Markus",0.006666666667,"DL",-0.0167,37
+"Higglystadt Patriots",14210,"Pratt, Germaine",-0.02933333333,"LB",-0.0167,37
+"Higglystadt Patriots",12217,"Fowler, Dante",-1.372666667,"DL",-1.3892,58
+"Higglystadt Patriots",14887,"Simmons, Isaiah",0.2035,"LB",0.2166,34
+"Higglystadt Patriots",10774,"Hightower, Dont'a",-0.3605,"LB",-0.3821,42
+"Higglystadt Patriots",14235,"Tranquill, Drue",-2.999666667,"LB",-2.9945,108
+"Higglystadt Patriots",15345,"Paye, Kwity",-3.009,"DL",-3.0223,109
+"Higglystadt Patriots",14162,"Wilkins, Christian",-0.3293333333,"DL",-0.3113,41
+"Higglystadt Patriots",14890,"Phillips, Jacob",-4.289,"LB",-4.2853,145
+"Higglystadt Patriots",12763,"Fackrell, Kyler",-3.743333333,"DL",-3.7457,132
+"German Swans",9051,"Campbell, Calais",-1.331666667,"DL",-1.3322,57
+"German Swans",13214,"Watt, T.J.",5.519333333,"DL",3.4684,1
+"German Swans",13201,"Barnett, Derek",-2.483333333,"DL",-2.4853,90
+"German Swans",13743,"Warner, Fred",6.008,"LB",3.4684,1
+"German Swans",14155,"Collier, L.J.",-6.469333333,"DL",-6.4702,249
+"German Swans",10762,"Cox, Fletcher",-2.069666667,"DL",-2.076,73
+"German Swans",9815,"Suh, Ndamukong",-2.417,"DL",-2.4152,87
+"German Swans",15029,"Crowder, Tae",1.789,"LB",1.7458,17
+"German Swans",11706,"Clowney, Jadeveon",-1.287,"DL",-1.2745,56
+"German Swans",15378,"Oweh, Jayson",-1.738,"DL",-1.7178,64
+"German Swans",15346,"Rousseau, Gregory",-1,"DL",-0.9751,51
+"German Swans",14247,"Greenlaw, Dre",2.264,"LB",2.2569,12
+"German Swans",12234,"Dupree, Bud",0.059,"DL",0.0598,36
+"German Swans",14879,"Epenesa, A.J.",-5.7515,"DL",-5.7506,204
+"German Swans",14932,"Lewis, Terrell",-5.779,"LB",-5.7696,205
+"German Swans",15345,"Paye, Kwity",-3.009,"DL",-3.0223,109
+"German Swans",15409,"Barnes, Derrick",-3.025,"LB",-3.0223,109
+"Newtown Patriots",13214,"Watt, T.J.",5.519333333,"DL",3.4684,1
+"Newtown Patriots",13208,"Allen, Jonathan",-0.005666666667,"DL",-0.0167,37
+"Newtown Patriots",13723,"Payne, Da'Ron",-1.257,"DL",-1.2745,56
+"Newtown Patriots",12741,"Jones, Chris",-0.5303333333,"DL",-0.5206,44
+"Newtown Patriots",14155,"Collier, L.J.",-6.469333333,"DL",-6.4702,249
+"Newtown Patriots",12075,"Barrett, Shaq",2.855333333,"DL",2.9036,6
+"Newtown Patriots",14899,"Kinlaw, Javon",-3.835,"DL",-3.8255,134
+"Newtown Patriots",12272,"McKinney, Benardrick",1.291333333,"LB",1.2614,22
+"Newtown Patriots",11720,"Barr, Anthony",-0.016,"LB",-0.0167,37
+"Newtown Patriots",15357,"Barmore, Christian",-3.563,"DL",-3.5608,127
+"Newtown Patriots",14925,"Uche, Josh",-6.6225,"LB",-6.5081,252
+"Newtown Patriots",13775,"Bentley, Ja'Whaun",-0.2826666667,"LB",-0.3113,41
+"Newtown Patriots",14877,"Young, Chase",-0.2315,"DL",-0.2393,40
+"Newtown Patriots",13727,"Vander Esch, Leighton",1.29,"LB",1.2614,22
+"Newtown Patriots",13268,"Anzalone, Alex",-1.4,"LB",-1.3892,58
+"Newtown Patriots",13987,"Spillane, Robert",-4.543333333,"LB",-4.5594,152
+"Auwald Woodpecker",12686,"Bosa, Joey",1.2,"DL",1.1678,23
+"Auwald Woodpecker",13706,"Baker, Jerome",3.99,"LB",3.4684,1
+"Auwald Woodpecker",10816,"Davis, Demario",4.609333333,"LB",3.4684,1
+"Auwald Woodpecker",12075,"Barrett, Shaq",2.855333333,"DL",2.9036,6
+"Auwald Woodpecker",14260,"Holcomb, Cole",4.036666667,"LB",3.4684,1
+"Auwald Woodpecker",15082,"Barnes, Krys",0.5435,"LB",0.5455,30
+"Auwald Woodpecker",10292,"Jordan, Cameron",1.213666667,"DL",1.1678,23
+"Auwald Woodpecker",14590,"Al-Shaair, Azeez",-2.568333333,"LB",-2.5631,93
+"Auwald Woodpecker",12764,"Hargrave, Javon",-1.456,"DL",-1.4456,59
+"Auwald Woodpecker",13762,"White, Kyzir",1.580666667,"LB",1.5487,19
+"Auwald Woodpecker",15443,"Wallow, Garret",-7.088,"LB",-6.5081,252
+"Auwald Woodpecker",14943,"Davis-Gaither, Akeem",-4.546,"LB",-4.5594,152
+"Auwald Woodpecker",15357,"Barmore, Christian",-3.563,"DL",-3.5608,127
+"Auwald Woodpecker",14170,"Bush, Devin",2.129666667,"LB",2.1526,13
+"Auwald Woodpecker",13216,"Cunningham, Zach",5.456666667,"LB",3.4684,1
+"Auwald Woodpecker",15424,"Johnson, Buddy",-9.4,"LB",-6.5081,252
+"Fulda Jets",13743,"Warner, Fred",6.008,"LB",3.4684,1
+"Fulda Jets",12756,"Ngakoue, Yannick",-0.8366666667,"DL",-0.8498,49
+"Fulda Jets",14210,"Pratt, Germaine",-0.02933333333,"LB",-0.0167,37
+"Fulda Jets",12217,"Fowler, Dante",-1.372666667,"DL",-1.3892,58
+"Fulda Jets",12739,"Clark, Kenny",-1.537666667,"DL",-1.5566,61
+"Fulda Jets",14896,"Queen, Patrick",2.7665,"LB",2.7934,7
+"Fulda Jets",15355,"Bolton, Nick",2.467,"LB",2.4685,10
+"Fulda Jets",14889,"Murray, Kenneth",-1.4025,"LB",-1.3892,58
+"Fulda Jets",12700,"Johnson, Austin",-4.187666667,"DL",-4.202,143
+"Fulda Jets",12948,"Okwara, Romeo",-3.035666667,"DL",-3.0223,109
+"Fulda Jets",13987,"Spillane, Robert",-4.543333333,"LB",-4.5594,152
+"Fulda Jets",15345,"Paye, Kwity",-3.009,"DL",-3.0223,109
+"Fulda Jets",15404,"Jones, Ernest",-2,"LB",-2.0113,71
+"Güstrow Torros",11757,"Donald, Aaron",1.562333333,"DL",1.5487,19
+"Güstrow Torros",13284,"Hendrickson, Trey",-1.982666667,"DL",-1.9762,70
+"Güstrow Torros",14672,"Reeder, Troy",-1.426333333,"LB",-1.4456,59
+"Güstrow Torros",15373,"Davis, Jamin",-1.467,"LB",-1.4456,59
+"Güstrow Torros",15378,"Oweh, Jayson",-1.738,"DL",-1.7178,64
+"Güstrow Torros",14157,"Williams, Quinnen",-0.7593333333,"DL",-0.7858,48
+"Güstrow Torros",15029,"Crowder, Tae",1.789,"LB",1.7458,17
+"Güstrow Torros",12831,"Roberts, Elandon",-2.140333333,"LB",-2.1344,75
+"Güstrow Torros",13221,"Davis, Jarrad",-2.258,"LB",-2.2599,80
+"Güstrow Torros",15543,"Griffith, Jonas",-4.4,"LB",-4.407,148
+"Güstrow Torros",15399,"Rice, Monty",-4.7,"LB",-4.6952,156
+"Güstrow Torros",14241,"Burr-Kirven, Ben",-8.846,"LB",-6.5081,252
+"Güstrow Torros",14149,"Gary, Rashan",-2.875333333,"DL",-2.883,104
+"Güstrow Torros",14962,"Gipson, Trevis",-4.091,"DL",-4.0754,140
+"Güstrow Torros",14268,"Long, David",-1.636333333,"LB",-1.6113,62
+"Baratheon Boars",12305,"Jarrett, Grady",-0.9583333333,"DL",-0.9751,51
+"Baratheon Boars",13201,"Barnett, Derek",-2.483333333,"DL",-2.4853,90
+"Baratheon Boars",12702,"Jack, Myles",3.526333333,"LB",3.4684,1
+"Baratheon Boars",14157,"Williams, Quinnen",-0.7593333333,"DL",-0.7858,48
+"Baratheon Boars",14218,"Okereke, Bobby",1.617666667,"LB",1.6467,18
+"Baratheon Boars",13699,"Evans, Rashaan",1.469333333,"LB",1.4518,20
+"Baratheon Boars",14163,"Simmons, Jeffery",-0.7333333333,"DL",-0.7209,47
+"Baratheon Boars",14217,"Barton, Cody",-7.394666667,"LB",-6.5081,252
+"Baratheon Boars",14892,"Brooks, Jordyn",2.726,"LB",2.6841,8
+"Baratheon Boars",15350,"Parsons, Micah",4.038,"LB",3.4684,1
+"Baratheon Boars",14887,"Simmons, Isaiah",0.2035,"LB",0.2166,34
+"Baratheon Boars",14923,"Taylor, Darrell",-2.538,"DL",-2.5361,92
+"Baratheon Boars",14926,"Gay, Willie",-2.964,"LB",-2.9667,107
+"Baratheon Boars",14251,"Cashman, Blake",-5.250333333,"LB",-5.2595,180
+"Baratheon Boars",14149,"Gary, Rashan",-2.875333333,"DL",-2.883,104
