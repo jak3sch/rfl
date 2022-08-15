@@ -154,7 +154,11 @@ stats <- do.call(rbind, statsList) %>%
       TRUE ~ mfl_position
     )
   ) %>% 
-  select(-pos)
+  select(-pos) %>% 
+  # player_avg
+  group_by(player_id) %>% 
+  mutate(ppg_avg = mean(ppg)) %>% 
+  ungroup()
   
 drafts <- do.call(rbind, draftList)
 
@@ -181,6 +185,13 @@ vbdPlayers <- stats %>%
       mfl_position == "RB" ~ ppg - ppg[30],
       mfl_position %in% c("WR", "DB") ~ ppg - ppg[36],
       TRUE ~ ppg - ppg[48]
+    ),
+    vbd_mfl_avg = case_when(
+      mfl_position %in% c("QB", "TE", "PK") ~ ppg_avg - ppg[12],
+      mfl_position == "DL" ~ ppg_avg - ppg[24],
+      mfl_position == "RB" ~ ppg_avg - ppg[30],
+      mfl_position %in% c("WR", "DB") ~ ppg_avg - ppg[36],
+      TRUE ~ ppg_avg - ppg[48]
     )
   ) %>% 
   
@@ -194,6 +205,13 @@ vbdPlayers <- stats %>%
       true_position == "RB" ~ ppg - ppg[30],
       true_position %in% c("WR", "DB") ~ ppg - ppg[36],
       TRUE ~ ppg - ppg[48]
+    ),
+    vbd_true_avg = case_when(
+      true_position %in% c("QB", "TE", "PK") ~ ppg_avg - ppg[12],
+      true_position == "DL" ~ ppg_avg - ppg[24],
+      true_position == "RB" ~ ppg_avg - ppg[30],
+      true_position %in% c("WR", "DB") ~ ppg_avg - ppg[36],
+      TRUE ~ ppg_avg - ppg[48]
     )
   ) %>% 
   ungroup() %>% 
@@ -219,8 +237,10 @@ vbdPlayers <- stats %>%
 #write.csv(vbdPlayers, "fantasy/rfl/data/true-positions/raw/vbd_players.csv", row.names = F)
 
 ### Combined Data ----
-playerValue <- stats %>% 
-  filter(season >= 2019) %>% 
+playerValue <- stats %>%
+  # nur avg in letzter saison
+  filter(season == 2021) %>% 
+  #filter(season >= 2019) %>% 
   
   left_join(vbdPlayers %>% select(player_id, season, starts_with("vbd_")), by = c("player_id", "season")) %>%
   left_join(snapCountsData, by = c("season", "player_id" = "mfl_id")) %>% 
@@ -241,7 +261,8 @@ playerValue <- stats %>%
   summarise(
     starter = sum(starter),
     points = ifelse(starter > 0, max(points), points), .groups = "drop",
-    ppg = mean(ppg),
+    #ppg = mean(ppg),
+    ppg_avg = ppg_avg, # avg
     vbd_mfl_total = sum(vbd_mfl),
     vbd_mfl_avg = mean(vbd_mfl),
     vbd_true_total = sum(vbd_true),
@@ -283,7 +304,7 @@ playerValue <- stats %>%
   select(-starts_with("rank")) %>% 
   distinct()
 
-#write.csv(playerValue, "fantasy/rfl/data/true-positions/raw/values_player.csv", row.names = F)
+#write.csv(playerValue, "fantasy/rfl/true-positions/data/raw/values_player_avg.csv", row.names = F)
 
 ## Factors ----
 factors <- playerValue %>% 
@@ -443,6 +464,9 @@ vbdPicks <- vbdPicksRaw %>%
 #write.csv(vbdPicks, "fantasy/rfl/data/true-positions/raw/vbd_picks.csv", row.names = F)
 
 ### Calc of smooth values
+
+#vbdPicks <- read.csv("fantasy/rfl/true-positions/data/raw/vbd_picks.csv")
+
 vbdPicks.lo <- loess(vbd_pick_avg ~ overall, vbdPicks)
 vbdPicks.pred <- predict(vbdPicks.lo, data.frame(overall = seq(1, 252, 1)), se = TRUE)$fit
 
@@ -466,14 +490,14 @@ rm(vbdPicks.lo, vbdPicks.pred)
 compPicks <- roster %>% 
   select(franchise_name, player_id) %>% 
   mutate(player_id = as.integer(player_id)) %>% 
-  left_join(read.csv("fantasy/rfl/data/true-positions/player-and-pick-values.csv"), by = "player_id") %>% # [1]
+  left_join(read.csv("fantasy/rfl/true-positions/data/player-and-pick-values_new.csv"), by = "player_id") %>% # [1]
   mutate(pick_value_raw = as.double(pick_value_raw)) %>% 
   left_join(pickValue, by = "pick_value_raw") %>% 
   rename(comp_pick = overall) %>% 
   filter(true_position %in% c("DL", "LB")) %>% 
   distinct()
 
-#write.csv(compPicks, "fantasy/rfl/data/true-positions/comp_picks.csv", row.names = F)
+#write.csv(compPicks, "fantasy/rfl/true-positions/data/comp_picks_new.csv", row.names = F)
 
 ggplot(vbdPicks, aes(x = overall, y = vbd_pick_avg)) +
   geom_vline(xintercept = 36) +
