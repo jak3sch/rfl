@@ -402,13 +402,20 @@ ggplot(rosterValueTotal, aes(x = diff, y = reorder(franchise_name, diff))) +
 
 ## FAAB berechnung ----
 var.faabMin = 50
-var.faabMax = 100
+var.faabMax = 150
 
 faab <- rosterValueTotal %>% 
   mutate(
     faab_normal = diff - min(diff),
     faab_perc = 1 - faab_normal/max(faab_normal),
     faab = round((var.faabMax * faab_perc) + var.faabMin)
+  )
+
+ggplot(faab, aes(x = reorder(franchise_name, desc(faab)), y = faab)) +
+  geom_col() +
+  geom_text(aes(label = faab), vjust = 2, color = "white") +
+  theme(
+    axis.text.x = element_text(angle = 90, vjust = 0.3, hjust = 1, size = 12)
   )
 
 #write.csv(faab, "fantasy/rfl/data/true-positions/faab.csv", row.names = F)
