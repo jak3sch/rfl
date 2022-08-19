@@ -1,0 +1,258 @@
+---
+title: "RFL Tools"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+    theme:
+      version: 4
+      bg: "#00183C"
+      fg: "#ffffff" 
+      primary: "#D03324"
+      navbar-bg: "#ffffff"
+      base_font: 
+        google: Open Sans
+      heading_font:
+        google: Sen
+      code_font:
+        google: 
+          # arguments to sass::font_google() 
+          family: JetBrains Mono
+          local: false
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(ffscrapr)
+library(dplyr)
+library(tidyr)
+library(RCurl)
+library(DT)
+library(ggplot2)
+library(scales)
+library(ggbump)
+library(here)
+```
+
+```{r global, message=TRUE, warning=TRUE, include=FALSE}
+var.mflLeagueID = 63018
+var.season = 2022
+
+var.colorBlue = "#00183C"
+var.colorRed = "#D03324"
+var.colorYellow = "#eb9b03"
+var.colorAccent = "#ffffff"
+var.fontText = "Open Sans"
+var.fontTextBold = "Open Sans Semibold"
+var.fontHeadline = "Open Sans Semibold"
+
+mflConnection <- ffscrapr::mfl_connect(season = var.season, league_id = var.mflLeagueID)
+franchises <- ffscrapr::ff_franchises(mflConnection)
+
+source("R/chunks/plotDefaults.R")
+```
+
+
+Strength of Schedule {data-navmenu="Fantasy Insights"}
+===================================== 
+
+```{r global-sos, message=TRUE, warning=TRUE, include=FALSE}
+sos <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl-data-science/main/data/rfl-sos.csv",
+                colClasses = c("franchise_id" = "character",
+                               "Total" = "numeric",
+                               "Division" = "numeric",
+                               "Conference" = "numeric",
+                               "Other" = "numeric",
+                               "rank_div" = "character",
+                               "conf_name" = "character",
+                               "div_name" = "character",
+                               "div_rank_in_conf" = "character",
+                               "season" = "integer")) %>% 
+  mutate(
+    above_avg = round(Total - mean(Total), 3),
+    SOS = round(SOS, 3),
+  ) %>% 
+  rename(Random = Other) %>% 
+  left_join(franchises %>% select(franchise_id, franchise_name), by = "franchise_id")
+```
+
+Inputs {.sidebar}
+-----------------------------------------------------------------------
+
+```{r inputs-sos, echo=FALSE, message=FALSE, warning=FALSE}
+selectizeInput(
+  "selectDivision",
+  "Filter nach Division",
+  choices = sos$div_name,
+  multiple= F,
+  options = list(
+    placeholder = "Division wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+selectizeInput(
+  "selectTeam",
+  "Filter nach Teams",
+  choices = sos$franchise_name,
+  multiple= T,
+  options = list(
+    placeholder = "Team wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Strength of Schedule above Average
+
+```{r plot-sos-above-avg, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+renderPlot({
+  sos %>% 
+    ggplot(aes(x = above_avg, y = reorder(franchise_name, above_avg))) +
+      plotDefaults +
+      geom_col(fill = var.colorAccent) +
+      geom_col(data = subset(sos, div_name == input$selectDivision | franchise_name %in% input$selectTeam), aes(fill = franchise_name)) +
+      paletteer::scale_fill_paletteer_d("awtools::ppalette") +
+      geom_text(data = subset(sos, above_avg >= 0), aes(label = above_avg), hjust = -0.1, vjust = 0.3, color = var.colorAccent) +
+      geom_text(data = subset(sos, above_avg < 0), aes(label = above_avg), hjust = 1.1, vjust = 0.3, color = var.colorAccent) +
+      labs(
+        title = paste("RFL Strength of Schedule", var.season, "above Average"),
+        subtitle = paste("Total Avg Opp Win % - maximale Total Avg Opp Win % der Liga.\nJe niedriger der Wert, desto leichter ist der SOS im Vergleich zum Rest der Liga."),
+        y = "",
+        x = "SOS above average"
+      ) +
+    theme(
+      legend.position = "top"
+    )
+})
+
+```
+
+### Strength of Schedule by Division and Matchup Type
+
+```{r chart-sos-by-matchup, echo=FALSE, message=FALSE, warning=FALSE}
+data_facet_annotation <- sos %>% 
+  select(div_name, div_rank_in_conf, conf_name) %>% 
+  distinct()
+
+chartSosByMatchupData <- sos %>% 
+  gather(matchup, sos, c(Total, Division, Conference, Random))
+
+renderPlot({
+  chartSosByMatchupData %>%
+    ggplot(aes(x = matchup, y = sos, group = franchise_name, color = franchise_name)) +
+      plotDefaults +
+
+      #annotate("text", data = data_facet_annotation, aes(label = div_name), x = "Conference", y = 0.6, size = 6) +
+      geom_point(size = 3, color = var.colorAccent, alpha = 0.5) +
+      geom_bump(data = subset(chartSosByMatchupData, div_name == input$selectDivision | franchise_name %in% input$selectTeam), size = 1) +
+      geom_point(data = subset(chartSosByMatchupData, div_name == input$selectDivision | franchise_name %in% input$selectTeam), size = 5) +
+      #ggrepel::geom_label_repel(data = subset(chartSosByMatchupData, matchup == "Random"), aes(label = franchise_name), size = 3) +
+      paletteer::scale_color_paletteer_d("awtools::ppalette") +
+      labs(
+        title = paste("Avgerage Opponent Win Percentage", var.season - 1),
+        subtitle = paste("Durchschnittliche Head to Head Win Percentage aller Gegner in", var.season, "aus der Vorsaison nach Matchup Typ.\nJe niedriger der Wert, desto weniger Siege hatten die Gegner in der Vorsaison."),
+        x = "Matchup",
+        y = "Avg Opponent Win Percentages",
+        color = ""
+      ) +
+      theme(
+        legend.position = "top",
+        strip.text.y = element_blank()
+      ) +
+      scale_y_continuous(c(0,1), labels = scales::percent)
+})
+```
+  
+Row
+-----------------------------------------------------------------------
+
+### Data
+
+```{r dt-sos, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
+
+DT::renderDataTable({
+  sosDT <- sos %>% 
+    mutate(
+      Total = scales::percent(Total, accuracy = 0.01),
+      Conference = scales::percent(Conference, accuracy = 0.01),
+      Division = scales::percent(Division, accuracy = 0.01),
+      Random = scales::percent(Random, accuracy = 0.01),
+    ) %>% 
+    select(franchise_name, SOS, Total, Conference, Division, Random, conf_name, div_name) %>% 
+    rename(
+      Franchise = franchise_name,
+      Random = Random,
+      CONF = conf_name,
+      DIV = div_name
+    )
+  
+  DT::datatable(
+    sosDT,
+    rownames = F, options = list(pageLength = 36, order = list(2, 'desc'), dom = 'ft')
+  )
+})
+
+```
+  
+
+True Positions Check {data-navmenu="Comissioner Tools"}
+=====================================     
+
+### StickyPositions
+```{r global-true-positions, message=FALSE, warning=FALSE, include=FALSE}
+# sticky positions
+sheet = RCurl::getForm("https://spreadsheets.google.com/spreadsheet/pub", 
+                       hl ="en_US", 
+                       key = "1rf5m-7DPzwfJViYNYZliBXVnaGuucrYAZhVCQlPTbI4", 
+                       output = "csv", 
+                       .opts = list(followlocation = TRUE, 
+                                    verbose = TRUE, 
+                                    ssl.verifypeer = FALSE)) 
+
+stickyPostitions <- read.csv(textConnection(sheet)) %>% 
+  rename(
+    player_name = MFL.Name,
+    player_id = X,
+    true = TRUE.POSITION,
+    mfl = MFL.POSITION
+  )
+      
+# roster ----
+player <- ffscrapr::mfl_players(mflConnection) %>% 
+  select(player_id, pos) %>% 
+  mutate(player_id = as.integer(player_id))
+      
+# abgleich ----
+compare <- stickyPostitions %>% 
+  left_join(player, by = "player_id") %>% 
+  mutate(compare = ifelse(true == pos, 1, 0))
+```
+
+
+    
+```{r dt-sticky-positions, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDT(
+  stickyPostitions,
+  rownames = F, options = list(pageLength = 30)
+)
+```
+
+> [Datenbank](https://docs.google.com/spreadsheets/d/1rf5m-7DPzwfJViYNYZliBXVnaGuucrYAZhVCQlPTbI4/edit#gid=662154673), anhand derer die True Positions vergeben werden
+
+### MFL
+
+```{r dt-mfl-positions, echo=FALSE, message=FALSE, warning=FALSE}
+DT::renderDT(
+  compare %>% filter(compare == 0),
+  rownames = F, options = list(dom = 't')
+)
+```
+
+> Spieler, die bei MFL noch nicht die korrekte Position haben

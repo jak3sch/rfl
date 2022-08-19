@@ -1,0 +1,13 @@
+name: rfl-tools
+title: rfl-tools
+username:
+account: jakesch
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6785434
+bundleId: 6217775
+url: https://jakesch.shinyapps.io/rfl-tools/
+when: 1660914689.70904
+lastSyncTime: 1660914689.70904
+asMultiple: FALSE
+asStatic: FALSE
