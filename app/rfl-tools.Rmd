@@ -54,9 +54,60 @@ franchises <- ffscrapr::ff_franchises(mflConnection)
 source("R/chunks/plotDefaults.R")
 ```
 
+# Wins above Replacement {data-navmenu="Fantasy Insights"}
 
-Strength of Schedule {data-navmenu="Fantasy Insights"}
-===================================== 
+## Inputs {.sidebar}
+
+```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
+war <- read.csv("data/rfl-war.csv")
+
+selectizeInput(
+  "selectPosition",
+  "Filter nach Position",
+  choices = war$pos,
+  multiple= T,
+  options = list(
+    placeholder = "Position wählen",
+    onInitialize = I('function() { this.setValue("QB"); }')
+  )
+)
+```
+
+## Row
+
+### Data
+
+```{r dt-war, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
+
+DT::renderDataTable({
+  warDT <- war %>% 
+    select(player_name, pos, points, war, war_per_points) %>% 
+    filter(
+      pos %in% input$selectPosition
+    ) %>% 
+    mutate(
+      war = round(war, 2),
+      war_per_points = round(war_per_points, 5)
+    ) %>% 
+    rename(
+      Spieler = player_name,
+      Position = pos,
+      FPts = points,
+      WAR = war,
+      "WAR/FPts" = war_per_points
+    )
+  
+  DT::datatable(
+    warDT,
+    rownames = F, options = list(pageLength = 50, order = list(3, 'desc'))
+  )
+})
+
+```
+ 
+
+
+# Strength of Schedule {data-navmenu="Fantasy Insights"}
 
 ```{r global-sos, message=TRUE, warning=TRUE, include=FALSE}
 sos <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl-data-science/main/data/rfl-sos.csv",
@@ -78,8 +129,7 @@ sos <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl-data-science/main
   left_join(franchises %>% select(franchise_id, franchise_name), by = "franchise_id")
 ```
 
-Inputs {.sidebar}
------------------------------------------------------------------------
+## Inputs {.sidebar}
 
 ```{r inputs-sos, echo=FALSE, message=FALSE, warning=FALSE}
 selectizeInput(
@@ -106,8 +156,7 @@ selectizeInput(
 ```
 
 
-Row
------------------------------------------------------------------------
+## Row
 
 ### Strength of Schedule above Average
 
