@@ -13,8 +13,8 @@
 total_games <- eventReactive(c(input$selectSeason, input$selectWeek), {
   starter %>% 
     filter(
-      season >= !!input$selectSeason[1] & season <= !!input$selectSeason[2],
-      week >= !!input$selectWeek[1] & week <= !!input$selectWeek[2]
+      season >= input$selectSeason[1] & season <= input$selectSeason[2],
+      week >= input$selectWeek[1] & week <= input$selectWeek[2]
     ) %>% 
     select(season, week) %>% 
     distinct() %>% 
@@ -172,7 +172,7 @@ replacement <- reactive({
 ## WAR berechnung ----
 war <- reactive({
   starter_by_week() %>% 
-    filter(!is.na(player_score)) %>% 
+    filter(!is.na(player_score)) %>%
     group_by(player_id) %>% 
     summarise(
       points = sum(player_score),
@@ -183,8 +183,10 @@ war <- reactive({
     left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>% 
     left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
     mutate(
+      points_per_game = points / games_played,
+      points_average_player = points_average_player,
       avg_team_points = avg_team()$points,
-      war_team_points = avg_team_points - points_average_player + points,
+      war_team_points = avg_team_points - points_average_player + points_per_game,
       win_probability = pnorm(war_team_points, avg_team_points, sd = avg_team()$sd), # pnorm "abritary normal distribution"; berechnet wahrscheinlichkeit aus gesuchtem wert, avg und standard deviation
     ) %>% 
     filter(!is.na(win_probability)) %>%
@@ -193,7 +195,9 @@ war <- reactive({
     summarise(
       points= sum(points),
       across(c(games_missed, win_probability, avg_team_points, win_probability_replacement, replacement_wins), mean),
-      win_probability = (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1)
+      win_probability = ifelse(
+        games_missed == 0, win_probability, (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1)
+      )
     ) %>% 
     ungroup %>%
     mutate(

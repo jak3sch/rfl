@@ -80,7 +80,7 @@ source("R/war/rfl-war.R", local = T)
 
 ## Row
 
-### Wins above Replacement
+### Wins Above Replacement (WAR)
 
 ```{r dt-war, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 
@@ -88,7 +88,10 @@ DT::renderDataTable({
   war_dt <- reactive({
     war() %>% 
       select(player_name, pos, points, war) %>% 
-      mutate(war = round(war, 2)) %>% 
+      mutate(
+        war = round(war, 2),
+        "WAR %" = scales::percent(war / max(war))
+      ) %>% 
       rename(
         Spieler = player_name,
         Pos = pos,
@@ -105,6 +108,7 @@ DT::renderDataTable({
 
 ```
  
+> WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
 
 # Strength of Schedule {data-navmenu="Fantasy Insights"}
 

@@ -188,9 +188,10 @@ war <- starter %>%
   ) %>% 
   left_join(avgPlayer %>% select(pos, points_average_player), by = "pos") %>% 
   mutate(
-    points_average_player = points_average_player * games,
+    points_per_game = points / games_played,
+    points_average_player = points_average_player,
     avg_team_points = avgTeam$points,
-    war_team_points = avg_team_points - points_average_player + points,
+    war_team_points = avg_team_points - points_average_player + points_per_game,
     win_probability = pnorm(war_team_points, avg_team_points, sd = avgTeam$sd), # pnorm "abritary normal distribution"; berechnet wahrscheinlichkeit aus gesuchtem wert, avg und standard deviation
   ) %>% 
   filter(!is.na(win_probability)) %>%
@@ -199,7 +200,9 @@ war <- starter %>%
   summarise(
     points= sum(points),
     across(c(games_missed, win_probability, avg_team_points, win_probability_replacement, replacement_wins), mean),
-    win_probability_new = (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1),
+    win_probability = ifelse(
+      games_missed == 0, win_probability, (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1)
+    ),
     .groups = "drop"
   ) %>% 
   ungroup() %>% 
