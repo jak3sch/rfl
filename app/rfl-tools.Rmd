@@ -59,18 +59,27 @@ source("R/chunks/plotDefaults.R")
 ## Inputs {.sidebar}
 
 ```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
-war <- read.csv("data/rfl-war.csv")
+starter <- purrr::map_df(2016:2021, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv")
+  )
+})
+
+sliderInput("selectSeason", "Seasons:", min = 2016, max = var.season, value = c(var.season - 1, var.season - 1), sep = "")
+sliderInput("selectWeek", "Weeks:", min = 1, max = 18, value = c(1, 18))
 
 selectizeInput(
   "selectPosition",
   "Filter nach Position",
-  choices = war$pos,
+  choices = starter$pos,
   multiple= T,
   options = list(
     placeholder = "Position wählen",
     onInitialize = I('function() { this.setValue("QB"); }')
   )
 )
+
+source("R/war/rfl-war.R", local = T)
 ```
 
 ## Row
@@ -80,25 +89,8 @@ selectizeInput(
 ```{r dt-war, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 
 DT::renderDataTable({
-  warDT <- war %>% 
-    select(player_name, pos, points, war, war_per_points) %>% 
-    filter(
-      pos %in% input$selectPosition
-    ) %>% 
-    mutate(
-      war = round(war, 2),
-      war_per_points = round(war_per_points, 5)
-    ) %>% 
-    rename(
-      Spieler = player_name,
-      Position = pos,
-      FPts = points,
-      WAR = war,
-      "WAR/FPts" = war_per_points
-    )
-  
   DT::datatable(
-    warDT,
+    war(),
     rownames = F, options = list(pageLength = 50, order = list(3, 'desc'))
   )
 })
