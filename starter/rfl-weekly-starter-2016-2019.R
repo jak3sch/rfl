@@ -11,15 +11,10 @@ for (year in 2016:2019) {
   
   playerList[[length(playerList) + 1]] <- player
   
-  for (week in 1:18) {
+  for (week in 1:12) {
     # scrape data
     jsonData <- jsonlite::fromJSON(paste("https://www48.myfantasyleague.com/", year, "/export?TYPE=weeklyResults&L=63018&APIKEY=&W=", week, "&JSON=1", sep = ""))
-    #jsonData <- toJSON(tmpData)
-    #write(jsonData, here(paste("fantasy/rfl/scrape-data/data/rfl-data-starter-", year, "-WK", sprintf("%02d", week), ".json", sep = "")))
-    
-    # read local data
-    #jsonData <- jsonlite::fromJSON(here(paste("fantasy/rfl/scrape-data/data/rfl-data-starter-2016-WK01.json", sep = "")))
-    results <- jsonData$weeklyResults$franchise %>% # ToDo: player Info hinzufügen
+    results <- jsonData$weeklyResults$franchise %>% # ToDo: player Info hinzuf?gen
       mutate(
         season = year,
         week = week

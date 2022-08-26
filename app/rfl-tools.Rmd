@@ -33,7 +33,6 @@ library(DT)
 library(ggplot2)
 library(scales)
 library(ggbump)
-library(here)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
@@ -66,17 +65,14 @@ starter <- purrr::map_df(2016:2021, function(x) {
 })
 
 sliderInput("selectSeason", "Seasons:", min = 2016, max = var.season, value = c(var.season - 1, var.season - 1), sep = "")
-sliderInput("selectWeek", "Weeks:", min = 1, max = 18, value = c(1, 18))
+sliderInput("selectWeek", "Weeks:", min = 1, max = 13, value = c(1, 13))
 
-selectizeInput(
+checkboxGroupInput(
   "selectPosition",
   "Filter nach Position",
-  choices = starter$pos,
-  multiple= T,
-  options = list(
-    placeholder = "Position wählen",
-    onInitialize = I('function() { this.setValue("QB"); }')
-  )
+  choices = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB"),
+  selected = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB"),
+  inline = T
 )
 
 source("R/war/rfl-war.R", local = T)
@@ -84,20 +80,31 @@ source("R/war/rfl-war.R", local = T)
 
 ## Row
 
-### Data
+### Wins above Replacement
 
 ```{r dt-war, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 
 DT::renderDataTable({
+  war_dt <- reactive({
+    war() %>% 
+      select(player_name, pos, points, war) %>% 
+      mutate(war = round(war, 2)) %>% 
+      rename(
+        Spieler = player_name,
+        Pos = pos,
+        FPts = points,
+        WAR = war
+      )
+  })
+  
   DT::datatable(
-    war(),
-    rownames = F, options = list(pageLength = 50, order = list(3, 'desc'))
+    war_dt(),
+    rownames = F, options = list(pageLength = 24, order = list(3, 'desc'))
   )
 })
 
 ```
  
-
 
 # Strength of Schedule {data-navmenu="Fantasy Insights"}
 

@@ -10,11 +10,23 @@
 
 ## 4. Simply adding all nine positional averages from this process together produces the expected amount of points the average team in a 12-team half-point PPR league for any given week.
 
-starterByWeek <- reactive({
+total_games <- eventReactive(c(input$selectSeason, input$selectWeek), {
+  starter %>% 
+    filter(
+      season >= !!input$selectSeason[1] & season <= !!input$selectSeason[2],
+      week >= !!input$selectWeek[1] & week <= !!input$selectWeek[2]
+    ) %>% 
+    select(season, week) %>% 
+    distinct() %>% 
+    summarise(games = n())
+}, ignoreNULL = FALSE)
+
+starter_by_week <- eventReactive(c(input$selectSeason, input$selectWeek, input$selectPosition), {
   starter %>% 
     filter(
       starter_status == "starter",
-      season >= input$selectSeason[1] && season <= input$selectSeason[2]
+      season >= !!input$selectSeason[1] & season <= !!input$selectSeason[2],
+      week >= !!input$selectWeek[1] & week <= !!input$selectWeek[2]
     ) %>% 
     mutate(
       pos = case_when( # fasse defensive positionen zusammen
@@ -23,6 +35,7 @@ starterByWeek <- reactive({
         TRUE ~ pos
       )
     ) %>% 
+    filter(pos %in% input$selectPosition) %>% 
     group_by(player_id, week, pos) %>% 
     mutate(start_pct = n() / 3) %>% # berechne start % innerhalb der liga 
     ungroup() %>% 
@@ -58,11 +71,11 @@ starterByWeek <- reactive({
         TRUE ~ eligable
       )
     )
-})
+}, ignoreNULL = FALSE)
 
 ## avg team points & std deviation ----
-avgPlayer <- reactive({
-  starterByWeek() %>% 
+avg_player <- reactive({
+  starter_by_week() %>% 
     filter(
       eligable == 1,
       !is.na(player_score)
@@ -90,8 +103,8 @@ avgPlayer <- reactive({
     )
 })
 
-avgTeam <- reactive({
-  avgPlayer() %>% 
+avg_team <- reactive({
+  avg_player() %>% 
     mutate(points_average_player = points_average_player * multiplier) %>% 
     summarise(
       points = sum(points_average_player),
@@ -103,7 +116,7 @@ avgTeam <- reactive({
 ## The idea of a replacement player is that if you have a starting player miss a game due to injury, suspension, bye, etc., you are forced to insert your next best option into your starting lineup.
 ## This would either be someone on your bench or from the waiver wire/free agent pool.
 replacement <- reactive({
-  starterByWeek() %>% 
+  starter_by_week() %>% 
     filter(eligable == 0) %>% 
     group_by(week, pos) %>% 
     arrange(desc(start_pct), desc(player_score)) %>% 
@@ -147,50 +160,48 @@ replacement <- reactive({
       points_replacement_player = mean(player_score)
     ) %>% 
     ungroup() %>% 
-    left_join(avgPlayer() %>% select(pos, points_average_player), by = "pos") %>% 
+    left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
     mutate(
-      replacement_team_points = avgTeam$points - points_average_player + points_replacement_player,
-      win_probability_replacement = pnorm(replacement_team_points, avgTeam$points, sd = avgTeam$sd),
-      replacement_wins = 13 * win_probability_replacement
+      replacement_team_points = avg_team()$points - points_average_player + points_replacement_player,
+      win_probability_replacement = pnorm(replacement_team_points, avg_team()$points, sd = avg_team()$sd),
+      replacement_wins = total_games()$games * win_probability_replacement
     ) %>% 
     select(-points_average_player)
 })
 
 ## WAR berechnung ----
 war <- reactive({
-  scores() %>% 
-    select(-is_available) %>% 
+  starter_by_week() %>% 
+    filter(!is.na(player_score)) %>% 
     group_by(player_id) %>% 
+    summarise(
+      points = sum(player_score),
+      games_played = n(),
+      games_missed = total_games()$games - games_played,
+      .groups = "drop"
+    ) %>% 
+    left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>% 
+    left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
     mutate(
-      games = n(),
-      games_missed = 13 - games,
-      pos = case_when(
-        pos %in% c("DT", "DE") ~ "DL",
-        pos %in% c("S", "CB") ~ "CB",
-        TRUE ~ pos
-      )
-    ) %>%
-    ungroup() %>%
-    left_join(avgPlayer() %>% select(pos, points_average_player), by = "pos") %>%
-    mutate(
-      avg_team_points = avgTeam$points,
+      avg_team_points = avg_team()$points,
       war_team_points = avg_team_points - points_average_player + points,
-      win_probability = pnorm(war_team_points, avg_team_points, sd = avgTeam$sd), # pnorm "abritary normal distribution"; berechnet wahrscheinlichkeit aus gesuchtem wert, avg und standard deviation
+      win_probability = pnorm(war_team_points, avg_team_points, sd = avg_team()$sd), # pnorm "abritary normal distribution"; berechnet wahrscheinlichkeit aus gesuchtem wert, avg und standard deviation
     ) %>% 
     filter(!is.na(win_probability)) %>%
-    left_join(replacement, by = "pos") %>% 
+    left_join(replacement(), by = "pos") %>% 
     group_by(player_id) %>% 
     summarise(
       points= sum(points),
       across(c(games_missed, win_probability, avg_team_points, win_probability_replacement, replacement_wins), mean),
       win_probability = (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1)
     ) %>% 
-    ungroup() %>%
+    ungroup %>%
     mutate(
-      expected_wins = 13 * win_probability,
+      total_games = total_games()$games,
+      expected_wins = total_games()$games * win_probability,
       war = expected_wins - replacement_wins
     ) %>% 
-    left_join(scores %>% select(player_id, player_name, pos), by = "player_id") %>% 
-    distinct() %>% 
-    select(player_id, player_name, pos, points, war)
+    left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>%
+    left_join(starter %>% select(player_id, player_name) %>% distinct(), by = "player_id") %>%
+    distinct()
 })
