@@ -33,6 +33,9 @@ library(DT)
 library(ggplot2)
 library(scales)
 library(ggbump)
+library(gt)
+library(gtExtras)
+library(jsonlite)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
@@ -53,6 +56,113 @@ franchises <- ffscrapr::ff_franchises(mflConnection)
 source("R/chunks/plotDefaults.R")
 ```
 
+# ELO Rating {data-navmenu="Fantasy Insights"}
+## Inputs {.sidebar}
+```{r inputs-elo, echo=FALSE, message=FALSE, warning=FALSE}
+selectizeInput(
+  "eloSelectDivision",
+  "Filter nach Division",
+  choices = franchises$division_name,
+  multiple= F,
+  options = list(
+    placeholder = "Division wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+selectizeInput(
+  "eloSelectTeam",
+  "Filter nach Teams",
+  choices = franchises$franchise_name,
+  multiple= T,
+  options = list(
+    placeholder = "Team wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+```
+
+> Das ELO Rating basiert auf einer Methode von [FiveThirtyEight](https://fivethirtyeight.com/methodology/how-our-nfl-predictions-work/). Mit Ligastart bekam jedes Team ein ELO Rating von 1500. Seit dem wird nach jedem Matchup die ELO eines jeden Teams angepasst. Faktoren hierbei sind die gegnerische ELO und die Punktedifferenz des Matchups. Vor jeder 1. Woche einer neuen Saison wird die ELO der vergangenen Saison um 1/3 in Richtung 1500 verschobenen. Das soll Roster Aktivitäten während der Offseason in der Berechnung berücksichtigen. Derzeit wird das ELO Rating nur in der Regular Season berechnet. Die Playoff Spiele dazuzunehmen steht noch auf dem Plan.
+
+## Row
+### Running ELO Rating {data-width=900}
+```{r elo, echo=FALSE, fig.height=7, message=FALSE, warning=FALSE}
+source("R/elo/rfl-elo.R")
+
+renderPlot({
+  running_elo %>% 
+    ggplot(aes(x = game, y = franchise_elo_postgame, color = franchise_name)) +
+      plotDefaults +
+      geom_hline(yintercept = 1500, color = var.colorRed, size = 0.5, alpha = 0.75) + # default elo
+      
+      geom_vline(xintercept = 13, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2017
+      geom_vline(xintercept = 25, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2018
+      geom_vline(xintercept = 37, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2019
+      geom_vline(xintercept = 49, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2020
+      geom_vline(xintercept = 61, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2021
+      geom_vline(xintercept = 74, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2022
+      
+      geom_point(color = var.colorAccent, alpha = 0.3) +
+      geom_line(data = subset(running_elo, division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam), size = 1) +
+  
+      paletteer::scale_color_paletteer_d("awtools::ppalette") +
+      labs(
+        title = paste("RFL ELO Rating"),
+        #subtitle = paste("Total Avg Opp Win % - maximale Total Avg Opp Win % der Liga.\nJe niedriger der Wert, desto leichter ist der SOS im Vergleich zum Rest der Liga."),
+        y = "ELO",
+        x = "Game",
+        color = ""
+      ) +
+      theme(
+        legend.position = "top",
+        legend.text = element_text(size = 12)
+      ) +
+      scale_x_discrete(limits = c(1, max(running_elo$games)))
+})
+```
+
+### ELO Ranking {data-width=300}
+```{r elo-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  DT::datatable(
+    running_elo %>% 
+      filter(
+        game == max(game),
+        #division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam
+      ) %>% 
+      select(franchise_name, franchise_elo_postgame) %>% 
+      rename(Franchise = franchise_name, ELO= franchise_elo_postgame),
+    rownames = F, options = list(pageLength = 18, order = list(1, 'desc'))
+  )
+})
+```
+
+## Row
+### Aktuelle Matchups {data-width=450}
+> Win % aus Sicht des Home Teams, berechent anhand der derzeitigen ELO
+
+```{r elo-matchups, echo=FALSE, fig.height=12, message=FALSE, warning=FALSE}
+DT::renderDataTable(
+  DT::datatable(
+    elo_matchups,
+    rownames = F, options = list(pageLength = 18, order = list(2, 'desc'))
+  )
+)
+```
+
+### Upsets {data-width=750}
+> Die größten Überraschungen anhand der ELO
+
+```{r upsets, echo=FALSE, message=FALSE, warning=FALSE}
+DT::renderDataTable(
+  DT::datatable(
+    elo_upsets,
+    rownames = F, options = list(pageLength = 18, order = list(5, 'asc'))
+  )
+)
+```
+
+
 # Wins above Replacement {data-navmenu="Fantasy Insights"}
 
 ## Inputs {.sidebar}
@@ -65,7 +175,7 @@ starter <- purrr::map_df(2016:2021, function(x) {
 })
 
 sliderInput("selectSeason", "Seasons:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
-sliderInput("selectWeek", "Weeks:", min = 1, max = 13, value = c(1, 13))
+sliderInput("selectWeek", "Weeks:", min = 1, max = 13, value = c(1, 3))
 
 checkboxGroupInput(
   "selectPosition",
@@ -107,6 +217,7 @@ DT::renderDataTable({
 })
 
 ```
+ 
  
 > WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
 
