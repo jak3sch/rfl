@@ -34,7 +34,7 @@ library(ggplot2)
 library(scales)
 library(ggbump)
 library(gt)
-library(gtExtras)
+library(formattable)
 library(jsonlite)
 ```
 
@@ -124,17 +124,36 @@ renderPlot({
 ### ELO Ranking {data-width=300}
 ```{r elo-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
 DT::renderDataTable({
-  DT::datatable(
-    running_elo %>% 
-      filter(
-        game == max(game),
-        #division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam
-      ) %>% 
-      select(franchise_name, franchise_elo_postgame) %>% 
-      rename(Franchise = franchise_name, ELO= franchise_elo_postgame),
-    rownames = F, options = list(pageLength = 18, order = list(1, 'desc'))
-  )
+  table_data <- running_elo %>%
+    filter(
+      game == max(game),
+      #division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam
+    ) %>% 
+    left_join(
+      running_elo %>% 
+        filter(game == max(game) - 1) %>%
+        group_by(franchise_id) %>% 
+        summarise(elo_prev_week = mean(franchise_elo_postgame), .groups = "drop") %>% 
+        ungroup(),
+      by = "franchise_id"
+    ) %>% 
+    mutate(elo_diff = franchise_elo_postgame - elo_prev_week) %>% 
+    select(franchise_name, franchise_elo_postgame, elo_diff) %>%
+    rename(Franchise = franchise_name, ELO= franchise_elo_postgame, "+/-" = elo_diff)
+  
+  formattable::formattable(
+    table_data,
+    list(
+      ELO = formattable::color_tile("#EA2027", "#009432"),
+      "+/-" = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = F, options = list(pageLength = 12, order = list(1, 'asc')))
+    
 })
+
+
+
 ```
 
 ## Row
@@ -365,9 +384,7 @@ DT::renderDataTable({
 ```
   
 
-True Positions Check {data-navmenu="Comissioner Tools"}
-=====================================     
-
+# True Positions Check {data-navmenu="Comissioner Tools"}
 ### StickyPositions
 ```{r global-true-positions, message=FALSE, warning=FALSE, include=FALSE}
 # sticky positions
@@ -419,3 +436,28 @@ DT::renderDT(
 ```
 
 > Spieler, die bei MFL noch nicht die korrekte Position haben
+
+# Lineup Check {data-navmenu="Comissioner Tools"}
+```{r comish-lineup-check, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
+DT::renderDT(
+  starter <- ffscrapr::ff_starters(mflConnection) %>% 
+  filter(
+    starter_status == "starter" & (player_score == 0 | is.na(player_score)),
+    week <= nflreadr::get_current_week() - 1
+  ) %>% 
+  distinct() %>% 
+  left_join(
+    nflreadr::load_ff_playerids() %>% 
+      select(mfl_id, gsis_id),
+    by = c("player_id" = "mfl_id")
+  ) %>% 
+  left_join(
+    nflreadr::load_injuries(var.season) %>% 
+      select(season, week, gsis_id, report_status),
+    by = c("season", "week", "gsis_id")
+  ) %>% 
+  select(season, week, franchise_name, player_name, pos, team, player_score, report_status),
+  rownames = F, options = list(pageLength = 17, order = list(list(2, 'asc'), list(7, 'asc')))
+)
+```
+
