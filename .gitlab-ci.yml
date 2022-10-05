@@ -12,10 +12,10 @@ cache:
 before_script:
   - Rscript -e "if (!requireNamespace('renv', quietly = TRUE)) install.packages('renv')"
   - Rscript -e "renv::restore()"
-  
-  run:
-    tags:
-      - docker
-    image: rocker/r-ver:4.2.0
-    script:
-      - Rscript test.R
+
+run:
+  tags:
+    - docker
+  image: rocker/r-ver:4.2.0
+  script:
+    - Rscript test.R
