@@ -51,13 +51,90 @@ var.fontTextBold = "Open Sans Semibold"
 var.fontHeadline = "Open Sans Semibold"
 
 mflConnection <- ffscrapr::mfl_connect(season = var.season, league_id = var.mflLeagueID)
-franchises <- ffscrapr::ff_franchises(mflConnection)
+
+## player data ----
+players <- jsonlite::read_json("https://www55.myfantasyleague.com/2022/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1") %>% 
+  purrr::pluck("players", "player") %>% 
+  dplyr::tibble() %>% 
+  tidyr::unnest_wider(1) %>% 
+  dplyr::rename(
+    player_name = name,
+    pos = position,
+    player_id = id
+  )
+
+source("R/base-data.R", local = T)
 
 source("R/chunks/plotDefaults.R")
 ```
 
-# ELO Rating {data-navmenu="Fantasy Insights"}
-## Inputs {.sidebar}
+# Power Ranking {data-navmenu="Teams"}
+## Sidebar {.sidebar}
+```{r inputs-power-ranking, echo=FALSE, message=FALSE, warning=FALSE}
+selectizeInput(
+  "powerRankSelectDivision",
+  "Filter nach Division",
+  choices = franchises$division_name,
+  multiple= F,
+  options = list(
+    placeholder = "Division wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+selectizeInput(
+  "powerRankSelectTeam",
+  "Filter nach Teams",
+  choices = franchises$franchise_name,
+  multiple= T,
+  options = list(
+    placeholder = "Team wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+```
+
+> Das Power Ranking setzt sich aus den Kategorien Points For, Potential Points, Effizienz und All Play Record zusammen. Das beste Team in jeder Kategorie erhält 36 Punkte, das schlechteste einen. Für das Ranking werden alle Punkte zusammengerechnet.
+
+## Main
+```{r power-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+true_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/rfl-true-standing.csv", colClasses = c("franchise_id" = "character")) %>% 
+  dplyr::left_join(
+    franchises %>% 
+      dplyr::select(franchise_id, franchise_name, division_name),
+    by = "franchise_id"
+  )
+
+renderPlot({
+  true_standing %>%
+    ggplot2::ggplot(aes(x = week, y = true_rank, group = franchise_id, color = franchise_id)) +
+      plotDefaults +
+      ggplot2::geom_point(size = 3, color = var.colorAccent, alpha = 0.5) +
+      ggbump::geom_bump(color = var.colorAccent, size = 1) +
+      ggplot2::geom_text(data = subset(true_standing, week == 1), aes(label = franchise_name), x = 0.97, hjust = 1, vjust = 0.35, color = var.colorAccent) +
+      ggplot2::geom_text(data = subset(true_standing, week == max(week)), aes(label = franchise_name, x = max(week) + 0.03), hjust = 0, vjust = 0.35, color = var.colorAccent) +
+    
+      geom_bump(data = subset(true_standing, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 1.8) +
+      geom_point(data = subset(true_standing, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 5) +
+    
+      ggplot2::scale_y_reverse() +
+      paletteer::scale_color_paletteer_d("awtools::ppalette") +
+    
+      labs(
+        title = paste("RFL Power Ranking", var.season),
+        x = "Woche",
+        y = "Power Rank",
+        color = ""
+      ) +
+      theme(
+        legend.position = "none"
+      ) +
+      scale_x_discrete(limits = c(-1, 15))
+}, height = 900)
+```
+
+# ELO Rating {data-navmenu="Teams"}
+## Sidebar {.sidebar}
 ```{r inputs-elo, echo=FALSE, message=FALSE, warning=FALSE}
 selectizeInput(
   "eloSelectDivision",
@@ -82,7 +159,7 @@ selectizeInput(
 )
 ```
 
-> Das ELO Rating basiert auf einer Methode von [FiveThirtyEight](https://fivethirtyeight.com/methodology/how-our-nfl-predictions-work/). Mit Ligastart bekam jedes Team ein ELO Rating von 1500. Seit dem wird nach jedem Matchup die ELO eines jeden Teams angepasst. Faktoren hierbei sind die gegnerische ELO und die Punktedifferenz des Matchups. Vor jeder 1. Woche einer neuen Saison wird die ELO der vergangenen Saison um 1/3 in Richtung 1500 verschobenen. Das soll Roster Aktivitäten während der Offseason in der Berechnung berücksichtigen. Derzeit wird das ELO Rating nur in der Regular Season berechnet. Die Playoff Spiele dazuzunehmen steht noch auf dem Plan.
+> Das ELO Rating basiert auf einer Methode von [FiveThirtyEight](https://fivethirtyeight.com/methodology/how-our-nfl-predictions-work/). Mit Ligastart bekam jedes Team ein ELO Rating von 1500. Seit dem wird nach jedem Matchup die ELO eines jeden Teams angepasst. Faktoren hierbei sind die gegnerische ELO und die Punktedifferenz des Matchups. Vor jeder 1. Woche einer neuen Saison wird die ELO der vergangenen Saison um 1/3 in Richtung 1500 verschobenen. Das soll Roster Aktivitäten während der Offseason in der Berechnung berücksichtigen. In Woche 14 2016 fanden keine H2H Matchups statt, demzufolge hatte diese Woche keinen Einfluss auf das ELO Rating.
 
 ## Row
 ### Running ELO Rating {data-width=900}
@@ -95,12 +172,12 @@ renderPlot({
       plotDefaults +
       geom_hline(yintercept = 1500, color = var.colorRed, size = 0.5, alpha = 0.75) + # default elo
       
-      geom_vline(xintercept = 13, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2017
-      geom_vline(xintercept = 25, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2018
-      geom_vline(xintercept = 37, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2019
-      geom_vline(xintercept = 49, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2020
-      geom_vline(xintercept = 61, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2021
-      geom_vline(xintercept = 74, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2022
+      #geom_vline(xintercept = 13, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2017
+      #geom_vline(xintercept = 25, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2018
+      #geom_vline(xintercept = 37, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2019
+      #geom_vline(xintercept = 49, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2020
+      #geom_vline(xintercept = 61, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2021
+      #geom_vline(xintercept = max(running_elo$game) - nflreadr::get_current_week() - 1, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2022
       
       geom_point(color = var.colorAccent, alpha = 0.3) +
       geom_line(data = subset(running_elo, division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam), size = 1) +
@@ -117,7 +194,7 @@ renderPlot({
         legend.position = "top",
         legend.text = element_text(size = 12)
       ) +
-      scale_x_discrete(limits = c(1, max(running_elo$games)))
+      scale_x_discrete(limits = c(1, 76))
 })
 ```
 
@@ -125,12 +202,15 @@ renderPlot({
 ```{r elo-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
 DT::renderDataTable({
   table_data <- running_elo %>%
+    group_by(franchise_name) %>% 
     filter(
       game == max(game),
       #division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam
     ) %>% 
+    ungroup() %>% 
     left_join(
       running_elo %>% 
+        group_by(franchise_name) %>% 
         filter(game == max(game) - 1) %>%
         group_by(franchise_id) %>% 
         summarise(elo_prev_week = mean(franchise_elo_postgame), .groups = "drop") %>% 
@@ -151,14 +231,11 @@ DT::renderDataTable({
   formattable::as.datatable(escape = FALSE, rownames = F, options = list(pageLength = 12, order = list(1, 'asc')))
     
 })
-
-
-
 ```
 
 ## Row
 ### Aktuelle Matchups {data-width=450}
-> Win % aus Sicht des Home Teams, berechent anhand der derzeitigen ELO
+> ELO Vortail aus Sicht des Home Teams, berechent anhand der derzeitigen ELO
 
 ```{r elo-matchups, echo=FALSE, fig.height=12, message=FALSE, warning=FALSE}
 DT::renderDataTable(
@@ -182,65 +259,102 @@ DT::renderDataTable(
 ```
 
 
-# Wins above Replacement {data-navmenu="Fantasy Insights"}
+# Wins above Replacement {data-navmenu="Spieler"}
 
 ## Inputs {.sidebar}
 
 ```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
-starter <- purrr::map_df(2016:2021, function(x) {
-  readr::read_csv(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv")
-  )
-})
-
-sliderInput("selectSeason", "Seasons:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
-sliderInput("selectWeek", "Weeks:", min = 1, max = 13, value = c(1, 3))
-
-checkboxGroupInput(
-  "selectPosition",
-  "Filter nach Position",
-  choices = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB"),
-  selected = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB"),
-  inline = T
-)
+sliderInput("selectSeason", "Saison:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
+sliderInput("selectWeek", "Wochen:", min = 1, max = 13, value = c(1, nflreadr::get_current_week() - 1))
 
 source("R/war/rfl-war.R", local = T)
+
+war_clean <- reactive({
+  war() %>% 
+    dplyr::left_join(
+      players %>% 
+        dplyr::select(player_name, player_id, pos) %>% 
+        dplyr::mutate(player_id = as.double(player_id)),
+      by = "player_id"
+    ) %>% 
+    dplyr::select(player_id, player_name, pos, points, war)
+})
 ```
 
-## Row
+> WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
 
+## Main
 ### Wins Above Replacement (WAR)
 
-```{r dt-war, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
-
+```{r dt-war, echo=FALSE, fig.height=9.5, message=FALSE, warning=FALSE}
 DT::renderDataTable({
-  war_dt <- reactive({
-    war() %>% 
-      select(player_name, pos, points, war) %>% 
-      mutate(
+  DT::datatable(
+    war_clean() %>% 
+      dplyr::select(player_name, pos, points, war) %>% 
+      dplyr::mutate(
         war = round(war, 2),
         "WAR %" = scales::percent(war / max(war))
       ) %>% 
-      rename(
+      dplyr::rename(
         Spieler = player_name,
         Pos = pos,
         FPts = points,
         WAR = war
-      )
-  })
-  
-  DT::datatable(
-    war_dt(),
-    rownames = F, options = list(pageLength = 24, order = list(3, 'desc'))
+      ),
+    rownames = F, filter = "top", options = list(pageLength = 12, order = list(3, 'desc'))
   )
 })
-
 ```
  
- 
-> WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
+# WAR nach Position {data-navmenu="Teams"}
+> Übersicht über die kummulierten WAR für die einzelnen Teams. Es fließen derzeit nur Spieler ein, die in dieser Saison mindestens einmal in der Liga gestartet wurden.
 
-# Strength of Schedule {data-navmenu="Fantasy Insights"}
+```{r war-teams, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  formattable::formattable(
+    roster %>% 
+      dplyr::left_join(
+        war_clean() %>%
+          dplyr::select(-pos, -player_name) %>% 
+          dplyr::mutate(player_id = as.character(player_id)),
+        by = "player_id"
+      ) %>% 
+      dplyr::group_by(franchise_id, pos) %>% 
+      dplyr::summarise(
+        war = round(sum(war, na.rm = T), 2),
+        .groups = "drop") %>% 
+      dplyr::group_by(franchise_id) %>% 
+      dplyr::mutate(total = sum(war, na.rm = T)) %>% 
+      dplyr::ungroup() %>% 
+      tidyr::spread(pos, war) %>% 
+      dplyr::left_join(
+        franchises %>% 
+          dplyr::select(franchise_id, franchise_name),
+        by = "franchise_id"
+      ) %>%
+      dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK),
+    list(
+      total = formattable::color_bar(var.colorYellow),
+      QB = formattable::color_bar("#341f97"),
+      RB = formattable::color_bar("#10ac84"),
+      WR = formattable::color_bar("#0abde3"),
+      TE = formattable::color_bar("#ff9f43"),
+      DT = formattable::color_bar("#f368e0"),
+      DE = formattable::color_bar("#f368e0"),
+      LB = formattable::color_bar("#ee5253"),
+      CB = formattable::color_bar("#2e86de"),
+      S = formattable::color_bar("#2e86de"),
+      PK = formattable::color_bar("#01a3a4")
+    )
+  ) %>% 
+    formattable::as.datatable(rownames = F, filter = "top", options = list(pageLength = 12, order = list(2, 'desc')))
+})
+
+# ToDo: WAR wird nur für spieler berechnet, die diese saison gestartet wurden
+# ToDo: Scaling und sortierung der color bars haut nicht hin
+```
+
+# Strength of Schedule {data-navmenu="Teams"}
 
 ```{r global-sos, message=TRUE, warning=TRUE, include=FALSE}
 sos <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl-data-science/main/data/rfl-sos.csv",
@@ -386,7 +500,7 @@ DT::renderDataTable({
 
 # True Positions Check {data-navmenu="Comissioner Tools"}
 ### StickyPositions
-```{r global-true-positions, message=FALSE, warning=FALSE, include=FALSE}
+```{r global-true-positions, echo=FALSE, message=FALSE, warning=FALSE}
 # sticky positions
 sheet = RCurl::getForm("https://spreadsheets.google.com/spreadsheet/pub", 
                        hl ="en_US", 
@@ -440,24 +554,30 @@ DT::renderDT(
 # Lineup Check {data-navmenu="Comissioner Tools"}
 ```{r comish-lineup-check, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 DT::renderDT(
-  starter <- ffscrapr::ff_starters(mflConnection) %>% 
-  filter(
-    starter_status == "starter" & (player_score == 0 | is.na(player_score)),
-    week <= nflreadr::get_current_week() - 1
-  ) %>% 
-  distinct() %>% 
-  left_join(
-    nflreadr::load_ff_playerids() %>% 
-      select(mfl_id, gsis_id),
-    by = c("player_id" = "mfl_id")
-  ) %>% 
-  left_join(
-    nflreadr::load_injuries(var.season) %>% 
-      select(season, week, gsis_id, report_status),
-    by = c("season", "week", "gsis_id")
-  ) %>% 
-  select(season, week, franchise_name, player_name, pos, team, player_score, report_status),
+  starter %>% 
+    dplyr::filter(
+      season == var.season,
+      starter_status == "starter" & (player_score == 0 | is.na(player_score)),
+      week <= nflreadr::get_current_week() - 1
+    ) %>% 
+    dplyr::distinct() %>% 
+    dplyr::left_join(
+      nflreadr::load_ff_playerids() %>% 
+        select(mfl_id, gsis_id) %>% 
+        dplyr::mutate(mfl_id = as.double(mfl_id)),
+      by = c("player_id" = "mfl_id")
+    ) %>% 
+    dplyr::left_join(
+      nflreadr::load_injuries(var.season) %>% 
+        select(season, week, gsis_id, report_status),
+      by = c("season", "week", "gsis_id")
+    ) %>% 
+    dplyr::left_join(
+      franchises %>% 
+        dplyr::select(franchise_id, franchise_name),
+      by = "franchise_id"
+    ) %>% 
+    dplyr::select(season, week, franchise_name, player_name, pos, team, player_score, report_status),
   rownames = F, options = list(pageLength = 17, order = list(list(2, 'asc'), list(7, 'asc')))
 )
 ```
-

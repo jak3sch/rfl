@@ -12,60 +12,59 @@
 
 total_games <- eventReactive(c(input$selectSeason, input$selectWeek), {
   starter %>% 
-    filter(
+    dplyr::filter(
       season >= input$selectSeason[1] & season <= input$selectSeason[2],
       week >= input$selectWeek[1] & week <= input$selectWeek[2]
     ) %>% 
-    select(season, week) %>% 
-    distinct() %>% 
-    summarise(games = n())
+    dplyr::select(season, week) %>% 
+    dplyr::distinct() %>% 
+    dplyr::summarise(games = n())
 }, ignoreNULL = FALSE)
 
 starter_by_week <- eventReactive(c(input$selectSeason, input$selectWeek, input$selectPosition), {
   starter %>% 
-    filter(
+    dplyr::filter(
       starter_status == "starter",
       season >= !!input$selectSeason[1] & season <= !!input$selectSeason[2],
       week >= !!input$selectWeek[1] & week <= !!input$selectWeek[2]
     ) %>% 
-    mutate(
+    dplyr::mutate(
       pos = case_when( # fasse defensive positionen zusammen
         pos %in% c("DT", "DE") ~ "DL",
         pos %in% c("CB", "S") ~ "DB",
         TRUE ~ pos
       )
     ) %>% 
-    filter(pos %in% input$selectPosition) %>% 
-    group_by(player_id, week, pos) %>% 
-    mutate(start_pct = n() / 3) %>% # berechne start % innerhalb der liga 
-    ungroup() %>% 
-    select(week, player_id, pos, start_pct, player_score) %>% 
-    distinct() %>% 
-    group_by(week, pos) %>% 
-    arrange(desc(start_pct), desc(player_score)) %>% 
-    mutate(rank = row_number()) %>% 
-    ungroup() %>% 
-    mutate(
-      eligable = case_when(
+    dplyr::group_by(player_id, week, pos) %>% 
+    dplyr::mutate(start_pct = n() / 3) %>% # berechne start % innerhalb der liga 
+    dplyr::ungroup() %>% 
+    dplyr::select(week, player_id, pos, start_pct, player_score) %>% 
+    dplyr::distinct() %>% 
+    dplyr::group_by(week, pos) %>% 
+    dplyr::arrange(desc(start_pct), desc(player_score)) %>% 
+    dplyr::mutate(rank = row_number()) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      eligable = dplyr::case_when(
         pos %in% c("QB", "TE", "PK") & rank <= 12 ~ 1,
         pos %in% c("RB", "WR", "DL", "LB", "DB") & rank <= 24 ~ 1,
         TRUE ~ 0
       )
     ) %>% 
     
-    mutate(
-      flex = case_when(
+    dplyr::mutate(
+      flex = dplyr::case_when(
         pos %in% c("RB", "WR", "TE") & eligable == 0 ~ "FLEX", # alle offense FLEX eligable positionen werden zu flex zusammengefasst
         pos %in% c("DL", "LB", "DB") & eligable == 0 ~ "IDP", # alle defense FLEX eligable positionen werden zu idp zusammengefasst
         TRUE ~ "no"
       )
     ) %>% 
-    group_by(week, flex) %>% 
-    arrange(desc(start_pct), desc(player_score)) %>%
-    mutate(rank_flex = row_number()) %>%
-    ungroup() %>% 
-    mutate(
-      eligable = case_when(
+    dplyr::group_by(week, flex) %>% 
+    dplyr::arrange(desc(start_pct), desc(player_score)) %>%
+    dplyr::mutate(rank_flex = row_number()) %>%
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      eligable = dplyr::case_when(
         flex == "FLEX" & rank_flex <= 24 ~ 1, # die ersten 24 flex spots bekommen eligable status
         flex == "IDP" & rank_flex <= 36 ~ 1, # die ersten 24 IDP spots bekommen eligable status
         TRUE ~ eligable
@@ -76,26 +75,26 @@ starter_by_week <- eventReactive(c(input$selectSeason, input$selectWeek, input$s
 ## avg team points & std deviation ----
 avg_player <- reactive({
   starter_by_week() %>% 
-    filter(
+    dplyr::filter(
       eligable == 1,
       !is.na(player_score)
     ) %>% 
-    mutate(
+    dplyr::mutate(
       pos = ifelse(flex == "no", pos, flex)
     ) %>% 
-    group_by(pos) %>% 
-    summarise(
+    dplyr::group_by(pos) %>% 
+    dplyr::summarise(
       points_average_player = mean(player_score),
       sd = sd(player_score)
     ) %>% 
-    ungroup() %>% 
-    mutate(
-      multiplier = case_when(
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      multiplier = dplyr::case_when(
         pos %in% c("QB", "TE", "PK") ~ 1,
         pos %in% c("RB", "WR", "FLEX", "DL", "LB", "DB") ~ 2,
         pos == "IDP" ~ 3
       ),
-      sd = case_when(
+      sd = dplyr::case_when(
         pos %in% c("QB", "TE", "PK") ~ sd^2,
         pos %in% c("RB", "WR", "FLEX", "DL", "LB", "DB") ~ sd^2 + sd^2,
         pos == "IDP" ~ sd^2 + sd^2 + sd^2
@@ -105,10 +104,11 @@ avg_player <- reactive({
 
 avg_team <- reactive({
   avg_player() %>% 
-    mutate(points_average_player = points_average_player * multiplier) %>% 
-    summarise(
+    dplyr::mutate(points_average_player = points_average_player * multiplier) %>% 
+    dplyr::summarise(
       points = sum(points_average_player),
-      sd = sqrt(sum(sd))
+      sd = sqrt(sum(sd)),
+      .groups = "drop"
     )
 })
 
@@ -117,95 +117,93 @@ avg_team <- reactive({
 ## This would either be someone on your bench or from the waiver wire/free agent pool.
 replacement <- reactive({
   starter_by_week() %>% 
-    filter(eligable == 0) %>% 
-    group_by(week, pos) %>% 
-    arrange(desc(start_pct), desc(player_score)) %>% 
-    mutate(rank = row_number()) %>% 
-    ungroup() %>% 
-    mutate(
-      eligable = case_when(
+    dplyr::filter(eligable == 0) %>% 
+    dplyr::group_by(week, pos) %>% 
+    dplyr::arrange(desc(start_pct), desc(player_score)) %>% 
+    dplyr::mutate(rank = row_number()) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      eligable = dplyr::case_when(
         pos %in% c("QB", "TE", "PK") & rank <= 12 ~ 1,
         pos %in% c("RB", "WR", "DL", "LB", "DB") & rank <= 24 ~ 1,
         TRUE ~ 0
       )
     ) %>% 
     
-    mutate(
-      flex = case_when(
+    dplyr::mutate(
+      flex = dplyr::case_when(
         pos %in% c("RB", "WR", "TE") & eligable == 0 ~ "FLEX", # alle offense FLEX eligable positionen werden zu flex zusammengefasst
         pos %in% c("DL", "LB", "DB") & eligable == 0 ~ "IDP", # alle defense FLEX eligable positionen werden zu idp zusammengefasst
         TRUE ~ "no"
       )
     ) %>% 
-    group_by(week, flex) %>% 
-    arrange(desc(start_pct), desc(player_score)) %>%
-    mutate(rank_flex = row_number()) %>%
-    ungroup() %>% 
-    mutate(
-      eligable = case_when(
+    dplyr::group_by(week, flex) %>% 
+    dplyr::arrange(desc(start_pct), desc(player_score)) %>%
+    dplyr::mutate(rank_flex = row_number()) %>%
+    dplyr::ungroup() %>% 
+    dplyr::mutate(
+      eligable = dplyr::case_when(
         flex == "FLEX" & rank_flex <= 24 ~ 1, # die ersten 24 flex spots bekommen eligable status
         flex == "IDP" & rank_flex <= 36 ~ 1, # die ersten 24 IDP spots bekommen eligable status
         TRUE ~ eligable
       )
     ) %>% 
-    filter(
+    dplyr::filter(
       eligable == 1,
       !is.na(player_score)
     ) %>% 
-    mutate(
+    dplyr::mutate(
       pos = ifelse(flex == "no", pos, flex)
     ) %>% 
-    group_by(pos) %>% 
-    summarise(
+    dplyr::group_by(pos) %>% 
+    dplyr::summarise(
       points_replacement_player = mean(player_score)
     ) %>% 
-    ungroup() %>% 
-    left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
-    mutate(
+    dplyr::ungroup() %>% 
+    dplyr::left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
+    dplyr::mutate(
       replacement_team_points = avg_team()$points - points_average_player + points_replacement_player,
       win_probability_replacement = pnorm(replacement_team_points, avg_team()$points, sd = avg_team()$sd),
       replacement_wins = total_games()$games * win_probability_replacement
     ) %>% 
-    select(-points_average_player)
+    dplyr::select(-points_average_player)
 })
 
 ## WAR berechnung ----
 war <- reactive({
   starter_by_week() %>% 
-    filter(!is.na(player_score)) %>%
-    group_by(player_id) %>% 
-    summarise(
+    dplyr::filter(!is.na(player_score)) %>%
+    dplyr::group_by(player_id) %>% 
+    dplyr::summarise(
       points = sum(player_score),
       games_played = n(),
       games_missed = total_games()$games - games_played,
       .groups = "drop"
     ) %>% 
-    left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>% 
-    left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
-    mutate(
+    dplyr::left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>% 
+    dplyr::left_join(avg_player() %>% select(pos, points_average_player), by = "pos") %>% 
+    dplyr::mutate(
       points_per_game = points / games_played,
       points_average_player = points_average_player,
       avg_team_points = avg_team()$points,
       war_team_points = avg_team_points - points_average_player + points_per_game,
       win_probability = pnorm(war_team_points, avg_team_points, sd = avg_team()$sd), # pnorm "abritary normal distribution"; berechnet wahrscheinlichkeit aus gesuchtem wert, avg und standard deviation
     ) %>% 
-    filter(!is.na(win_probability)) %>%
-    left_join(replacement(), by = "pos") %>% 
-    group_by(player_id) %>% 
-    summarise(
+    dplyr::filter(!is.na(win_probability)) %>%
+    dplyr::left_join(replacement(), by = "pos") %>% 
+    dplyr::group_by(player_id) %>% 
+    dplyr::summarise(
       points= sum(points),
       across(c(games_missed, win_probability, avg_team_points, win_probability_replacement, replacement_wins), mean),
       win_probability = ifelse(
         games_missed == 0, win_probability, (win_probability + (win_probability_replacement * games_missed)) / (games_missed + 1)
-      )
+      ),
+      .groups = "drop"
     ) %>% 
-    ungroup %>%
-    mutate(
+    dplyr::mutate(
       total_games = total_games()$games,
       expected_wins = total_games()$games * win_probability,
       war = expected_wins - replacement_wins
-    ) %>% 
-    left_join(starter_by_week() %>% select(player_id, pos) %>% distinct(), by = "player_id") %>%
-    left_join(starter %>% select(player_id, player_name) %>% distinct(), by = "player_id") %>%
-    distinct()
+    ) %>%
+    dplyr::distinct()
 })
