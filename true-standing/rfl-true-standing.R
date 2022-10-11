@@ -2,7 +2,7 @@ library(tidyverse)
 library(nflreadr)
 
 var.season = nflreadr::get_current_season()
-var.week = nflreadr::get_current_week()
+var.week = nflreadr::get_current_week() - 1
 
 starter <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-2022.csv", colClasses = c("franchise_id" = "character"))
 schedule <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/rfl-schedules.csv", colClasses = c("franchise_id" = "character", "opponent_id" = "character")) %>% 
