@@ -1,9 +1,31 @@
 library(tidyverse)
 library(ffscrapr)
 
-conn <- ffscrapr::ff_connect(platform = "mfl", league_id = 63018, 2022)
-scores <- ffscrapr::ff_playerscores(conn, 2022, 1:3)
+var.week <- 5
 
-saveRDS(scores, "data/playerscores/rfl-playerscores-2022.rds")
+scores <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/2022/export?TYPE=playerScores&L=63018&APIKEY=&W=", var.week, "&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")) %>%  
+  purrr::pluck("playerScores", "playerScore") %>% 
+  dplyr::tibble() %>% 
+  tidyr::unnest_wider(1) %>% 
+  dplyr::left_join(
+    jsonlite::read_json("https://www55.myfantasyleague.com/2022/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1") %>% 
+      purrr::pluck("players", "player") %>% 
+      dplyr::tibble() %>% 
+      tidyr::unnest_wider(1),
+    by = "id"
+  ) %>% 
+  dplyr::mutate(season = 2022) %>% 
+  dplyr::select(season, week, id, name, position, team, score) %>% 
+  dplyr::rename(
+    player_id = id,
+    player_name = name,
+    pos = position,
+    points = score
+  )
 
-loadData = readRDS("data/playerscores/rfl-playerscores-2022.rds")
+loadData <- readRDS("data/playerscores/rfl-playerscores-2022.rds") %>% 
+  dplyr::filter(week < var.week)
+
+saveRDS(rbind(loadData, scores), "data/playerscores/rfl-playerscores-2022.rds")
+
+
