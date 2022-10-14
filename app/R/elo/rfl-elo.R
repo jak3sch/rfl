@@ -1,4 +1,4 @@
-elo <- read.csv("data/rfl-elo.csv", colClasses=c("franchise_id" = "character", "opponent_id" = "character")) %>% 
+elo <- read.csv("data/rfl-elo.csv", colClasses=c("franchise_id" = "character", "opponent_id" = "character", "franchise_elo_postgame" = "numeric", "franchise_score" = "numeric")) %>% 
   left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>% 
   left_join(franchises %>% select(franchise_id, franchise_name) %>% rename(opponent_name = franchise_name), by = c("opponent_id" = "franchise_id"))
 
@@ -12,14 +12,13 @@ running_elo <- elo %>%
   left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>% 
   ungroup()
 
-elo_upsets <- elo %>% 
+elo_matchups_prev <- elo %>% 
   mutate(
     elo_diff = franchise_elo_pregame - opponent_elo_pregame,
     upset = ifelse(elo_diff < 0 & score_differential > 0, 1, 0)
   ) %>% 
-  filter(upset == 1) %>%
-  select(season, week, franchise_name, franchise_elo_pregame, franchise_score, elo_diff, opponent_score, opponent_name, opponent_elo_pregame) %>% 
-  rename(
+  dplyr::select(season, week, franchise_name, franchise_elo_pregame, franchise_score, elo_diff, opponent_score, opponent_elo_pregame, opponent_name, upset, elo_shift) %>% 
+  dplyr::rename(
     Season = season,
     WK = week,
     Home = franchise_name,
@@ -28,10 +27,11 @@ elo_upsets <- elo %>%
     "Away ELO" = opponent_elo_pregame,
     "ELO Diff" = elo_diff,
     "Home Score" = franchise_score,
-    "Away Score" = opponent_score
+    "Away Score" = opponent_score,
+    "ELO Shift" = elo_shift
   )
 
-elo_matchups <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=schedule&L=63018&APIKEY=&W=", nflreadr::get_current_week(), "&JSON=1")) %>% 
+elo_matchups_next <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=schedule&L=63018&APIKEY=&W=", nflreadr::get_current_week(), "&JSON=1")) %>% 
   purrr::pluck("schedule", "weeklySchedule", "matchup") %>% 
   tibble::tibble() %>% 
   tidyr::unnest_wider(1) %>% 
