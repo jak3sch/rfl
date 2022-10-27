@@ -48,4 +48,26 @@ current_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main
   dplyr::mutate(
     subline = paste(division_name, conference_name, sep = ", ")
   ) %>% 
-  dplyr::select(place, season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:18, 5:6, elo_shift, subline)
+  dplyr::group_by(division_name) %>% 
+  dplyr::arrange(desc(win), desc(pf)) %>% 
+  dplyr::mutate(rank_div = row_number()) %>%
+  dplyr::group_by(conference_name, rank_div) %>% 
+  dplyr::arrange(desc(win), desc(pf)) %>% 
+  dplyr::mutate(
+    seed = case_when(
+      rank_div == 1 ~ row_number()
+    )
+  ) %>% 
+  dplyr::group_by(conference_name) %>% 
+  dplyr::arrange(seed, desc(win), desc(pf)) %>% 
+  dplyr::mutate(
+    seed = ifelse(is.na(seed), row_number(), seed),
+    bowl = case_when(
+      seed <= 2 ~ emoji::emoji("zzz"),
+      seed >= 3 & seed <= 6 ~ emoji::emoji("trophy"),
+      seed >= 7 & seed <= 12 ~ emoji::emoji("sports medal"),
+      seed >= 13 ~ emoji::emoji("pile of poo")
+    )
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(place, season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, division_name, conference_name, seed, bowl)

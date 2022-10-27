@@ -39,6 +39,7 @@ library(jsonlite)
 library(gtExtras)
 library(svglite)
 library(webshot2)
+library(emoji)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
@@ -117,7 +118,7 @@ gt::render_gt({
     
     gtExtras::gt_merge_stack(
       franchise_name,
-      subline,
+      division_name,
       small_cap = F,
       palette = c("#222f3e", "#8395a7"),
       #font_size = c("14px", "10px"),
@@ -157,6 +158,11 @@ gt::render_gt({
       columns = dplyr::ends_with("_rank")
     ) %>% 
     
+    gt::tab_spanner(
+      label = "Post-Season",
+      columns = c(bowl, seed)
+    ) %>% 
+    
     gt::data_color(
       dplyr::ends_with("_rank"),
       colors = scales::col_numeric(
@@ -178,7 +184,6 @@ gt::render_gt({
       columns = c(franchise_elo_postgame, elo_shift),
       pattern = "{1} ({2})"
     ) %>%
-  
     
     gtExtras::gt_add_divider(c(franchise_name, pp_dist, true_rank), color = "#c8d6e5", include_labels = F) %>% 
     
@@ -196,7 +201,9 @@ gt::render_gt({
       record_rank = "Record",
       all_play_rank = "All-Play",
       coach_rank = "Coach",
-      true_rank = "Ovrl"
+      true_rank = "Ovrl",
+      bowl = "Bowl",
+      seed = "Seed"
     ) %>% 
     
     gt::cols_align(
@@ -245,7 +252,8 @@ gt::render_gt({
       footnotes.padding = gt::px(100),
       footnotes.padding.horizontal = gt::px(35),
       footnotes.border.bottom.color = "#222f3e"
-    )
+    ) %>% 
+    gt::cols_hide(conference_name)
 })
 ```
 
@@ -417,7 +425,7 @@ DT::renderDataTable(
     elo_matchups_prev %>% 
       dplyr::filter(upset == 1) %>% 
       dplyr::select(-upset),
-    rownames = F, options = list(dom = "Ppft", pageLength = 6, order = list(5, 'asc'))
+    rownames = F, filter = "top", options = list(dom = "Ppft", pageLength = 6, order = list(5, 'asc'))
   )
 )
 ```
