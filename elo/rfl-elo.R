@@ -5,9 +5,9 @@ library(tidyverse)
 library(jsonlite)
 
 var.season <- 2022
-var.week <- 6
+var.week <- 8
 
-for (var.week in 1:6) {
+for (var.week in 1:9) {
 if(var.week == 1) {
   elo_past <- read.csv(paste0("data/elo/rfl-elo-", var.season - 1, ".csv"), colClasses=c("franchise_id" = "character", "franchise_elo_postgame" = "integer")) %>% 
     dplyr::filter(season == var.season - 1)
@@ -109,7 +109,7 @@ elo <- schedule %>%
 if (var.week == 1) {
   write.csv(elo, paste0("data/elo/rfl-elo-", var.season, ".csv"), row.names = F)
 } else {
-  elo_old <- read.csv(paste0("data/elo/rfl-elo-", var.season, ".csv"), colClasses=c("franchise_id" = "character", "opponent_id" = "character"))
+  elo_old <- read.csv(paste0("data/elo/rfl-elo-", var.season, ".csv"), colClasses=c("franchise_id" = "character", "opponent_id" = "character")) %>% filter(week < var.week)
   write.csv(rbind(elo_old, elo), paste0("data/elo/rfl-elo-", var.season, ".csv"), row.names = F)
 }
 }
