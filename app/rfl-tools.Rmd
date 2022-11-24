@@ -108,9 +108,7 @@ source("R/true-standing/true-standing.R")
 gt::render_gt({
   current_standing %>% 
     dplyr::select(-season, -week) %>% 
-    gt::gt(
-      rowname_col = "place"
-    ) %>% 
+    gt::gt() %>% 
     gt::tab_header(
       title = paste("RFL Standings"),
       subtitle = paste("Woche", current_standing$week[1], current_standing$season[1])
@@ -118,7 +116,7 @@ gt::render_gt({
     
     gtExtras::gt_merge_stack(
       franchise_name,
-      division_name,
+      subline,
       small_cap = F,
       palette = c("#222f3e", "#8395a7"),
       #font_size = c("14px", "10px"),
@@ -231,7 +229,7 @@ gt::render_gt({
       ),
       placement = "left"
     ) %>% 
-      
+    
     gt::tab_options(
       table.font.size = gt::px(14),
       table.font.color = "#222f3e",
@@ -252,8 +250,7 @@ gt::render_gt({
       footnotes.padding = gt::px(100),
       footnotes.padding.horizontal = gt::px(35),
       footnotes.border.bottom.color = "#222f3e"
-    ) %>% 
-    gt::cols_hide(conference_name)
+    )
 })
 ```
 

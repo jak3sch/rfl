@@ -67,7 +67,8 @@ current_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main
       seed >= 3 & seed <= 6 ~ emoji::emoji("trophy"),
       seed >= 7 & seed <= 12 ~ emoji::emoji("sports medal"),
       seed >= 13 ~ emoji::emoji("pile of poo")
-    )
+    ),
+    subline = paste(conference_name, division_name, sep = ", ")
   ) %>% 
   dplyr::ungroup() %>% 
-  dplyr::select(place, season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, division_name, conference_name, seed, bowl)
+  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, subline, seed, bowl)
