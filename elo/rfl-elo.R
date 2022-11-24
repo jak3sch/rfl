@@ -7,7 +7,7 @@ library(jsonlite)
 var.season <- 2022
 var.week <- 8
 
-for (var.week in 1:9) {
+for (var.week in 1:11) {
 if(var.week == 1) {
   elo_past <- read.csv(paste0("data/elo/rfl-elo-", var.season - 1, ".csv"), colClasses=c("franchise_id" = "character", "franchise_elo_postgame" = "integer")) %>% 
     dplyr::filter(season == var.season - 1)
