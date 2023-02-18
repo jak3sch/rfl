@@ -102,7 +102,7 @@ selectizeInput(
 
 ## Row
 ### Aktuelles Standing
-```{r current-standing, echo=FALSE, fig.height=19, message=FALSE, warning=FALSE}
+```{r current-standing, echo=FALSE, fig.height=20, message=FALSE, warning=FALSE}
 source("R/true-standing/true-standing.R")
 
 gt::render_gt({
@@ -130,6 +130,7 @@ gt::render_gt({
     
     gtExtras::gt_plt_winloss(
       winloss,
+      max_wins = 26,
       palette = c("#10ac84", "#ee5253", "gray"),
       type = "pill"
     ) %>% 
@@ -500,20 +501,7 @@ DT::renderDataTable({
           dplyr::select(franchise_id, franchise_name),
         by = "franchise_id"
       ) %>%
-      dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK),
-    list(
-      total = formattable::color_bar(var.colorYellow),
-      QB = formattable::color_bar("#341f97"),
-      RB = formattable::color_bar("#10ac84"),
-      WR = formattable::color_bar("#0abde3"),
-      TE = formattable::color_bar("#ff9f43"),
-      DT = formattable::color_bar("#f368e0"),
-      DE = formattable::color_bar("#f368e0"),
-      LB = formattable::color_bar("#ee5253"),
-      CB = formattable::color_bar("#2e86de"),
-      S = formattable::color_bar("#2e86de"),
-      PK = formattable::color_bar("#01a3a4")
-    )
+      dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK)
   ) %>% 
     formattable::as.datatable(rownames = F, filter = "top", options = list(pageLength = 12, order = list(2, 'desc')))
 })
@@ -718,82 +706,3 @@ DT::renderDT(
 ```
 
 > Spieler, die bei MFL noch nicht die korrekte Position haben
-
-# Lineup Check {data-navmenu="Comissioner Tools"}
-```{r comish-lineup-check, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
-DT::renderDT(
-  starter %>% 
-    dplyr::filter(
-      season == var.season,
-      starter_status == "starter" & (player_score == 0 | is.na(player_score)),
-      week <= nflreadr::get_current_week() - 1
-    ) %>% 
-    dplyr::distinct() %>% 
-    dplyr::left_join(
-      nflreadr::load_ff_playerids() %>% 
-        select(mfl_id, gsis_id) %>% 
-        dplyr::mutate(mfl_id = as.double(mfl_id)),
-      by = c("player_id" = "mfl_id")
-    ) %>% 
-    dplyr::left_join(
-      nflreadr::load_injuries(var.season) %>% 
-        select(season, week, gsis_id, report_status),
-      by = c("season", "week", "gsis_id")
-    ) %>% 
-    dplyr::left_join(
-      franchises %>% 
-        dplyr::select(franchise_id, franchise_name),
-      by = "franchise_id"
-    ) %>% 
-    dplyr::select(season, week, franchise_name, player_name, pos, team, player_score, report_status),
-  rownames = F, options = list(pageLength = 17, order = list(list(2, 'asc'), list(7, 'asc')))
-)
-```
-
-# Taxi Squad Check {data-navmenu="Comissioner Tools"}
-> Prüft die TS nach Auffälligkeiten. Überall, wo die Diff > 0 ist, sollte mal nachgeprüft werden.
-
-```{r ts-check, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
-ts_roster <- ffscrapr::ff_rosters(mflConnection) %>% 
-  dplyr::mutate(
-    pos = dplyr::case_when(
-      pos %in% c("DE", "DT") ~ "DL",
-      pos %in% c("S", "CB") ~ "DB",
-      TRUE ~ pos
-    )
-  )
-
-ts_player_scores <- ts_roster %>% 
-  dplyr::left_join(
-    ffscrapr::ff_playerscores(mflConnection, 2022, "YTD") %>% 
-      dplyr::select(player_id, points) %>% 
-      dplyr::rename(total_points = points),
-    by = "player_id"
-  ) %>% 
-  dplyr::left_join(
-    ffscrapr::ff_playerscores(mflConnection, 2022, "AVG") %>% 
-      dplyr::select(player_id, points) %>% 
-      dplyr::rename(average_points = points),
-    by = "player_id"
-  )
-
-DT::renderDT(
-  ts_player_scores %>% 
-    dplyr::filter(roster_status == "TAXI_SQUAD") %>% 
-    dplyr::left_join(
-      ts_player_scores %>% 
-        dplyr::group_by(franchise_name, pos) %>% 
-        dplyr::summarise(
-          average_points_pos = round(mean(average_points, na.rm = TRUE), 2),
-          .groups = "drop"
-        ),
-      by = c("franchise_name", "pos")
-    ) %>% 
-    dplyr::mutate(
-      diff = round(average_points - average_points_pos, 2)
-    ) %>% 
-    dplyr::select(franchise_name, player_name, pos, team, total_points, average_points, average_points_pos, diff),
-  rownames = F, options = list(pageLength = 17, order = list(7, 'desc'))
-)
-```
-

@@ -71,4 +71,5 @@ current_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main
     subline = paste(conference_name, division_name, sep = ", ")
   ) %>% 
   dplyr::ungroup() %>% 
+  dplyr::group_by(conference_name) %>% 
   dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, subline, seed, bowl)
