@@ -5,10 +5,10 @@ library(here)
 
 # https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory
 
-var.lastSeason = 2022
+var.lastSeason = 2016
 
 # base data ----
-starter <- purrr::map_df(2016:var.lastSeason, function(x) {
+starter <- purrr::map_df(var.lastSeason, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv")
   )
@@ -215,6 +215,6 @@ war <- starter %>%
   left_join(starterByWeek %>% select(player_id, pos) %>% distinct(), by = "player_id", multiple = "all") %>%
   select(player_id, player_name, pos, points, war)
 
-write.table(war, paste0("fantasy/data/war/war-2016-", var.lastSeason, ".csv"), row.names = F, col.names = T)
+write.table(war, paste0("data/war/rfl-war-", var.lastSeason, ".csv"), row.names = F, col.names = T, sep = "; ")
 
 rm(starter, var.totalGames, starterByWeek, avgPlayer, avgTeam, replacement, war)
