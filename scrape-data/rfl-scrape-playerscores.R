@@ -23,7 +23,7 @@ scores <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/2022/exp
   )
 
 loadData <- readRDS("data/playerscores/rfl-playerscores-2022.rds") %>%
-  dplyr::filter(week < var.week)
+  dplyr::filter(as.numeric(week) < var.week)
 
 saveRDS(rbind(loadData, scores), "data/playerscores/rfl-playerscores-2022.rds")
 
