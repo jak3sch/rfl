@@ -1,0 +1,1764 @@
+---
+title: "RFL Season Review"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include = FALSE)
+```
+
+```{r libraries, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+library(here)
+library(tidyverse)
+library(officer)
+library(ffscrapr)
+library(scales)
+library(paletteer)
+library(viridis)
+library(GGally)
+library(ggrepel)
+library(extrafont)
+library(extrafontdb)
+library(flextable)
+library(stringr)
+library(ggraph)
+library(ggradar)
+library(ggbump)
+library(geomtextpath)
+library(ggimage)
+library(cropcircles)
+library(magick)
+library(glue)
+library(grafify)
+library(geomtextpath)
+
+#library(remotes)
+#remotes::install_version("Rttf2pt1", version = "1.3.8") # fix extrafont bug bei fontimport
+#extrafont::font_import() # nur auszuführen, wenn eine neue schrift installiert wurde; danach session neu starten
+#windowsFonts()
+extrafont::loadfonts(device = "win") # vor ggplot
+
+library(ggplot2)
+```
+
+```{r variables, message=FALSE, warning=FALSE, include=FALSE}
+var.platform = "mfl"
+var.firstSeason = 2016
+var.lastSeason = 2022
+var.mflLeagueID = 63018
+
+var.colorBlue = "#00183C"
+var.colorLightblue = "#263C56"
+var.colorRed = "#D03324"
+var.colorYellow = "#eb9b03"
+var.colorAccent = "#ffffff"
+
+var.fontText = "Libre Franklin"
+var.fontTextBold = "Libre Franklin ExtraBold"
+var.fontHeadline = "Lora"
+
+var.posOrder = c("QB", "RB", "WR", "TE", "PK", "DT", "DE", "LB", "CB", "S")
+```
+
+```{r message=FALSE, warning=TRUE, include=FALSE}
+# create connection
+conn <- ffscrapr::mfl_connect(league_id = var.mflLeagueID, season = var.lastSeason + 1, rate_limit = F)
+
+latestLeagueData <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.lastSeason + 1, "/export?TYPE=league&L=", var.mflLeagueID, "&JSON=1"))$league
+
+# franchises
+franchisesLatest <- latestLeagueData$franchises$franchise %>% 
+  dplyr::tibble() %>% 
+  tidyr::unnest_wider(1) %>% 
+  dplyr::rename(franchise_id = id, franchise_name = name) %>% 
+
+  # add division data
+  dplyr::left_join(
+    latestLeagueData$divisions$division %>% 
+      dplyr::tibble() %>% 
+      tidyr::unnest_wider(1) %>% 
+      dplyr::rename(division_name = name) %>% 
+      dplyr::mutate(division_name = stringr::str_replace(division_name, "\\s[^ ]+$", "")), # entferne "Division" aus Name
+    by = c("division" = "id")
+  ) %>%
+  
+  # add conference names
+  dplyr::left_join(
+    latestLeagueData$conferences$conference %>% 
+      dplyr::tibble() %>% 
+      tidyr::unnest_wider(1) %>% 
+      dplyr::rename(conference_name = name),
+    by = c("conference" = "id")
+  )
+  
+franchisesLatestIDs <- as.vector(t(franchisesLatest %>% select(franchise_id)))
+
+template <- officer::read_pptx("template/rfl-report-template.pptx")
+output <- template
+```
+
+
+```{r load data, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+source("chunks/plots.R", local = knitr::knit_global())
+source("chunks/teams.R", local = knitr::knit_global())
+source("chunks/regularseason.R", local = knitr::knit_global())
+
+source("chunks/divisions.R", local = knitr::knit_global())
+source("chunks/conferences.R", local = knitr::knit_global())
+#source(here("reports/rfl/chunks/postseason.R"), local = knitr::knit_global())
+source("chunks/player.R", local = knitr::knit_global())
+#source(here("reports/rfl/chunks/draft.R"), local = knitr::knit_global())
+#source(here("reports/rfl/chunks/transactions.R"), local = knitr::knit_global())
+```
+
+
+# Infos
+
+- reg season daten aktualisieren
+- https://simulatedfootball.com/leagues/formulas.html
+- Team Platzierung: Titelkennzeichnung
+
+# Einleitung
+```{r einleitung, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+output <- output %>% 
+  officer::remove_slide(1) %>% 
+  officer::add_slide(layout = "Kapitel") %>% 
+  officer::ph_with(value = "Einleitung", location = officer::ph_location_label("title")) %>% 
+  
+  officer::add_slide(layout = "Inhalt") %>% 
+  officer::ph_with(value = "Datenquellen", location = officer::ph_location_label("title")) %>%
+  officer::ph_with(value = c(
+    "Dieser Report wurde in R und mit Hilfe des \"officer\" Packages erstellt",
+    "Ihm liegen Daten von MyFantasyLeague (MFL) zu Grunde, die zum Großteil durch das Package \"ffscrapr\" zugänglich gemacht wurden",
+    "An den Stellen wo das nicht funktioniert hat, kam die MFL eigene API zum Einsatz, deren Daten frei zugänglich sind (so lange die Liga öffentlich ist)"
+  ), location = officer::ph_location_label("content"))
+
+
+# lexikon
+
+bold <- fp_text(bold = T, var.colorAccent, font.size = 16, font.family = var.fontText)
+regular <- fp_text(color = var.colorAccent, font.size = 16, font.family = var.fontText)
+italic <- fp_text(italic = T, color = var.colorYellow, font.size = 16, font.family = var.fontText)
+
+lexikon_expw <- fpar(ftext("Expected Wins (ExpW)\n", bold),
+                     ftext("Expected Wins basieren auf dem aus der NFL (und vor allem MLB) bekannten \"Pythagorean Theorem\". Hierbei werden die erwarteten Siege anhand der erzielten Punkte berechnet. Für jede Woche wird dabei berechnet, wie viele Siege ein Team am Ende der Saison anhand der eigenen und der im Ligaschnitt kumulierten Punkte haben sollte. Die Formel lautet: ", regular),
+                     ftext("Wins + (Games Remaining * PF^2.37) / (PF^2.37 + League Avg PF^2.37)\n\n", italic)
+)
+
+lexikon_draft <- fpar(ftext("Draft Score\n", bold),
+                      ftext("Der Draftscore ist eine kleine Spielerei und sollte unter keinen Umständen als aussagekräftige Bewerung genommen werden.\n", regular),
+                      ftext("Der MFL ADP ist nach folgenden Einstellungen gefiltert: Alle Positionen, Ligen mit 12 Teams, PPR Scoring, Rookie Only Drafts, keine Mock Drafts und Draft Start nach dem NFL Draft\n\n", regular)
+)
+
+lexikon_histogram <- fpar(ftext("Histogram\n", bold),
+                          ftext("Ein Histogram stellt die Verteilung der Daten in einem Datensatz dar. Kommt ein Datenpaar besonders häufig im Datensatz vor, wird die Kurve an dieser Stelle besonders groß.", regular)
+)
+
+lexikon_luck <- fpar(ftext("Luck\n", bold),
+                     ftext("Luck misst die Points Against gegen das Team gegen den Liga Durchschnitt. Die Berechnung wird für jede Woche vorgenommen und am Ende der Saison Schnitt ermittelt. Glück ist größer als 1, Pech ist kleiner als 1. Die Formel lautet: ", regular),
+                     ftext("League Avg PF / Points Against\n", italic),
+                     ftext("Luck ist das Gegenstück zu \"Skill\" (Luck + Skill = 1)\n\n", regular)
+)
+
+lexikon_perzentile <- fpar(ftext("Perzentile (Pctl)\n", bold),
+                           ftext("Das x-%-Perzentil ist ein Schwellenwert innerhalb eines der Größe nach geordneten Datensatzes bei dem x % aller Werte kleiner oder gleich dieses Schwellenwertes sind. Der Rest ist größer. Für das 20 % Perzentil bedeutet das zum Beispiel, dass 20 % der Werte unterhalb oder gleich dieses Perzentils liegen.\n\n", regular)
+)
+
+lexikon_skill <- fpar(ftext("Skill\n", bold),
+                      ftext("Skill misst die Points For des Teams gegen den Liga Durchschnitt. Die Berechnung wird für jede Woche vorgenommen und am Ende der Saison Schnitt ermittelt. Guter Skill ist größer als 1, schlechter Skill ist kleiner als 1. Die Formel lautet: ", regular),
+                      ftext("Points For / League Avg PF\n", italic),
+                      ftext("Skill ist das Gegenstück zu \"Luck\" (Skill + Luck = 1)", regular)
+)
+
+lexikon_sos <- fpar(ftext("Strength of Schedule (SOS)\n", bold),
+                    ftext("Der SOS ist die durchschnittliche All Play Win Percentage aus der Vorsaison aller Gegner eines Teams.\n\n", regular)
+)
+
+lexikon_war <- fpar(ftext("Wins above Replacement (WAR)\n", bold),
+                    ftext("WAR soll den Wert eines Spielers repräsentieren. Er sagt aus, für wie viele Siege der Spieler im Vergleich zu einem Ersatzspieler verantwortlich war. WAR bezieht das Scoring der RFL ein und wurde anhand der in jeder Woche erzielten Fantasy Punkte berechnet.\n\n", regular)
+)
+
+lexikon_win_perc <- fpar(ftext("Win Percentage (Win Perc/Win %)\n", bold),
+                         ftext("Die Head to Head Win Percentage des Teams, die auch für die Standings relevant ist.\n\n", regular)
+)
+
+lexikon_all_play_win_perc <- fpar(ftext("All Play Win Percentage (All Play Win Perc/All Play Win %)\n", bold),
+                                  ftext("Die theoretische Win Percentage wenn ein Team in jeder Woche gegen jedes andere spielen würde. Die Differenz zeigt in gewisser Weise den Einfluss des Schedules auf den Record des Teams.", regular)
+)
+
+lexikon1 <- block_list(
+  lexikon_expw,
+  lexikon_draft,
+  lexikon_histogram
+)
+
+lexikon2 <- block_list(
+  lexikon_luck,
+  lexikon_perzentile,
+  lexikon_skill
+)
+
+
+lexikon3 <- block_list(
+  lexikon_sos,
+  lexikon_war,
+  lexikon_win_perc,
+  lexikon_all_play_win_perc
+)
+
+output <- output %>% 
+  officer::add_slide(layout = "Inhalt") %>%
+  officer::ph_with(value = "Begriffserklaerungen", location = officer::ph_location_label("title")) %>% 
+  officer::ph_with(value = lexikon1, location = officer::ph_location_label("content")) %>% 
+  officer::add_slide(layout = "Inhalt") %>%
+  officer::ph_with(value = "Begriffserklaerungen", location = officer::ph_location_label("title")) %>% 
+  officer::ph_with(value = lexikon2, location = officer::ph_location_label("content")) %>% 
+  officer::add_slide(layout = "Inhalt") %>%
+  officer::ph_with(value = "Begriffserklaerungen", location = officer::ph_location_label("title")) %>% 
+  officer::ph_with(value = lexikon3, location = officer::ph_location_label("content"))
+```
+
+# Liga
+```{r league, echo=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+output <- output %>% 
+  officer::add_slide(layout = "Kapitel") %>% 
+  officer::ph_with(value = "League", location = officer::ph_location_label("title"))
+```
+
+## Auszeichnungen
+### Auszeichnungen der letzten Saison
+```{r league-player-awards, echo=FALSE, fig.height=7.5, fig.width=13, message=FALSE, warning=FALSE}
+# alle awards ----
+league_awards <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/awards/rfl-player-awards.csv") %>% 
+  dplyr::left_join(nflreadr::load_players() %>% dplyr::select(gsis_id, headshot), by = "gsis_id")
+
+recent_mvps <- league_awards %>% 
+  dplyr::filter(season == var.lastSeason & rank == 1) %>% 
+  dplyr::mutate(
+    war_pct = (war / max(war)) * 7,
+    size_outer_ring = 35 + war_pct,
+    award_f = factor(award, c("MVP", "OPOY", "DPOY", "CPOY", "APOY", "GPOY", "OROY", "DROY")),
+    subline = case_when(
+      award == "MVP" ~ "Die meisten WAR",
+      award == "OPOY" ~ "Die meisten WAR: Offense non-MVP",
+      award == "DPOY" ~ "Die meisten WAR: Defense non-MVP",
+      award == "CPOY" ~ "Die größte WAR Veränderung zum Vorjahr\nund Vorsaison auf IR beendet",
+      award == "APOY" ~ "Die meisten Fantasy Punkte\ndurch die Luft (QB)",
+      award == "GPOY" ~ "Die meisten Fantasy Punkte\nam Boden",
+      award == "OROY" ~ "Die meisten WAR: Offense Rookie",
+      award == "DROY" ~ "Die meisten WAR: Defense Rookie",
+    ),
+  )
+
+## awards der vergangenen saison
+chart <- ggplot(recent_mvps, aes(x = 0.5, y = 0.8)) +
+  plotDefaultsMinimal +
+  facet_wrap(~ award_f, ncol = 4) +
+
+  geom_point(aes(stroke = war_pct, size = war), color = var.colorYellow, size = 35) +
+  geom_image(aes(image = cropcircles::circle_crop(headshot, border_size = 20, border_colour = var.colorBlue)), asp = 1.25, size = 0.35) +
+  
+  geom_text(aes(label = display_name), x = 0.5, y = 3, hjust = 0.5, vjust = 1, color = var.colorYellow, size = 4.7, family = var.fontTextBold) +
+  geom_text(aes(label = toupper(label)), x = 0.5, y = 2.55, hjust = 0.5, vjust = 1, color = plot.geom_text_shadow_color, size = plot.geom_text_shadow_size, family = plot.geom_text_shadow_family) +
+  
+  geom_text(aes(label = subline), x = 0.5, y = -0.7, hjust = 0.5, vjust = 1, color = var.colorAccent, size = plot.geom_text_small_size, family = plot.geom_text_small_family) +
+  
+  scale_x_continuous(limits = c(0,1)) +
+  scale_y_continuous(limits = c(-1,3)) +
+  labs(
+    title = toupper(paste("Spieler-Awards", var.lastSeason)),
+    subtitle = "Die wertvollsten Spieler nach Kategorie",
+  ) +
+  theme(
+    plot.margin = margin(15, 15, 30, 15),
+    legend.position = "top",
+    panel.spacing = unit(0, "lines")
+  )
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+```
+
+### MVPs der vergangenen Jahre
+```{r mvp history, echo=FALSE, message=FALSE, warning=FALSE}
+past_mvp_data <- league_awards %>% 
+  dplyr::filter(award == "MVP" & rank == 1) %>% 
+  dplyr::mutate(
+    segment_start = ifelse(war >= mean(war), war - 0.13, war + 0.13),
+    segment_end = ifelse(war >= mean(war), war - 0.3, war + 0.3),
+    text_align = ifelse(war >= mean(war), 1, 0),
+    text_start = ifelse(war >= mean(war), war - 0.32, war + 0.32),
+  )
+
+chart <- ggplot(past_mvp_data, aes(x = war, y = season)) +
+  plotDefaultsMinimal +
+
+  geom_segment(aes(x = segment_start, xend = segment_end, yend = season, color = pos), size = plot.line_width_m) +
+  grafify::scale_color_grafify(palette = "bright", ColSeq = FALSE) +
+  
+  geom_image(data = subset(past_mvp_data, season != var.lastSeason), aes(image = cropcircles::circle_crop(headshot, border_size = 20, border_colour = var.colorAccent)), asp = 2.4, size = 0.08) +
+  geom_image(data = subset(past_mvp_data, season == var.lastSeason), aes(image = cropcircles::circle_crop(headshot, border_size = 20, border_colour = var.colorYellow)), asp = 2.4, size = 0.08) +
+  
+  geom_text(aes(label = paste0(season, ": ", display_name), x = text_start, hjust = text_align), vjust = 0.4, color = var.colorAccent, size = plot.geom_text_small_size, family = plot.geom_text_small_family) +
+  
+  scale_x_continuous(limits = c(min(past_mvp_data$war) - 0.1, max(past_mvp_data$war) + 0.1)) +
+  scale_y_continuous(limits = c(min(past_mvp_data$season) - 0.5, max(past_mvp_data$season) + 0.7)) +
+  
+  labs(
+    title = toupper("Alle MVP der RFL"),
+    subtitle = "Die Spieler mit den meisten WAR einer jeden Saison seit 2016",
+    color = NULL
+  ) +
+  theme(
+    panel.grid.major.x = element_line(color = var.colorLightblue, size = plot.line_width),
+    axis.text.x = element_text(color = plot.theme_text_shadow_color, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family),
+    legend.position = "top",
+    legend.justification = "right",
+    legend.text = element_text(size = 8)
+  )
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+
+# Für die Zukunft kann von season zu points umgestellt werden um ein schöneres cluster zu kriegen: https://infobeautiful3.s3.amazonaws.com/2014/11/rappers_459.png
+```
+
+### Position MVPs
+```{r league-position-mvps, echo=FALSE, fig.height=7.5, fig.width=13, message=FALSE, warning=FALSE}
+# mvp für jede position ----
+league_mvp_positions <- franchiseWARPlayer %>% 
+  dplyr::select(player_id, pos, points, war) %>% 
+  dplyr::distinct() %>% 
+  dplyr::left_join(nflreadr::load_ff_playerids() %>% dplyr::select(mfl_id, gsis_id), by = c("player_id" = "mfl_id")) %>% 
+  dplyr::left_join(nflreadr::load_players() %>% dplyr::select(gsis_id, display_name), by = "gsis_id") %>% 
+  dplyr::filter(!is.na(war)) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(desc(war)) %>% 
+  dplyr::mutate(
+    rank = dplyr::row_number(),
+    war_pct = war / max(war),
+    colHeight = 1 * war_pct,
+    pos_f = factor(pos, c("QB", "RB", "WR", "TE", "PK", "DT", "DE", "LB", "CB", "S"))
+  ) %>% 
+  dplyr::ungroup()
+
+chart <- ggplot(subset(league_mvp_positions, rank <= 3), aes(x = factor(rank, levels = c(2,1,3)), y = colHeight)) +
+  plotDefaultsMinimal +
+  facet_wrap(~pos_f, ncol = 5, strip.position = "bottom") +
+  geom_col(aes(alpha = rank), fill = var.colorAccent) +
+
+  geom_text(aes(label = war), vjust = 1.7, size = plot.geom_text_large_size, color = plot.geom_text_large_color, family = plot.geom_text_large_family) +
+  geom_text(aes(label = paste0("#", rank)), vjust = 4.5, color = var.colorBlue, size = plot.geom_text_small_size, family = plot.geom_text_small_family) +
+
+  nflplotR::geom_nfl_headshots(aes(player_gsis = gsis_id), y = 0, height = 0.25, vjust = 0) +
+  geom_text(aes(label = sapply(display_name, function(x) paste(strwrap(x, width = 5), collapse = "\n"))), vjust = -0.5, hjust = 0.5, size = plot.geom_text_xsmall_size, family = plot.geom_text_xsmall_family, color = var.colorAccent) +
+
+  geom_hline(yintercept = 0, color = var.colorAccent, size = plot.line_width_m) +
+
+  scale_alpha_continuous(range = c(0.5, 0.3)) +
+  scale_y_continuous(limits = c(0, 1.2)) +
+  labs(
+    title = toupper(paste("Die wertvollsten Spieler", var.lastSeason)),
+    subtitle = "Die nach WAR wertvollsten Spieler ihrer Positionsgruppe.",
+    x = NULL,
+    y = NULL
+  ) +
+  theme(
+    strip.text = element_text(color = plot.theme_text_shadow_color, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family),
+    panel.spacing = unit(1, "lines")
+  )
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+```
+
+## Starter
+### Starter by Position
+```{r starter by position, echo=FALSE}
+starter_by_position_data <- starter %>% 
+  dplyr::filter(starter_status == "starter") %>% 
+  dplyr::group_by(season, week, franchise_id, pos) %>%
+  dplyr::summarise(value = n(), .groups = "drop") %>%
+  dplyr::filter(!pos %in% c("PK", "QB")) %>% 
+  dplyr::mutate(pos = factor(pos, var.posOrder))
+
+starter_by_position_chart_data <- starter_by_position_data %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::summarise(value = mean(value, na.rm = TRUE), .groups = "drop")
+
+starter_by_position_segments <- data.frame(
+  xstart = rep(0.5, 6),
+  xend = rep(7.5, 6), # -0.5 von max anzahl an cols
+  ystart = c(0, 1, 2, 3, 4, 5),
+  yend = c(0, 1, 2, 3, 4, 5)
+)
+
+starter_by_position_labels <- data.frame(
+  y = c(1, 2, 3, 4, 5),
+  x = rep(0.1, 5)
+)
+
+starter_per_position_base_chart <- ggplot(starter_by_position_chart_data, aes(x = pos, y = value)) +
+  plotDefaultsMinimal +
+  coord_polar() +
+
+  geom_textpath(inherit.aes = FALSE,
+               mapping = aes( x = pos, label = pos, y = 8),
+               family = plot.geom_text_shadow_family, upright = TRUE, text_only = TRUE, size = plot.geom_text_shadow_size, color = plot.geom_text_shadow_color) +
+  
+  geom_textpath(inherit.aes = FALSE,
+               mapping = aes( x = pos, label = round(value, 1), y = 6.5),
+               family = plot.geom_text_large_family, upright = TRUE, text_only = TRUE, size = plot.geom_text_large_size, color = plot.geom_text_large_color) +
+  
+  geom_segment(inherit.aes = FALSE, data = starter_by_position_segments, mapping = aes(x = xstart, xend = xend, y = ystart, yend = yend), linewidth = plot.line_width, color = var.colorLightblue) +
+  geom_col(width = 0.8, fill = var.colorAccent) +
+  scale_y_continuous(limits = c(-5, 8)) +
+  geom_textsegment(inherit.aes = FALSE, data = starter_by_position_labels, mapping = aes(x = 7.5, xend = 8.5, y = y, yend = y, label = y), linewidth = plot.line_width, size = 2.5, color = var.colorLightblue)
+
+chart1 <- starter_per_position_base_chart +
+  labs(
+    title = toupper("Durchschnittliche Anzahl Starter"),
+    subtitle = "Im Durchschnitt gestartete Spieler je Positionsgruppe"
+  )
+  
+```
+
+### Starter per NFL Team
+```{r starter per nfl team, echo=FALSE, message=FALSE, warning=FALSE}
+starter_by_nfl_team_data <- starter %>%
+  dplyr::filter(starter_status == "starter" & !team %in% c("FA", "FA*")) %>% 
+  dplyr::group_by(season, franchise_id, pos, team) %>% 
+  dplyr::summarise(count = n(), .groups = "drop") %>% 
+  dplyr::mutate(team = nflreadr::clean_team_abbrs(team)) %>% 
+  dplyr::left_join(nflreadr::load_teams() %>% dplyr::select(team_abbr, team_name), by = c("team" = "team_abbr"))
+
+helper <- function(df) {
+  df %>% 
+    dplyr::summarise(total = sum(count, na.rm = TRUE), .groups = "drop") %>%
+    dplyr::group_by(pos) %>% 
+    dplyr::arrange(team) %>%
+    dplyr::mutate(pos = factor(pos, var.posOrder))
+}
+
+chart_data <- starter_by_nfl_team_data %>% 
+  dplyr::group_by(team, team_name, pos) %>% 
+  helper() %>% 
+  dplyr::mutate(
+    unit = ifelse(pos %in% c("QB", "RB", "WR", "TE", "PK"), "offense", "defense"),
+    text_alignment = ifelse(dplyr::row_number() <= 15, 0, 1),
+    text_position_x = ifelse(dplyr::row_number() <= 15, dplyr::row_number() + 4, dplyr::row_number() - 4), # je größer row_number, desto weiter hinten steht das team im alphabet
+    text_position_y = ifelse(unit == "offense", 3, 8), # wenn text sehr weit unten steht, sitzer er über dem punkt. ansonsten drunter
+    text_position_v = ifelse(unit == "offense", 0, 1), # wenn text sehr weit unten steht, ist vertical alignment unten
+    curve_position_x = ifelse(dplyr::row_number() <= 15, text_position_x - 0.5, text_position_x + 0.5),
+    curve_position_y = ifelse(unit == "offense", text_position_y + 0.5, text_position_y - 0.5),
+    #curve_direction = case_when(
+    #  dplyr::row_number() <= 15 & unit == "offense" ~ 0.6,
+    #  dplyr::row_number() > 15 ~ 0.6,
+    #  dplyr::row_number() <= 15 & unit == "defense" ~ 0.6,
+    #  TRUE ~ -0.6
+    #)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::left_join(starter_by_position_chart_data %>% dplyr::rename(starter = value), by = "pos") %>% 
+  dplyr::mutate(per_starter = ifelse(is.na(starter), total, total / starter))
+
+#chart_annotation <- chart_data %>% 
+  #dplyr::filter(pos == "WR" & team == "KC")
+#  dplyr::filter(count == max(count))
+
+starter_per_nfl_team_base_chart <- ggplot(chart_data, aes(x = pos, y = reorder(team, desc(team)))) +
+  plotDefaultsMinimal +
+  #geom_point(data = chart_annotation, color = var.colorAccent, size = 2.5) +
+  #geom_curve(data = chart_annotation, aes(xend = curve_position_x, yend = curve_position_y), size = 0.4, color = var.colorAccent) +
+  #geom_text(
+  #  data = chart_annotation,
+  #  aes(label = paste("Die", pos, "der", team_name, "\nwurden mit insgesamt", count, "Spielern\nam häufigsten gestartet."), x = text_position_x, y = text_position_y, vjust = text_position_v, hjust = text_alignment),
+  #  color = var.colorAccent, family = var.fontTextBold, angle = 8, size = 3) +
+  scale_fill_gradient(low = var.colorBlue, high = var.colorYellow) +
+  nflplotR::scale_y_nfl() +
+  nflplotR::theme_y_nfl() +
+  theme(
+    axis.text.x = element_text(color = plot.theme_text_shadow_color, family = plot.theme_text_shadow_family, size = plot.theme_text_shadow_size)
+  )
+
+# total starter per nfl team
+chart2 <- starter_per_nfl_team_base_chart +
+  geom_tile(aes(fill = total)) +
+  geom_text(aes(label = total), size = plot.geom_text_xsmall_size, family = plot.geom_text_xsmall_family, color = var.colorAccent) +
+  labs(
+    title = toupper("Starter aus den NFL Teams"),
+    subtitle = "Insgesamt gestartete Spieler je NFL Team"
+  )
+
+output <- output %>%
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% # plot von vorherigem code snippet
+  officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+
+# nfl starter per fantasy starter
+chart1 <- starter_per_nfl_team_base_chart +
+  geom_tile(aes(fill = per_starter)) +
+  geom_text(aes(label = round(per_starter)), size = plot.geom_text_xsmall_size, family = plot.geom_text_xsmall_family, color = var.colorAccent) +
+  labs(
+    title = toupper("Die Fantasy Studs der NFL Teams"),
+    subtitle = "Insgesamt gestartete Spieler / im durchschnitt gestartete Spieler"
+  )
+
+# letzte saison
+latest_chart_data <- starter_by_nfl_team_data %>% 
+  dplyr::filter(season == var.lastSeason) %>% 
+  dplyr::group_by(team, team_name, pos) %>% 
+  helper() %>% 
+  dplyr::left_join(starter_by_position_chart_data %>% dplyr::rename(starter = value), by = "pos") %>% 
+  dplyr::mutate(per_starter = ifelse(is.na(starter), total, total / starter))
+
+chart2 <- starter_per_nfl_team_base_chart +
+  geom_tile(data = latest_chart_data, aes(fill = per_starter)) +
+  geom_text(data = latest_chart_data, aes(label = round(per_starter)), size = plot.geom_text_xsmall_size, family = plot.geom_text_xsmall_family, color = var.colorAccent) +
+  labs(
+    title = toupper(paste("Die Fantasy Studs der NFL Teams", var.lastSeason)),
+    subtitle = paste(var.lastSeason, "gestartete Spieler / im durchschnitt gestartete Spieler")
+  )
+
+output <- output %>%
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+  officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+  
+```
+
+# Conferences
+```{r conferences, echo=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+print(output, paste0("output/rfl-season-report-", var.lastSeason, ".pptx"))
+
+output <- output %>% 
+  officer::add_slide(layout = "Kapitel") %>% 
+  officer::ph_with(value = "Conferences", location = officer::ph_location_label("title"))
+```
+
+## Conference Win Percentage
+```{r confs win perc, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+chart <- ggplot(standings, aes(y = rank_conference, x = reorder(conference_name, season), fill = win_pct)) +
+  facet_grid(cols = vars(season)) +
+  geom_tile() +
+  plotHeatmap +
+  labs(
+    title = "Conference Win Pct",
+    subtitle = paste("Verteilung der Win Percentages innerhalb der Conferences von", var.firstSeason, "-", var.lastSeason, "\nDa sich die Zusammensetzung der Conferences jedes Jahr ändert, ist dieses Chart nur bedingt aussagekräftig."),
+    x = "",
+    y = "Conference Rank",
+    fill = "Win %"
+  ) +
+  scale_x_discrete(expand=c(0,0)) +
+  scale_y_reverse(expand=c(0,0))
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+```
+
+## Stärke der Divisions
+```{r div win perc by conf, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+heatmapChartData <- standings %>% 
+  left_join(divInConf %>% select(season, division, div_rank_in_conf), by = c("season", "division"))
+
+chartDefaults <- list (
+  facet_grid(rows = vars(season), cols = vars(conference_name)),
+  plotHeatmap,
+  labs(
+    x = "",
+    y = "Division Rank"
+  ),
+  theme(
+    plot.margin = margin(15, 15, 5, 15),
+    axis.text.x = element_blank()
+  ),
+  scale_x_continuous(expand=c(0,0), breaks = pretty_breaks()),
+  scale_y_reverse(expand=c(0,0), breaks = pretty_breaks())
+)
+  
+chart1 <- ggplot(subset(heatmapChartData, season == var.lastSeason), aes(y = rank_division, x = div_rank_in_conf, fill = win_pct)) +
+  facet_grid(rows = vars(season), cols = vars(conference_name)) +
+  chartDefaults +
+  labs(
+    title = paste("Division Win Pct", var.lastSeason),
+    subtitle = paste("Verteilung der Win Percentages\nin den Division nach Conference in", var.lastSeason),
+    fill = "Win %"
+  ) 
+
+chart2 <- ggplot(subset(heatmapChartData, season == var.lastSeason), aes(y = rank_division, x = div_rank_in_conf, fill = allplay_winpct)) +
+  facet_grid(rows = vars(season), cols = vars(conference_name)) +
+  chartDefaults +
+  labs(
+    title = paste("Division All Play Win Pct", var.lastSeason),
+    subtitle = paste("Verteilung der All Play Win Percentages\nin den Division nach Conference in", var.lastSeason),
+    fill = "All Play Win %"
+  )
+
+output <- output %>% 
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+  officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+
+# wins histogram
+confWinsLastYear <- standings %>%
+  select(franchise_id, conference_name) %>% 
+  left_join(standings %>% filter(season == var.lastSeason - 1) %>% select(franchise_id, win_pct), by = "franchise_id")
+
+chart <- ggplot(standings, aes(x = win_pct)) +
+  geom_density(color = "transparent", fill = var.colorAccent, alpha = .2) + 
+  geom_density(data = confWinsLastYear, aes(color = paste(conference_name, var.lastSeason)), alpha = 0, size = 1, linetype = "dashed") +
+  geom_density(data = subset(standings, season == var.lastSeason), aes(color = paste(conference_name, var.lastSeason)), alpha = 0, linewidth = 1) +
+  
+  scale_color_manual(values = c(var.colorRed, var.colorYellow)) +
+  plotHistogram +
+  labs(
+    title = "Conference Win Pct - Histogram",
+    subtitle = paste("Verteilung der Win Percentages innerhalb der Conferences ", var.firstSeason, "-", var.lastSeason, " (Reg Season)\nGestrichelte Linie = Win % aller Conference Teams vor der Saison ", var.lastSeason, sep = ""),
+    x = "Win Percentage",
+    color = ""
+  ) +
+  scale_x_continuous(limits = c(0,1), labels = scales::percent, expand = c(0,0))
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+
+rm(chartDefaults, chart1, chart2, confWinsLastYear)
+```
+
+## Einzelne Conferences
+```{r conf, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+heatmapChartDataGathered <- heatmapChartData %>%
+  mutate(
+    luck_term = case_when(
+      sf_luck_pctl_season >= .85 ~ "Glückspilz",
+      sf_luck_pctl_season >= .70 ~ "Lucky",
+      sf_luck_pctl_season >= .35 ~ "No luck",
+      sf_luck_pctl_season >= .10 ~ "Unlucky",
+      sf_luck_pctl_season < .10 ~ "Pechvogel"
+    )
+  ) %>% 
+  rename(
+    "Win Pct" = win_pct,
+    "All Play Win Pct" = allplay_winpct
+  ) %>% 
+  gather(key, win_pct, c("Win Pct", "All Play Win Pct"))
+
+
+latestConferences <- latestLeagueData$conferences$conference %>%
+  dplyr::tibble() %>% 
+  tidyr::unnest_wider(1)
+
+for (row in 1:nrow(latestConferences)) {
+  confID <- latestConferences[row, "id"]
+  confName <- latestConferences[row, "name"]
+
+  # kapitel folie
+  output <- output %>% 
+    officer::add_slide(layout = "Kapitel") %>% 
+    officer::ph_with(value = paste(confName, var.lastSeason), location = officer::ph_location_label("title"))
+  
+  # Win Percentages
+  chartDefaults <- list(
+    facet_grid(cols = vars(division_name)),
+    plotHeatmap,
+    theme(
+      plot.margin = margin(15, 15, 5, 15)
+    ),
+    labs(
+      x = "",
+      y = "Division Rank"
+    ),
+    scale_x_discrete(expand=c(0,0)),
+    scale_y_reverse(expand=c(0,0), breaks = pretty_breaks())
+  )
+  
+  chart <- ggplot(subset(heatmapChartDataGathered, season == var.lastSeason & conference_id == confID$id), aes(y = rank_division, x = reorder(key, win_pct), fill = win_pct)) +
+    chartDefaults +
+    labs(
+      title = paste(confName, "Division Win Pct", var.lastSeason),
+      subtitle = paste("Verteilung der Win Percentages in den Divisions der", confName, var.lastSeason),
+      fill = "Win %"
+    )
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Bild") %>% 
+    officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+}
+
+rm(confID, confName)
+```
+
+# Divisions
+```{r divisions, echo=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+output <- output %>% 
+  officer::add_slide(layout = "Kapitel") %>% 
+  officer::ph_with(value = "Divisions", location = officer::ph_location_label("title"))
+```
+
+## Division Siege
+```{r divs win pct, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+# heat map
+chart <- ggplot(standings, aes(x = rank_division, y = season, fill = win_pct)) +
+  facet_wrap(vars(division_name)) +
+  plotHeatmap +
+  labs(
+    title = "Division Win Pct - Heatmap",
+    subtitle = paste("Verteilung der Win Percentages innerhalb der Divisions von", var.firstSeason, "-", var.lastSeason),
+    x = "Division Rank",
+    y = "",
+    fill = "Win %"
+  ) +
+  theme(
+    axis.text.x = element_text(vjust = 3)
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = pretty_breaks()) +
+  scale_y_continuous(breaks = pretty_breaks())
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+
+# histogram
+
+## wins
+chartWins <- ggplot(standings, aes(x = win_pct, group = 1)) +
+  facet_wrap(vars(reorder(division_name, desc(win_pct))), ncol = 2) +
+  geom_density(color = "transparent", fill = var.colorAccent, alpha = .2) +
+  geom_density(data = subset(standings, season == var.lastSeason), aes(fill = paste("Saison", var.lastSeason)),
+               color = var.colorRed, alpha = 0) +
+  plotHistogram +
+  labs(
+    title = "Division Win Pct - Histogram",
+    subtitle = paste("Verteilung der Win Percentages innerhalb der Divisions ", var.firstSeason, "-", var.lastSeason, " (Reg Season)", sep = ""),
+    x = "Win Percentage"
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  scale_x_continuous(limits = c(0,1), labels = scales::percent, expand = c(0,0))
+
+## points
+chartPoints <- ggplot(standings, aes(x = points_for / 2)) +
+  facet_wrap(vars(reorder(division_name, desc(win_pct))), ncol = 2) +
+  geom_density(color = "transparent", fill = var.colorAccent, alpha = .2) +
+  geom_density(data = subset(standings, season == var.lastSeason), aes(fill = paste("Saison", var.lastSeason)),
+               color = var.colorRed, alpha = 0) +
+  
+  plotHistogram +
+  labs(
+    title = "Division Total PF - Histogram",
+    subtitle = paste("Verteilung der Total Points innerhalb der Divisions", var.firstSeason, "-", var.lastSeason, "(Reg Season)"),
+    x = "Total Points"
+  ) +
+  theme(
+    legend.position = "top"
+  ) +
+  scale_x_continuous(expand = c(0,0))
+
+output <- output %>%
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = chartWins, location = officer::ph_location_label("img-left")) %>% 
+  officer::ph_with(value = chartPoints, location = officer::ph_location_label("img-right"))
+```
+
+## kumulierte Siege und Punkte
+```{r divs kumuliert, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+divTotals <- divisionStandings %>% 
+  group_by(season) %>% 
+  mutate(
+    total_league_wins = sum(h2h_wins),
+    total_league_points = sum(points_for) / 2
+  ) %>% 
+  group_by(season, division_name) %>% 
+  summarise(
+    h2h_wins = sum(h2h_wins),
+    division_win_pct = sum(h2h_wins) / total_league_wins,
+    points_for = sum(points_for) / 2,
+    division_points_for_pct = points_for / total_league_points,
+    .groups = "drop"
+  ) %>% 
+  distinct() %>%
+  group_by(division_name) %>% 
+  mutate(
+    total_div_points = format(round(as.numeric(sum(points_for)), 0), nsmall = 0, big.mark = ","),
+    label_wins = paste(division_name, "\nTotal:\n", sum(h2h_wins), sep = ""),
+    label_points = paste(division_name, "\nTotal:\n", total_div_points, sep = "")
+  ) %>% 
+  ungroup()
+
+# kumulierte siege
+kumulierteChartsDefaults <- list(
+  geom_col(),
+  geom_text(position = position_stack(vjust = 0.5), size = 4, color = var.colorBlue),
+  plotDefaults,
+  paletteer::scale_fill_paletteer_d("colorBlindness::ModifiedSpectralScheme11Steps"),
+  theme(
+    legend.position = "top",
+    plot.margin = margin(15, 15, 5, 15),
+  ),
+  scale_x_discrete(labels = function(x){sub("\\s", "\n", x)})
+)
+
+chart1 <- ggplot(divTotals,
+                aes(y = h2h_wins, x = reorder(label_wins, h2h_wins),
+                    fill = season, label = percent(division_win_pct, accuracy = 0.1))) +
+  
+  kumulierteChartsDefaults +
+  labs(
+    title = "Kumulierte Siege",
+    subtitle = paste("Alle Wins der Divisions von", var.firstSeason, "-", var.lastSeason, "addiert (Reg Season)"),
+    y = "Anzahl der Siege",
+    x = "",
+    fill = ""
+  ) +
+  scale_y_continuous(expand=c(0,0,0,50))
+  
+# kumulierte Punkte
+chart2 <- ggplot(divTotals, aes(y = points_for, x = reorder(label_points, h2h_wins), fill = season, label = percent(division_points_for_pct, accuracy = 0.1))) +
+  kumulierteChartsDefaults +
+  labs(
+    title = "Kumulierte Total Points",
+    subtitle = paste("Alle Total Points von ", var.firstSeason, "-", var.lastSeason, " addiert (Reg Season)", sep = ""),
+    y = "Total Points",
+    x = "",
+    fill = ""
+  ) +
+  scale_y_continuous(breaks = pretty_breaks(), labels = scales::comma, expand=c(0,0,0,100))
+
+output <- output %>% 
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+  officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+
+rm(kumulierteChartsDefaults)
+```
+
+## einzelne Division
+```{r div, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+divs <- divInConf %>% 
+  filter(season == var.lastSeason) %>% 
+  group_by(conference_id) %>% 
+  arrange(conference_id, div_rank_in_conf) %>% 
+  ungroup() %>% 
+  mutate(rank = row_number())
+
+for (row in 1:nrow(divs)) {
+  divID <- divs[row, "division"]
+  divID <- divID$division
+  divName <- divs[row, "division_name"]
+  divName <- divName$division_name
+  
+  chart <- ggplot(data = subset(heatmapChartDataGathered, season == var.lastSeason & division == divID),
+         aes(x = factor(key, levels = c("Win Pct", "All Play Win Pct")), y = reorder(latest_franchise_name, desc(rank_division)),
+             fill = win_pct)) +
+    plotHeatmap +
+    
+    geom_text(aes(label = paste("W", h2h_wins, "-", h2h_losses, "L\n", format(round(as.numeric(points_for), 2), big.mark = ","), "PF\nExpW: ", round(sf_expw, 0)), color = h2h_wins > 11), x = "Win Pct") +
+    geom_text(aes(label = paste("W ", allplay_wins, " - ", allplay_losses, " L\nLuck Pctl Season\n", percent(sf_luck_pctl_season, 2), " (", luck_term, ")", sep =""), color = allplay_wins > 290), x = "All Play Win Pct") +
+    scale_color_manual(guide = "none", values = c("#FED799", var.colorBlue)) + # färbt text je nach value hell oder dunkel
+    
+    theme (
+      plot.margin = margin(15, 15, 5, 15),
+      axis.text.y = element_text(size = 12),
+      axis.ticks.y = element_blank()
+    ) +
+    labs(
+      x = "",
+      y = "",
+      fill = "Win %"
+    ) +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_y_discrete(expand = c(0,0), labels = function(x){sub("\\s", "\n", x)})
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Division Titel") %>% 
+    officer::ph_with(value = divName, location = officer::ph_location_label("title")) %>% 
+    officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+  
+  # ranking changes
+  chartData <- standings %>% 
+    filter(division_name == divName) %>% 
+    select(franchise_id, season, rank_division, division_name) %>% 
+    left_join(franchisesLatest %>% select(franchise_id, franchise_name), by = "franchise_id")
+
+  chart1 <- ggplot(chartData, aes(x = season, y = rank_division, color = franchise_name)) +
+    plotDefaults +
+    geom_bump(size = 1) +
+    geom_point(size = 3) +
+    paletteer::scale_color_paletteer_d("awtools::ppalette") +
+    theme(
+      legend.position = "top",
+      legend.key.size = unit(12, "pt"),
+      panel.grid.minor = element_blank()
+    ) +
+    labs(
+      title = paste(divName, "Rankings"),
+      subtitle = paste("Platzierungen innerhalb der", divName, "Division von", var.firstSeason, "-", var.lastSeason),
+      x = "Season",
+      y = "Division Rank",
+      color = ""
+    ) +
+    scale_y_reverse(limits = c(6,1), expand = c(0,0.1))
+  
+  chartData <- sos %>%
+    gather(matchup, sos, c(-starts_with("franchise"), -division, -conference))
+
+  chart2 <- ggplot(chartData, aes(x = matchup, y = sos, group = franchise_name)) +
+    plotDefaults +
+    geom_point(data = subset(chartData, division != divID), color = var.colorAccent, size = 2, alpha = 0.3) +
+    geom_bump(data = subset(chartData, division == divID), aes(color = franchise_name), size = 1) +
+    geom_point(data = subset(chartData, division == divID), aes(color = franchise_name), size = 3) +
+    paletteer::scale_color_paletteer_d("awtools::ppalette") +
+    theme(
+      plot.margin = margin(15, 15, 5, 15),
+      legend.position = "top",
+      legend.key.size = unit(12, "pt")
+    ) +
+    labs(
+      title = paste(divName, "SOS", var.lastSeason),
+      subtitle = paste("Abgebildet sind alle Teams und ihr\njeweiliger Strength of Schedule vor der Saison", var.lastSeason),
+      x = "",
+      y = "All Play SOS",
+      color = ""
+    )
+  
+  output <- output %>% 
+    officer::add_slide(layout = "2 Bilder") %>% 
+    officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+    officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+}
+  
+```
+
+# Teams
+```{r teams kapitel, echo=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+output <- output %>% 
+  officer::add_slide(layout = "Kapitel") %>% 
+  officer::ph_with(value = "Teams", location = officer::ph_location_label("title"))
+```
+
+## einzelner Team Bericht
+```{r team, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+# points by position
+ptsByPosChartData <- seasonTotals %>% 
+  select(season, franchise_id, ends_with("_starter")) %>% 
+  mutate(
+    defense_DL_starter = defense_DT_starter + defense_DE_starter,
+    defense_DB_starter = defense_S_starter + defense_CB_starter
+  ) %>% 
+  select(-defense_DT_starter, -defense_DE_starter, -defense_S_starter, -defense_CB_starter, -offense_starter, -defense_starter)
+
+### liga durchschnitt seit ligasstart
+ptsByPosLeagueAvgChartData <- summarise_all(
+  ptsByPosChartData %>%
+    group_by(franchise_id) %>% 
+    summarise(across(where(is.numeric), mean)) %>% 
+    select(-franchise_id, -season),
+  mean
+) %>% 
+  mutate(type = "League Avg")
+
+# trades
+#tradeChartDataRaw <- trades %>% 
+#  select(player_id, player_name, franchise_id, trade_partner, transfer_dir) %>%
+#  mutate(
+#    trade_id = paste(player_id, franchise_id, trade_partner, sep = "_")
+#  ) %>% 
+#  rename(
+#    from = franchise_id,
+#    to = trade_partner
+#  )
+
+
+i = "0007"
+
+#for (i in franchisesLatestIDs) {
+  
+  # infos für das einzelne franchise werden gefiltert
+  franchise <- franchisesLatest %>% 
+    filter(franchise_id == i)
+  
+  franchiseMVP <- franchiseWARPlayer %>% 
+    filter(franchise_id == i) %>% 
+    arrange(desc(war_per_fpt)) %>% 
+    slice(1)
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Team Report Titel") %>% 
+    officer::ph_with(value = franchise$franchise_name, location = officer::ph_location_label("title")) %>% 
+    officer::ph_with(value = paste(franchise$franchise_name, " MVP ", var.lastSeason, ": ", franchiseMVP$pos, " ", franchiseMVP$player_name, "\nEr erzielte ", franchiseMVP$points, " FPts und war damit für ", round(franchiseMVP$war, digits = 1), " Wins above replacement (WAR) verantwortlich.", sep = ""), location = officer::ph_location_label("mvp"))
+  
+  # season percentiles ----
+  franchise_percentiles <- standings %>% 
+    filter(
+      franchise_id == i
+    ) %>% 
+    group_by(franchise_id) %>% 
+    mutate(
+      across(ends_with("pctl_total"), mean)
+    ) %>% 
+    ungroup() %>% 
+    filter(
+      season == var.lastSeason | season == var.lastSeason - 1
+    ) %>% 
+    gather(key, pctl, c(ends_with("_season"), ends_with("_total"))) %>% 
+    mutate(
+      type = ifelse(grepl("_total", key), "total", "season"),
+      key = sub("[^_]+$", "", key),
+      key = case_when(
+        key == "allplay_win_pctl_" ~ "All Win %",
+        key == "efficiency_pctl_" ~ "Effizienz",
+        key == "points_against_pctl_" ~ "Points Against",
+        key == "points_for_pctl_" ~ "Total Points",
+        key == "points_per_game_pctl_" ~ "Points per Game",
+        key == "points_potential_pctl_" ~ "Potential Points",
+        key == "sf_expw_pctl_" ~ "Expected Wins",
+        key == "sf_luck_pctl_" ~ "Luck",
+        key == "sf_skill_pctl_" ~ "Skill",
+        key == "win_pctl_" ~ "Win %"
+      )
+    )
+  
+  chart <- ggplot(data = subset(franchise_percentiles, type == "total" & season == var.lastSeason),
+         aes(x = factor(key, levels = c("Win %", "All Win %", "Total Points", "Potential Points", "Points per Game", "Effizienz", "Points Against", "Expected Wins", "Luck", "Skill")), y = pctl * 100, fill = pctl)) + 
+    geom_col() +
+    geom_hline(yintercept = 50, color = var.colorAccent, alpha = 0.3) +
+    geom_hline(yintercept = 75, color = var.colorAccent, alpha = 0.3) +
+    geom_hline(yintercept = 90, color = var.colorAccent, alpha = 0.3) +
+    
+    geom_text(aes(label = round(pctl * 100, digits = 0)), nudge_y = 5, color = var.colorAccent) +
+    geom_point(data = subset(franchise_percentiles, type == "season" & season == var.lastSeason), color = var.colorAccent, size = 5, shape = 23, stroke = 1) +
+    geom_point(data = subset(franchise_percentiles, type == "season" & season == var.lastSeason - 1), color = var.colorAccent, size = 3, shape = 21, stroke = 1, position = position_nudge(x = 0.005)) +
+    
+    plotDefaults +
+    viridis::scale_fill_viridis(option = "magma", labels = percent, begin = 0, end = 1, limits = c(0,1)) +
+    
+    theme(
+      legend.key.size = unit(12, "pt"),
+      plot.margin = margin(15, 15, 5, 15),
+    ) +
+    scale_x_discrete(labels = function(x){sub("\\s", "\n", x)}) +
+    scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
+    labs(
+      title = paste(franchise$franchise_name, "Perzentile"),
+      subtitle = paste("Balken = Perzentile des Durchschnitts von", var.firstSeason, "-", var.lastSeason, "\nKaro = Perzentile innerhalb der Saison", var.lastSeason, "\nKreis = Perzentile innerhalb der Saison ", var.lastSeason - 1),
+      x = "",
+      y = "Perzentil",
+      fill = "Perzentil"
+    )
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Bild") %>% 
+    officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+  
+
+  
+  
+  # franchise ranks über die Jahre
+  #franchise_ranks <- standings %>% 
+  #  filter(franchise_id == i) %>%
+  #  rename(
+  #    Division = rank_division,
+  #    Conference = rank_conference,
+  #    League = rank_league
+  #  ) %>% 
+  #  mutate(
+  #    bowl = case_when(
+  #      super_bowl == 1 ~ "Super Bowl",
+  #      pro_bowl == 1 ~ "Pro Bowl",
+  #      toilet_bowl == 1 ~ "Toilet Bowl"
+  #    )
+  #  )
+  
+  #franchise_postseason_shedule <- postseason %>% 
+  #  filter(franchise_id == franchise$franchise_id) %>% 
+  #  rename(
+  #    vs = opponent_name,
+  #    PF = franchise_points,
+  #    PA = opponent_points,
+  #  ) %>% 
+  #  mutate(
+  #    title = ifelse(title == 1 & bracket_name == "Superbowl", 1, 0)
+  #  )
+  
+  #franchise_names <- franchise_ranks %>% 
+  #  select(season, franchise_name) %>% 
+  #  arrange(season)
+  
+  #franchise_names <- franchise_names[!duplicated(franchise_names$franchise_name),] %>% 
+  #  left_join(franchise_ranks %>% select(season, League), by = "season") %>% 
+  #  mutate(label = paste(season, "\n", franchise_name, sep = ""))
+  
+  #franchise_ranks <- franchise_ranks %>% 
+  #  left_join(franchise_names %>% select(season, label), by = "season") %>% 
+  #  gather(key, rank, c(Division, Conference, League)) %>% 
+  #  mutate(
+  #    rank = as.numeric(rank),
+  #    season = as.character(season),
+  #    label = ifelse(is.na(label), season, str_replace(label, "\\s", "\n"))
+  #  ) %>% 
+  #  left_join(franchise_postseason_shedule %>% select(season, title, week), by = "season") %>% 
+  #  mutate(
+  #    title = ifelse(is.na(title), 0, title),
+  #    bowl = ifelse(title == 1, "Titel", bowl)
+  #  ) %>% 
+  #  group_by(season) %>% 
+  #  filter(week == max(week) | is.na(week))
+
+  #chart2 <- ggplot(franchise_ranks,
+  #       aes(x = label, y = rank, fill = key, group = key, shape = bowl)) +
+  #  
+  #  geom_hline(yintercept = 6, color = var.colorAccent, size = 0.25, linetype = "dashed") +
+  #  geom_hline(yintercept = 18, color = var.colorRed, size = 0.25, linetype = "dashed") +
+  #  geom_hline(yintercept = 36, color = var.colorYellow, size = 0.25, linetype = "dashed") +
+
+  #  geom_line(aes(color = key), size = 1) +
+    
+  #  geom_point(size = 8, stroke = 1.5, color = "#002459") +
+    
+  #  geom_text(aes(label = rank), color = var.colorBlue, size = 3, family = var.fontText, fontface = "bold") +
+    
+  #  scale_shape_manual(values = c(24, 21, 25, 23), breaks = c("Super Bowl", "Pro Bowl", "Toilet Bowl", "Titel")) +
+  #  scale_color_manual(values = c(var.colorRed, var.colorAccent, var.colorYellow)) +
+  #  scale_fill_manual(values = c(var.colorRed, var.colorAccent, var.colorYellow), guide = "none") +
+    
+  #  guides(shape = guide_legend(nrow = 2, override.aes = list(color = var.colorAccent, fill = var.colorAccent, size = 1)),
+  #         color = guide_legend(nrow = 2, byrow = T, title = "")) +
+    
+  #  plotDefaults +
+  #  theme(
+  #    legend.position = "top",
+  #    axis.title = element_blank(),
+  #    legend.key.width = unit(10, "pt")
+  #  ) +
+  #  labs(
+  #    title = paste(franchise$franchise_name, "\nSaisonplatzierungen"),
+  #    subtitle = "Platzierungen am Ende der Regular Season",
+  #    color = "",
+  #    fill = "test",
+  #    shape = ""
+  #  ) +
+  #  scale_x_discrete(labels = function(x){sub("\\s", "\n", x)}) +
+  #  scale_y_reverse()
+  
+  # seite 2 ----
+  ## siege pro spieltag ----
+  points_per_game_data <- matchups %>% 
+    dplyr::group_by(season, week) %>% 
+    dplyr::mutate(
+      weekly_pts_pct = points_for / max(points_for),
+      result = ifelse(result == "W", 1, 0)
+    ) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::filter(
+      franchise_id == i,
+      !is.na(result)
+    ) %>% 
+    dplyr::select(season, week, points_for, weekly_pts_pct, result) %>% 
+    dplyr::group_by(season, week) %>% 
+    dplyr::mutate(high_score = ((1 - weekly_pts_pct) * points_for) + points_for) %>% 
+    dplyr::summarise(
+      wins = sum(result),
+      dplyr::across(c(points_for, weekly_pts_pct), mean),
+      .groups = "drop"
+    ) %>% 
+    dplyr::arrange(season, week) %>% 
+    dplyr::mutate(game_day = row_number())
+  
+  chart1 <- ggplot(points_per_game_data, aes(x = week, y = wins, alpha = weekly_pts_pct)) +
+    plotDefaults +
+    facet_wrap(~season, ncol = 4, strip.position = "bottom") +
+    geom_col(aes(y = 2), fill = var.colorAccent, alpha = 0.1, width = 0.5) +
+    geom_col(fill = var.colorYellow, width = 0.5) +
+    scale_y_continuous(limits = c(0,2.5), breaks = c(1,2)) +
+    
+    labs(
+      title = toupper(paste(franchise$franchise_name, "Siege pro Spieltag")),
+      subtitle = "Wie viele Matchusp wurden pro Spieltag gewonnen?",
+      x = "",
+      y = "",
+      alpha = ""
+    ) +
+    theme(
+      legend.position = "none",
+      axis.ticks = element_blank(),
+      axis.line = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_text(size = 8),
+      panel.background = element_blank(),
+      strip.background.x = element_rect(fill = NA),
+      strip.text = element_text(color = var.colorAccent, size = 8),
+      panel.spacing = unit(0, "lines")
+    )
+  
+  ## elo ----
+  biggest_elo_changes <- elo %>% 
+    dplyr::filter(franchise_id == i) %>% 
+    dplyr::mutate(
+      biggest_win = ifelse(elo_shift == max(elo_shift), 1, 0),
+      biggest_loss = ifelse(elo_shift == min(elo_shift), 1, 0)
+    ) %>% 
+    dplyr::filter(
+      biggest_win == 1 | biggest_loss == 1
+    )
+  
+  chart_data <- elo %>% 
+    dplyr::select(season, week, franchise_id, franchise_elo_postgame, dplyr::starts_with("biggest")) %>% 
+    dplyr::left_join(biggest_elo_changes %>% dplyr::select(season, week, opponent_id, dplyr::starts_with("biggest")), by = c("season", "week")) %>% 
+    dplyr::distinct() %>% 
+    dplyr::group_by(season, franchise_id) %>% 
+    dplyr::arrange(week) %>% 
+    dplyr::do(
+      dplyr::reframe(
+        .,
+        week = c(week, rep(NA, 1)),
+        franchise_elo_postgame = c(franchise_elo_postgame, rep(NA_integer_, )),
+        biggest_win = c(biggest_win, rep(NA_integer_, )),
+        biggest_loss = c(biggest_loss, rep(NA_integer_, ))
+      )
+    ) %>%  # add empty rows after each pos
+    dplyr::group_by(franchise_id) %>% 
+    dplyr::arrange(season, week) %>% 
+    dplyr::mutate(game_nr = dplyr::row_number()) %>% 
+    dplyr::ungroup()
+
+  chart_annotations <- chart_data %>% 
+    dplyr::group_by(season) %>% 
+    dplyr::summarise(
+      x_mean = mean(game_nr, na.rm = TRUE),
+      y_min = min(franchise_elo_postgame, na.rm = TRUE)
+    ) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::mutate(y_min = min(y_min)) %>% 
+    dplyr::rowwise() %>% 
+    dplyr::transmute(annotations = pmap(list(season, x_mean, y_min), function(s, x, y) {
+      annotate("text", x = x, y = y - 50, label = s, color = var.colorAccent, size = 3, alpha = 0.5)
+    })) %>% 
+    pull(annotations)
+  
+  biggest_elo_changes_chart_data <- chart_data %>% 
+    dplyr::filter(franchise_id == i, biggest_win == 1 | biggest_loss == 1) %>% 
+    dplyr::mutate(
+      ystart = ifelse(franchise_elo_postgame <= 1600, franchise_elo_postgame + 15, franchise_elo_postgame - 15),
+      yend = ifelse(franchise_elo_postgame <= 1600, franchise_elo_postgame + 250, franchise_elo_postgame - 250),
+      yLabelLarge = ifelse(franchise_elo_postgame <= 1600, yend + 20, yend - 50),
+      yLabel = yLabelLarge + 20
+    ) %>% 
+    dplyr::left_join(elo %>% dplyr::filter(franchise_id == i) %>% dplyr::select(season, week, opponent_id, elo_shift), by = c("season", "week"), multiple = "all") %>% 
+    dplyr::filter(elo_shift == min(elo_shift) | elo_shift == max(elo_shift)) %>% 
+    dplyr::left_join(franchisesLatest %>% dplyr::select(franchise_id, franchise_name), by = c("opponent_id" = "franchise_id"))
+  
+  
+  chart2 <- ggplot(chart_data, aes(x = game_nr, y = franchise_elo_postgame, group = franchise_id)) +
+    plotDefaults +
+    
+    geom_hline(yintercept = 1500, color = var.colorAccent, alpha = 0.1) +
+    geom_line(color = var.colorAccent, alpha = 0.05, size = 0.5) +
+    geom_line(data = subset(chart_data, franchise_id == i), color = var.colorYellow, linewidth = 0.8) +
+    
+    scale_y_continuous(limits = c(min(chart_data$franchise_elo_postgame), max(chart_data$franchise_elo_postgame) + 50), breaks = c(1500, max(chart_data$franchise_elo_postgame))) +
+    
+    chart_annotations + # bottom labels
+    
+    # höchster sieg
+    geom_point(data = biggest_elo_changes_chart_data, shape = 21, fill = NA, color = var.colorAccent, size = 6, stroke = 1.3) +
+    geom_segment(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(xend = game_nr, y = ystart, yend = yend), color = var.colorAccent, size = 0.8) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabel, label = toupper("Größte Überraschung vs.")), color = var.colorAccent, size = 2) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabelLarge, label = paste0(franchise_name, " +", elo_shift)), color = var.colorAccent, size = 2.7, family = var.fontTextBold) +
+    
+    # höchster niederlage
+    #geom_point(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), shape = 21, fill = NA, color = var.colorAccent, size = 6, stroke = 1.3) +
+    geom_segment(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(xend = game_nr, y = ystart, yend = yend), color = var.colorAccent, size = 0.8) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabel, label = toupper("Größte Enttäuschung vs.")), color = var.colorAccent, size = 2) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabelLarge, label = paste(franchise_name, elo_shift)), color = var.colorAccent, size = 2.7, family = var.fontTextBold) +
+  
+    
+    labs(
+      title = toupper(paste(franchise$franchise_name, "running ELO")),
+      subtitle = "Wie hat sich die ELO über die Jahre\nim Vergleich zu den anderen Teams verändert?",
+      x = "",
+      y = ""
+    ) +
+    theme(
+      axis.text = element_text(size = 8, color = var.colorAccent, family = var.fontText),
+      panel.background = element_blank(),
+      panel.spacing = unit(0, "lines"),
+      axis.line = element_blank(),
+      axis.text.x = element_blank(),
+      axis.text.y = element_text(vjust = 0.4),
+      axis.ticks = element_blank(),
+    )
+  
+  # win perc heat map
+  #heatmapData <- heatmapChartDataGathered %>% 
+  #  filter(
+  #    division_name == franchise$division_name,
+  #    key == "Win Pct"
+  #  )
+  
+  #chart2 <- ggplot(heatmapData, aes(x = rank_division, y = season, fill = win_pct, label = paste("W ", h2h_wins, " - ", h2h_losses, " L", sep = ""))) +
+  #  plotDefaults +
+  #  plotHeatmap +
+  #  
+  #  geom_tile(data = subset(heatmapData, franchise_id == i), color = var.colorAccent, size = 0.5, alpha = 0) +
+
+  #  geom_text(data = subset(heatmapData, franchise_id == i), aes(color = h2h_wins > 11), size = 3, family = var.fontTextBold) +
+  #  scale_color_manual(guide = "none", values = c("#FED799", var.colorBlue)) + # färbt text je nach value hell oder dunkel
+    
+   # labs(
+   #   title = paste(franchise$franchise_name, "\nWin Percentages"),
+  #    subtitle = "Win % am Ende der Regular Season",
+  #    x = "Division Rank",
+  #    y = "Season",
+  #    fill = "Win %"
+  #  ) +
+  #  theme(
+  #    axis.text.x = element_text(vjust = 5),
+  #    legend.key.size = unit(10, "pt")
+  #  ) +
+  #  scale_x_continuous(expand=c(0,0), breaks = pretty_breaks()) +
+  #  scale_y_continuous(breaks = pretty_breaks())
+#  
+  output <- output %>% 
+    officer::add_slide(layout = "2 Bilder") %>% 
+    officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+    officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+  
+  # points
+  ## points by unit
+  chart1 <- ggplot(seasonTotals, aes(x = points_for)) +
+    plotHistogram +
+    geom_density(aes(x = offense_starter, fill = "League Offense"), color = "transparent", alpha = 0.4) +
+    geom_density(aes(x = defense_starter, fill = "League Defense"), color = "transparent", alpha = 0.4) +
+    
+    geom_density(data = subset(seasonTotals, franchise_id == franchise$franchise_id),
+                 aes(x = offense_starter, color = "Team Offense"), alpha = 0, size = 1) +
+    geom_density(data = subset(seasonTotals, franchise_id == franchise$franchise_id),
+                 aes(x = defense_starter, color = "Team Defense"), alpha = 0, size = 1) +
+    
+    geom_point(data = subset(seasonTotals, season == var.lastSeason & franchise_id == franchise$franchise_id),
+               aes(x = offense_starter), shape = 24,
+               y = 0, fill = var.colorRed, color = var.colorBlue, stroke = 1, size = 8) +
+    geom_point(data = subset(seasonTotals, season == var.lastSeason & franchise_id == franchise$franchise_id),
+               aes(x = defense_starter), shape = 24,
+               y = 0, fill = var.colorYellow, color = var.colorBlue, stroke = 1, size = 8) +
+    
+    scale_color_manual(values = c(var.colorYellow, var.colorRed)) +
+    scale_fill_manual(values = c(var.colorYellow, var.colorRed)) +
+    scale_shape_manual(values = c(24, 24)) +
+    
+    guides(color = guide_legend(nrow = 2, byrow = T, title = ""),
+           fill = guide_legend(nrow = 2, byrow = T, title = ""),
+           shape = guide_legend(nrow = 2, byrow = T, title = "")) +
+    
+    scale_x_continuous(expand = c(0,0), limits = c(min(seasonTotals$defense_starter), max(seasonTotals$offense_starter))) +
+    
+    labs(
+      title = paste(franchise$franchise_name, "Total Points"),
+      subtitle = paste("Verteilung der Total Points (PF) von ", var.firstSeason, " - ", var.lastSeason, " (Dreiecke = Pts ", var.lastSeason, ")", sep = ""),
+      x = "Total Points"
+    ) +
+    theme(
+      legend.position = "top"
+    )
+  
+  ## points by position
+  ### team durchschnitt
+  ptsByPosFranchiseAvgChartData <- summarise_all(
+    ptsByPosChartData %>%
+      filter(franchise_id == franchise$franchise_id) %>% 
+      group_by(franchise_id) %>% 
+      summarise(across(where(is.numeric), mean)) %>% 
+      select(-franchise_id, -season),
+    mean
+  ) %>% 
+    mutate(type = "Team Avg")
+  
+  ### team durchschnitt letzte saison
+  ptsByPosTeamAvgLastSeasonChartData <- summarise_all(
+    ptsByPosChartData %>%
+      filter(season == var.lastSeason & franchise_id == franchise$franchise_id) %>% 
+      group_by(franchise_id) %>% 
+      summarise(across(where(is.numeric), mean)) %>% 
+      select(-franchise_id, -season),
+    mean
+  ) %>% 
+    mutate(type = paste("Team Avg", var.lastSeason))
+  
+  ptsByPosLeagueMaxChartData <- summarise_all(
+    rbind(ptsByPosLeagueAvgChartData, ptsByPosFranchiseAvgChartData, ptsByPosTeamAvgLastSeasonChartData), max) %>% 
+    gather(key, value) %>% 
+    arrange(desc(value)) %>% 
+    slice(1) 
+  
+  chartData <- rbind(ptsByPosTeamAvgLastSeasonChartData, ptsByPosLeagueAvgChartData, ptsByPosFranchiseAvgChartData) %>% 
+    select(type, ends_with("_starter")) %>% 
+    rename_all(~stringr::str_replace(., "_starter", "")) %>% 
+    rename_all(~stringr::str_replace(., "offense_", "")) %>% 
+    rename_all(~stringr::str_replace(., "defense_", "")) %>% 
+    gather(key, score, -type)
+
+  chart2 <- ggplot(chartData,
+                   aes(x = factor(key, levels = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB")), y = score, color = type, group = type)) +
+    plotDefaults +
+    coord_polar() +
+    geom_col(data = subset(chartData, type == "League Avg"), aes(fill = type), width = 1, color = var.colorBlue, alpha = 0.3) +
+    
+    geom_line(data = subset(chartData, type != "League Avg"), size = 1) +
+    geom_point(data = subset(chartData, type != "League Avg"), size = 3) +
+    
+    scale_fill_manual(values = var.colorAccent) +
+    scale_color_manual(values = c(var.colorYellow, var.colorRed)) +
+    
+    guides(color = guide_legend(nrow = 2, byrow = T, title = "")) +
+    
+    theme(
+      legend.position = "top",
+      panel.grid.major.x = element_line(color = alpha(var.colorAccent, 0.1)),
+      panel.background = element_rect(fill = NA),
+      #panel.grid.minor.y = element_blank(),
+      #panel.grid.major.y = element_blank(),
+      axis.text.y = element_blank(),
+      axis.line = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.x = element_text(size = 10, family = var.fontTextBold),
+      aspect.ratio = 0.56
+    ) +
+    
+    labs(
+      title = paste(franchise$franchise_name, "\nPts by Position"),
+      x = "",
+      y = "",
+      color = "",
+      fill = ""
+    ) +
+    ylim(c(0, max(chartData$score)))
+  
+  output <- output %>% 
+    officer::add_slide(layout = "2 Bilder") %>% 
+    officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+    officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+  
+  # offseason
+  ## draft
+  #franchise_draft <- draft %>% 
+  #  filter(franchise_id == i)
+  
+  ## check, ob draft daten vorhanden (berlin bears haben zB keinen in 2022)
+  #if(dim(franchise_draft)[1] != 0) {
+  
+  #  chart <- ggplot(franchise_draft, aes(x = overall_clean, y = reorder(player, desc(overall)))) +
+  #    plotDefaults +
+      
+  #    geom_segment(aes(x = rfl_clean_min, xend = rfl_clean_max, yend = player), color = var.colorAccent, size = 1) +
+  #    geom_point(aes(x = rfl_clean_min), color = var.colorAccent, size = 3) +
+  #    geom_point(aes(x = rfl_clean_max), color = var.colorAccent, size = 3) +
+  #    geom_point(aes(x = rfl_clean_avg, color = "RFL Draft Range (Clean)"), size = 3) +
+      
+  #    geom_point(aes(color = "Team Pick"), size = 5) +
+  #    geom_point(aes(x = pick_avg, color = "MFL ADP"), size = 2) +
+  #    scale_color_manual(values = c(var.colorYellow, var.colorAccent, var.colorRed)) +
+  #    geom_text_repel(aes(label = pick_cat), family = var.fontText, size = 4, color = var.colorAccent, nudge_y = 0.5) +
+      
+  #    geom_label(data = subset(draftScore, franchise_id == i),
+  #              aes(label = paste("Draft Score: ", round(pick_diff, digits = 1), " (", pick_cat, ")", sep = "")),
+  #              x = Inf, y = Inf, size = 3, hjust = 1.2, vjust = 2, lineheight = 1.6) +
+      
+  #    theme(
+  #      plot.margin = margin(15, 15, 15, 0),
+  #      legend.position = "top",
+  #      legend.key.height = unit(12, "pt"),
+  #      legend.title = element_blank()
+  #    ) +
+  #    labs(
+  #      title = paste(franchise$franchise_name, "Draft", var.lastSeason + 1),
+  #      x = "Overall Pick",
+  #      y = ""
+  #    ) +
+  #    xlim(c(1, 90))
+    
+  #  output <- output %>% 
+  #    officer::add_slide(layout = "Bild") %>% 
+  #    officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+  
+  #}
+  
+  ## transactions
+  #chart <- ggplot(transactions, aes(x = points, y = war, shape = type_desc)) +
+  #  plotDefaults +
+  #  facet_wrap(vars(transfer_dir)) +
+  #  geom_point(data = subset(transactions, franchise_id != franchise$franchise_id), color = var.colorAccent, alpha = 0.3, size = 2) +
+  #  geom_point(data = subset(transactions, franchise_id == franchise$franchise_id), color = var.colorRed, size = 3) +
+  #  scale_shape_manual(values = c(16, 16, 15, 15)) +
+  #  geom_label_repel(data = subset(transactions, franchise_id == franchise$franchise_id), aes(label = paste(pos, player_name)),
+  #                  size = 2, color = var.colorBlue, max.overlaps = 25) +
+  #  labs(
+  #    title = paste(franchise$franchise_name, "Offseason Transaktionen"),
+  #    subtitle = paste("Abgebildet sind alle Transaktionen in der Offseason", var.lastSeason + 1),
+  #    x = paste("Fantasy Points", var.lastSeason),
+  #    y = paste("Wins over Replacement", var.lastSeason),
+  #    shape = ""
+  #  ) +
+  #  theme(
+  #    legend.position = "top"
+  #  )
+  
+  #output <- output %>% 
+  #  officer::add_slide(layout = "Bild") %>% 
+  #  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+  
+  ### trades
+  #franchiseTradeFor <- tradeChartDataRaw %>% 
+  #  filter(
+  #    to == franchise$franchise_id,
+  #    transfer_dir == "Abgang"
+  #  ) %>% 
+  #  gather(key, franchise_id, c(from, to)) %>% 
+  #  left_join(franchisesLatest %>% select(franchise_id, franchise_name), by = "franchise_id")
+  
+  #franchiseTradeAway <- tradeChartDataRaw %>% 
+  #  filter(
+  #    from == franchise$franchise_id,
+  #    transfer_dir == "Abgang"
+  #  ) %>% 
+  #  gather(key, franchise_id, c(from, to)) %>% 
+  #  left_join(franchisesLatest %>% select(franchise_id, franchise_name), by = "franchise_id")
+  
+  #chartData <- tradeChartDataRaw %>% 
+  #  filter(from != franchise$franchise_id) %>% 
+  #  gather(key, franchise_id, c(from, to)) %>% 
+  #  left_join(franchisesLatest %>% select(franchise_id, franchise_name), by = "franchise_id")
+    
+  
+  #chart1 <- ggplot(chartData, aes(x = key, y = franchise_name, group = trade_id)) +
+  #  plotDefaults +
+  #  scale_x_discrete(expand = c(0, 0)) +
+    
+  #  geom_bump(color = var.colorAccent, alpha = 0.050, size = 1) +
+    
+  #  scale_color_manual(values = c(var.colorRed, var.colorYellow)) +
+
+  #  theme(
+  #    axis.line = element_blank(),
+  #    axis.ticks = element_blank(),
+  #    axis.text.x = element_blank(),
+  #    legend.key.size = unit(10, "pt"),
+  #    legend.position = "top"
+  #  ) +
+    
+  #  labs(
+  #    title = paste(franchise$franchise_name, "Trades\nin der Offseason", var.lastSeason + 1),
+  #    x = "",
+  #    y = "",
+  #    color = ""
+  #  )
+  
+  #if(dim(franchiseTradeFor)[1] != 0) {
+  #  chart1 <- chart1 + geom_bump(data = franchiseTradeFor, aes(color = "Zugang"))
+  #}
+  
+  #if(dim(franchiseTradeAway)[1] != 0) {
+  #  chart1 <- chart1 + geom_bump(data = franchiseTradeAway, aes(color = "Abgang"))
+  #}
+  
+  # war diff liga
+  #chart2 <- ggplot(transactionsByFranchise, aes(x = reorder(franchise_name, desc(war_diff)), y = war_diff)) +
+  #  plotDefaults +
+  #  geom_col(fill = var.colorAccent) +
+  #  geom_col(data = subset(transactionsByFranchise, franchise_id == franchise$franchise_id), fill = var.colorRed) +
+  #  theme(
+  #    axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+  #  ) +
+  #  labs(
+  #    title = paste(franchise$franchise_name, "WAR Veraenderung"),
+  #    subtitle = paste("WAR Veränderung für alle Teams während der Offseason", var.lastSeason + 1),
+  #    x = "",
+  #    y = "Offseason WAR Veränderung"
+  #  )
+  
+  #output <- output %>% 
+  #  officer::add_slide(layout = "2 Bilder") %>% 
+  #  officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
+  #  officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
+  
+
+  
+
+
+
+
+#}
+
+```
+
+
+```{r eval=FALSE, include=FALSE}
+
+# How many startes by position league wide
+
+  library(igraph)
+
+ starter_per_position_data <- starter %>% 
+    dplyr::filter(starter_status == "starter") %>% 
+    dplyr::group_by(season, week, franchise_id, pos) %>%
+    dplyr::summarise(value = n(), .groups = "drop") %>% 
+    dplyr::filter(!pos %in% c("PK", "QB")) %>% 
+    dplyr::mutate(
+      group = paste0(pos, value),
+      unit = ifelse(pos %in% c("RB", "WR", "TE"), "offense", "defense")
+    ) %>% 
+    dplyr::group_by(unit, group, pos) %>% 
+    dplyr::summarise(value = sum(value), .groups = "drop")
+  
+  level1 <- starter_per_position_data %>% 
+    dplyr::select(unit, pos) %>% 
+    dplyr::mutate(
+      unit = paste0("unit.", unit),
+      pos = paste(unit, pos, sep = ".")
+    ) %>% 
+    tidyr::gather(from, to, c(unit, pos)) %>% 
+    dplyr::distinct() %>% 
+    mutate(from = ifelse(grepl("unit.defense", to), "unit.defense", "unit.offense"))
+  
+  level2 <- starter_per_position_data %>% 
+    dplyr::mutate(
+      pos = paste0("unit.", unit, ".", pos),
+      group = paste(pos, group, sep = ".")
+    ) %>% 
+    dplyr::select(pos, group) %>% 
+    tidyr::gather(from, to, c(pos, group)) %>% 
+    dplyr::distinct() %>% 
+    dplyr::ungroup() %>% 
+    dplyr::filter(from == "group") %>% 
+    dplyr::mutate(
+      from = paste0("unit.", map_chr(str_split(to, "\\."), 2), ".", map_chr(str_split(to, "\\."), 3))
+    )
+  
+  levels <- rbind(level1, level2) %>% 
+    dplyr::filter(from != to)
+  
+  values <- starter_per_position_data %>% 
+    dplyr::group_by(unit) %>% 
+    dplyr::mutate(
+      unit = paste0("unit.", unit),
+      sum_unit = sum(value)
+    ) %>% 
+    dplyr::group_by(pos) %>% 
+    dplyr::mutate(
+      pos = paste(unit, pos, sep = "."),
+      sum_pos = sum(value)
+    ) %>% 
+    dplyr::group_by(group) %>% 
+    dplyr::mutate(
+      group = paste(pos, group, sep = "."),
+      sum_group = sum(value)
+    ) %>% 
+    tidyr::spread(unit, sum_unit) %>% 
+    tidyr::spread(pos, sum_pos) %>% 
+    tidyr::spread(group, sum_group) %>% 
+    tidyr::gather(key, value, dplyr::starts_with("unit.")) %>% 
+    dplyr::distinct() %>% 
+    dplyr::filter(!is.na(value)) %>% 
+    dplyr::mutate(
+      label = sapply(str_split(key, "\\."), tail, 1)
+    )
+  
+  mygraph <- igraph::graph_from_data_frame(levels, vertices = values)
+ 
+# Make the plot
+ggraph(mygraph, layout = 'circlepack', weight = value) + 
+  geom_node_circle(aes(fill = depth)) +
+  geom_node_text(aes(label = label, filter = leaf, size = value)) +
+  theme_void() + 
+  theme(legend.position="FALSE") +
+  scale_fill_distiller(palette = "RdPu")
+  
+
+
+
+
+
+  
+  
+  
+    
+    
+  plotDefaults +
+    
+    geom_point(data = subset(starter_per_position_data, franchise_id == i))
+    #geom_violin(data = subset(starter_per_position_data, franchise_id == i), scale = "count") +
+    theme(
+      #axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 4)
+    )
+  #chart <- create_layout(chart1, layout = 'dendrogram', circular)
+  
+  #output <- output %>% 
+    #officer::add_slide(layout = "2 Bilder") %>% 
+    #officer::ph_with(value = chart1, location = officer::ph_location_label("img-left"))
+  
+
+
+ # cumulated PF
+  chartData <- matchups %>% 
+    select(season, week, franchise_id, points_for) %>% 
+    distinct() %>% 
+    group_by(franchise_id) %>% 
+    arrange(season, week) %>% 
+    mutate(
+      game = row_number(),
+      points_for_running = points_for[1] + cumsum(c(0, points_for[-1]))
+    ) %>% 
+    ungroup()
+    
+  
+  ggplot(subset(chartData, franchise_id != i), aes(x = game, y = points_for_running, group = franchise_id)) +
+    geom_line(color = "grey") +
+    geom_line(data = subset(chartData, franchise_id == i), color = var.colorRed)
+  
+  
+  # expected wins
+  ggplot(subset(franchise_matchups, season == var.lastSeason & franchise_id == i), aes(x = week)) +
+    geom_line(aes(y = wins_running)) +
+    geom_line(aes(y = sf_expw), color = "red") +
+    plotDefaults +
+    scale_x_continuous(breaks = pretty_breaks())
+  
+  #franchise_postseason_shedule_table <- head(franchise_postseason_shedule %>% select(WK, vs, PF, PA, "Opp Rnk"))
+  franchise_matchups <- matchups %>% 
+    filter(season == var.lastSeason & franchise_id == i) %>%
+    select(-total_wins_pctl,-total_wins_pctl_wkly, -sf_skill_pctl, -sf_skill_pctl_wkly) %>% 
+    gather(pctl_key_tot, pctl_tot, c(ends_with("pctl"))) %>% 
+    gather(pctl_key_wkly, pctl_wkly, c(ends_with("wkly"))) %>% 
+    mutate(
+      label = paste("WK", week, result, "vs", opponent_id)
+    )
+
+  # matchup
+  ggplot(data = subset(franchise_matchups), aes(x = week, y = pctl_wkly, color = pctl_key_wkly)) +
+    geom_col(data = subset(franchise_matchups, pctl_key_wkly == "points_for_pctl_wkly")) +
+    geom_point(data = subset(franchise_matchups, pctl_key_wkly == "points_against_pctl_wkly")) +
+    geom_line(data = subset(franchise_matchups, pctl_key_wkly == "sf_luck_pctl_wkly"))
+  
+  
+  ggplot(data = subset(franchise_matchups), aes(x = week, y = pctl_tot, color = pctl_key_tot)) +
+    geom_col(data = subset(franchise_matchups, pctl_key_tot == "points_for_pctl_tot")) +
+    geom_point(data = subset(franchise_matchups, pctl_key_tot == "points_against_pctl_tot")) +
+    geom_line(data = subset(franchise_matchups, pctl_key_tot == "sf_luck_pctl_tot"))
+```
+
+
+# export
+```{r include=FALSE}
+print(output, paste0("output/rfl-season-report-", var.lastSeason, ".pptx"))
+
+template %>% 
+  officer::layout_properties()
+```
+
