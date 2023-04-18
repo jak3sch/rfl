@@ -34,6 +34,7 @@ library(glue)
 library(grafify)
 library(geomtextpath)
 library(emoji)
+library(treemapify)
 
 #library(remotes)
 #remotes::install_version("Rttf2pt1", version = "1.3.8") # fix extrafont bug bei fontimport
@@ -284,7 +285,7 @@ output <- output %>%
 ```
 
 ### MVPs der vergangenen Jahre
-```{r mvp history, eval=FALSE, message=FALSE, warning=FALSE}
+```{r mvp history, echo=FALSE, message=FALSE, warning=FALSE}
 past_mvp_data <- league_awards %>% 
   dplyr::filter(award == "MVP" & rank == 1) %>% 
   dplyr::mutate(
@@ -329,7 +330,7 @@ output <- output %>%
 ```
 
 ### Position MVPs
-```{r league-position-mvps, eval=FALSE, fig.height=7.5, fig.width=13, message=FALSE, warning=FALSE}
+```{r league-position-mvps, echo=FALSE, fig.height=7.5, fig.width=13, message=FALSE, warning=FALSE}
 # mvp für jede position ----
 league_mvp_positions <- franchiseWARPlayer %>% 
   dplyr::select(player_id, pos, points, war) %>% 
@@ -380,7 +381,7 @@ output <- output %>%
 
 ## Starter
 ### Starter by Position
-```{r starter by position, eval=FALSE}
+```{r starter by position, echo=FALSE}
 starter_by_position_data <- starter %>% 
   dplyr::filter(starter_status == "starter") %>% 
   dplyr::group_by(season, week, franchise_id, pos) %>%
@@ -430,7 +431,7 @@ chart1 <- starter_per_position_base_chart +
 ```
 
 ### Starter per NFL Team
-```{r starter per nfl team, eval=FALSE, message=FALSE, warning=FALSE}
+```{r starter per nfl team, echo=FALSE, message=FALSE, warning=FALSE}
 starter_by_nfl_team_data <- starter %>%
   dplyr::filter(starter_status == "starter" & !team %in% c("FA", "FA*")) %>% 
   dplyr::group_by(season, franchise_id, pos, team) %>% 
@@ -983,15 +984,14 @@ for (row in 1:nrow(divs)) {
 ```
 
 # Teams
-```{r teams kapitel, echo=FALSE, message=FALSE, warning=TRUE, include=FALSE}
-print(output, paste0("output/rfl-season-report-", var.lastSeason, ".pptx"))
+```{r teams kapitel, echo=FALSE, message=FALSE, warning=TRUE}
 output <- output %>% 
   officer::add_slide(layout = "Kapitel") %>% 
   officer::ph_with(value = "Teams", location = officer::ph_location_label("title"))
 ```
 
 ## einzelner Team Bericht
-```{r team, eval=FALSE, message=FALSE, warning=TRUE, include=FALSE}
+```{r team, echo=FALSE, message=FALSE, warning=TRUE}
 # points by position
 ptsByPosChartData <- seasonTotals %>% 
   select(season, franchise_id, ends_with("_starter")) %>% 
@@ -1036,12 +1036,25 @@ i = "0007"
     arrange(desc(war_per_fpt)) %>% 
     slice(1)
   
+  
+  ###
+  ### TITEL ----
+  ###
+  
+  
   output <- output %>% 
     officer::add_slide(layout = "Team Report Titel") %>% 
     officer::ph_with(value = franchise$franchise_name, location = officer::ph_location_label("title")) %>% 
     officer::ph_with(value = paste(franchise$franchise_name, " MVP ", var.lastSeason, ": ", franchiseMVP$pos, " ", franchiseMVP$player_name, "\nEr erzielte ", franchiseMVP$points, " FPts und war damit für ", round(franchiseMVP$war, digits = 1), " Wins above replacement (WAR) verantwortlich.", sep = ""), location = officer::ph_location_label("mvp"))
   
-  # season percentiles ----
+  
+    
+  ###
+  ### Perzentile ----
+  ###
+  
+  key_order <- c("Win %", "All Win %", "Expected Wins", "Total Points", "Potential Points", "Points per Game", "Points Against", "Effizienz", "Luck", "Skill")
+  
   franchise_percentiles <- standings %>% 
     filter(
       franchise_id == i
@@ -1071,41 +1084,132 @@ i = "0007"
         key == "win_pctl_" ~ "Win %"
       )
     )
-  
-  chart <- ggplot(data = subset(franchise_percentiles, type == "total" & season == var.lastSeason),
-         aes(x = factor(key, levels = c("Win %", "All Win %", "Total Points", "Potential Points", "Points per Game", "Effizienz", "Points Against", "Expected Wins", "Luck", "Skill")), y = pctl * 100, fill = pctl)) + 
-    geom_col() +
-    geom_hline(yintercept = 50, color = var.colorAccent, alpha = 0.3) +
-    geom_hline(yintercept = 75, color = var.colorAccent, alpha = 0.3) +
-    geom_hline(yintercept = 90, color = var.colorAccent, alpha = 0.3) +
+
+  franchise_percentiles_additional_data <- franchise_percentiles %>% 
+    dplyr::filter(season == var.lastSeason) %>%  
+    dplyr::left_join(franchise_percentiles %>%  dplyr::filter(type == "season" & season == var.lastSeason - 1) %>% dplyr::select(key, pctl) %>% dplyr::rename(pctl_prev_season = pctl), by = "key") %>% 
+    dplyr::filter(type == "season") %>% 
+    dplyr::left_join(franchise_percentiles %>% dplyr::filter(type == "total" & season == var.lastSeason) %>%  dplyr::select(key, pctl) %>% dplyr::rename(pctl_total = pctl), by = "key") %>% 
+    dplyr::mutate(key_f = factor(key, key_order)) %>% 
+    dplyr::arrange(key_f) %>% 
+    dplyr::mutate(key_rank = dplyr::row_number()) %>% 
+    dplyr::mutate(
+      spape = 21, shape = ifelse(pctl > pctl_prev_season, "arrow_up", "arrow_down"),
+      
+      # find empty bar für label
+      empty_bar = case_when(
+        pctl_total < pctl & pctl_total < pctl_prev_season ~ 1, # pctl der letzten beiden jahre sind beide größer als total
+        pctl_total < pctl & pctl_total > pctl_prev_season ~ 2, # total pctl ist nur größer als pctl prev season
+        pctl_total == max(pctl_total) ~ 3, # der höchste pctl balken
+        TRUE ~ 0
+      ),
+      
+      empty_bar = case_when(
+        key_rank > 1 & dplyr::lag(empty_bar) == 0 ~ 0,
+        key_rank < max(key_rank) & dplyr::lead(empty_bar) == 0 ~ 0,
+        TRUE ~ empty_bar
+      )
+    ) %>% 
+    dplyr::select(season, key, key_rank, type, pctl, pctl_prev_season, pctl_total, shape, empty_bar)
+
+    # labels
+    franchise_percentiles_labels <- franchise_percentiles_additional_data %>% 
+      dplyr::filter(empty_bar > 0) %>% 
+      dplyr::filter(pctl_total == max(pctl_total)) %>% 
+      dplyr::mutate(
+        label_type = "bar"
+      ) %>% 
+      
+      # points
+      rbind(
+        franchise_percentiles_additional_data %>% 
+          dplyr::mutate(diff = pctl - pctl_prev_season) %>% 
+          dplyr::arrange(desc(diff)) %>% 
+          utils::head(1) %>% 
+          dplyr::select(-diff) %>% 
+          dplyr::mutate(
+            label_type = "point"
+          )
+      ) %>% 
+      
+      # bar label
+      dplyr::mutate(
+        label = dplyr::case_when(
+          label_type == "bar" ~ paste("ø der Perzentile\nvon", var.firstSeason, "-", var.lastSeason),
+          label_type == "point" ~ paste0("Perzentile der Saison ", var.lastSeason, ".\nRichtung markiert Veränderung zum Vorjahr (Quadrat).")
+        ),
+        
+        label_align = dplyr::case_when(
+          label_type == "bar" & key_rank <= 7 ~ "left",
+          label_type == "point" & key_rank <= 5 ~ "left",
+          TRUE ~ "right"
+        )
+      )
+      
+    chart <- ggplot(data = subset(franchise_percentiles, type == "total" & season == var.lastSeason), aes(x = factor(key, key_order), y = pctl * 100, fill = pctl)) + 
+      plotDefaultsMinimal +
+      
+      geom_col(fill = var.colorAccent, alpha = 0.1) +
+      
+      # verbindungslinie zwischen den season stats
+      geom_segment(franchise_percentiles_additional_data, mapping = aes(xend = key, yend = pctl_prev_season * 100), size = plot.line_width_l, color = var.colorLightblue) +
+      
+      # total pctl
+      plot_geom_large_text(color = var.colorAccent, aes(label = round(pctl * 100, digits = 0)), nudge_y = 5) +
+      
+      # season stats
+      geom_point(data = subset(franchise_percentiles, type == "season" & season == var.lastSeason - 1), size = 2, shape = 22, stroke = NA, position = position_nudge(x = 0.01)) +
+      geom_point(
+        data = subset(franchise_percentiles_additional_data, type == "season" & season == var.lastSeason),
+        aes(shape = shape),
+        color = var.colorBlue, size = 5, stroke = plot.line_width_l
+      ) +
+      
+      # labels
+      geom_curve(
+        data = subset(franchise_percentiles_labels, label_type == "bar"),
+        aes(x = key_rank + 0.1, xend = key_rank + 0.65, y = pctl_total * 10, yend = pctl_total * 20),
+        curvature = -0.5, color = var.colorAccent, size = plot.line_width_m) +
+      
+      plot_geom_xsmall_text(
+        data = subset(franchise_percentiles_labels, label_type == "bar"),
+        aes(label = label, hjust = ifelse(label_align == "left", 0, 1), x = ifelse(label_align == "left", key_rank + 0.8, key_rank - 0.8), y = pctl_total * 10),
+        vjust = 0, color = var.colorAccent) +
+      
+      geom_curve(
+        data = subset(franchise_percentiles_labels, label_type == "point"),
+        aes(xend = key_rank),
+        yend = 105, curvature = -0.5, color = var.colorAccent, size = plot.line_width_m) +
+      
+      plot_geom_xsmall_text(
+        data = subset(franchise_percentiles_labels, label_type == "point"),
+        aes(label = label, x = ifelse(label_align == "left", 1, max(franchise_percentiles_additional_data$key_rank)), hjust = ifelse(label_align == "left", 0, 1)),
+        y = 108, vjust = 0, color = var.colorAccent) +
+      
+      # theme
+      
+      labs(
+        title = toupper(paste0(franchise$franchise_name, ": Perzentile ", var.lastSeason))
+      ) +
     
-    geom_text(aes(label = round(pctl * 100, digits = 0)), nudge_y = 5, color = var.colorAccent) +
-    geom_point(data = subset(franchise_percentiles, type == "season" & season == var.lastSeason), color = var.colorAccent, size = 5, shape = 23, stroke = 1) +
-    geom_point(data = subset(franchise_percentiles, type == "season" & season == var.lastSeason - 1), color = var.colorAccent, size = 3, shape = 21, stroke = 1, position = position_nudge(x = 0.005)) +
-    
-    plotDefaults +
-    viridis::scale_fill_viridis(option = "magma", labels = percent, begin = 0, end = 1, limits = c(0,1)) +
-    
-    theme(
-      legend.key.size = unit(12, "pt"),
-      plot.margin = margin(15, 15, 5, 15),
-    ) +
-    scale_x_discrete(labels = function(x){sub("\\s", "\n", x)}) +
-    scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
-    labs(
-      title = paste(franchise$franchise_name, "Perzentile"),
-      subtitle = paste("Balken = Perzentile des Durchschnitts von", var.firstSeason, "-", var.lastSeason, "\nKaro = Perzentile innerhalb der Saison", var.lastSeason, "\nKreis = Perzentile innerhalb der Saison ", var.lastSeason - 1),
-      x = "",
-      y = "Perzentil",
-      fill = "Perzentil"
-    )
+      scale_shape_manual(values = c("arrow_up" = 24, "arrow_down" = 25)) +
+      scale_fill_gradient2(low = var.colorRed, high = var.colorYellow, midpoint = 0.5) +
+      scale_x_discrete(labels = function(x){sub("\\s", "\n", x)}) +
+      scale_y_continuous(limits = c(0,115), expand = c(0,0), breaks = c(25, 50, 75, 100)) +
+      
+      theme(
+        panel.grid.major.y = element_line(size = plot.line_width, color = var.colorLightblue),
+        axis.text = element_text(size = plot.theme_text_shadow_size, color = plot.theme_text_shadow_color, family = plot.theme_text_shadow_family)
+        #legend.key.size = unit(12, "pt"),
+        #plot.margin = margin(15, 15, 5, 15),
+      )
   
   output <- output %>% 
     officer::add_slide(layout = "Bild") %>% 
     officer::ph_with(value = chart, location = officer::ph_location_label("img"))
   
 
-  
+  # ----
   
   # franchise ranks über die Jahre
   #franchise_ranks <- standings %>% 
@@ -1194,8 +1298,16 @@ i = "0007"
   #  scale_x_discrete(labels = function(x){sub("\\s", "\n", x)}) +
   #  scale_y_reverse()
   
-  # seite 2 ----
-  ## siege pro spieltag ----
+  
+  
+  
+  
+  ###
+  ### Siege pro Spieltag ----
+  ###
+  
+  
+  
   points_per_game_data <- matchups %>% 
     dplyr::group_by(season, week) %>% 
     dplyr::mutate(
@@ -1219,32 +1331,31 @@ i = "0007"
     dplyr::mutate(game_day = row_number())
   
   chart1 <- ggplot(points_per_game_data, aes(x = week, y = wins, alpha = weekly_pts_pct)) +
-    plotDefaults +
+    plotDefaultsMinimal +
     facet_wrap(~season, ncol = 4, strip.position = "bottom") +
     geom_col(aes(y = 2), fill = var.colorAccent, alpha = 0.1, width = 0.5) +
     geom_col(fill = var.colorYellow, width = 0.5) +
     scale_y_continuous(limits = c(0,2.5), breaks = c(1,2)) +
     
     labs(
-      title = toupper(paste(franchise$franchise_name, "Siege pro Spieltag")),
-      subtitle = "Wie viele Matchusp wurden pro Spieltag gewonnen?",
-      x = "",
-      y = "",
+      title = toupper(paste0(franchise$franchise_name, ": Siege pro Spieltag")),
       alpha = ""
     ) +
     theme(
-      legend.position = "none",
-      axis.ticks = element_blank(),
-      axis.line = element_blank(),
-      axis.text.x = element_blank(),
-      axis.text.y = element_text(size = 8),
-      panel.background = element_blank(),
-      strip.background.x = element_rect(fill = NA),
-      strip.text = element_text(color = var.colorAccent, size = 8),
+      strip.text = element_text(color = plot.theme_text_shadow_color, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family),
       panel.spacing = unit(0, "lines")
     )
   
-  ## elo ----
+  
+  
+  
+  
+  ###
+  ### ELO ----
+  ###
+  
+  
+  
   biggest_elo_changes <- elo %>% 
     dplyr::filter(franchise_id == i) %>% 
     dplyr::mutate(
@@ -1285,7 +1396,7 @@ i = "0007"
     dplyr::mutate(y_min = min(y_min)) %>% 
     dplyr::rowwise() %>% 
     dplyr::transmute(annotations = pmap(list(season, x_mean, y_min), function(s, x, y) {
-      annotate("text", x = x, y = y - 50, label = s, color = var.colorAccent, size = 3, alpha = 0.5)
+      annotate("text", x = x, y = y - 50, label = s, color = plot.geom_text_shadow_color, size = plot.geom_text_shadow_size, family = plot.geom_text_shadow_family)
     })) %>% 
     pull(annotations)
   
@@ -1303,43 +1414,36 @@ i = "0007"
   
   
   chart2 <- ggplot(chart_data, aes(x = game_nr, y = franchise_elo_postgame, group = franchise_id)) +
-    plotDefaults +
-    
-    geom_hline(yintercept = 1500, color = var.colorAccent, alpha = 0.1) +
-    geom_line(color = var.colorAccent, alpha = 0.05, size = 0.5) +
-    geom_line(data = subset(chart_data, franchise_id == i), color = var.colorYellow, linewidth = 0.8) +
+    plotDefaultsMinimal +
+  
+    geom_hline(yintercept = 1500, color = var.colorLightblue, size = plot.line_width) +
+    geom_line(color = var.colorAccent, alpha = 0.1, size = plot.line_width_m) +
+    geom_line(data = subset(chart_data, franchise_id == i), color = var.colorYellow, linewidth = plot.line_width_l) +
     
     scale_y_continuous(limits = c(min(chart_data$franchise_elo_postgame), max(chart_data$franchise_elo_postgame) + 50), breaks = c(1500, max(chart_data$franchise_elo_postgame))) +
+    scale_x_continuous(expand = c(0.02, 0, 0, 0)) +
     
     chart_annotations + # bottom labels
     
     # höchster sieg
     geom_point(data = biggest_elo_changes_chart_data, shape = 21, fill = NA, color = var.colorAccent, size = 6, stroke = 1.3) +
     geom_segment(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(xend = game_nr, y = ystart, yend = yend), color = var.colorAccent, size = 0.8) +
-    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabel, label = toupper("Größte Überraschung vs.")), color = var.colorAccent, size = 2) +
-    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabelLarge, label = paste0(franchise_name, " +", elo_shift)), color = var.colorAccent, size = 2.7, family = var.fontTextBold) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabel, label = "Größte Überraschung vs."), color = var.colorAccent, size = plot.geom_text_xsmall_size) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_win == 1), aes(y = yLabelLarge, label = paste0(franchise_name, " +", elo_shift)), color = plot.geom_text_large_color, size = plot.geom_text_large_size, family = plot.geom_text_large_family) +
     
     # höchster niederlage
     #geom_point(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), shape = 21, fill = NA, color = var.colorAccent, size = 6, stroke = 1.3) +
     geom_segment(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(xend = game_nr, y = ystart, yend = yend), color = var.colorAccent, size = 0.8) +
-    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabel, label = toupper("Größte Enttäuschung vs.")), color = var.colorAccent, size = 2) +
-    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabelLarge, label = paste(franchise_name, elo_shift)), color = var.colorAccent, size = 2.7, family = var.fontTextBold) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabel, label = "Größte Enttäuschung vs."), color = var.colorAccent, size = plot.geom_text_xsmall_size) +
+    geom_text(data = subset(biggest_elo_changes_chart_data, biggest_loss == 1), aes(y = yLabelLarge, label = paste(franchise_name, elo_shift)), color = plot.geom_text_large_color, size = plot.geom_text_large_size, family = plot.geom_text_large_family) +
   
     
     labs(
-      title = toupper(paste(franchise$franchise_name, "running ELO")),
-      subtitle = "Wie hat sich die ELO über die Jahre\nim Vergleich zu den anderen Teams verändert?",
-      x = "",
-      y = ""
+      title = toupper(paste0(franchise$franchise_name, ": ELO Entwicklung ", var.firstSeason, " - ", var.lastSeason))
     ) +
     theme(
-      axis.text = element_text(size = 8, color = var.colorAccent, family = var.fontText),
-      panel.background = element_blank(),
       panel.spacing = unit(0, "lines"),
-      axis.line = element_blank(),
-      axis.text.x = element_blank(),
-      axis.text.y = element_text(vjust = 0.4),
-      axis.ticks = element_blank(),
+      axis.text.y = element_text(vjust = 0.4, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family, color = plot.theme_text_shadow_color),
     )
   
   # win perc heat map
@@ -1377,6 +1481,108 @@ i = "0007"
     officer::ph_with(value = chart1, location = officer::ph_location_label("img-left")) %>% 
     officer::ph_with(value = chart2, location = officer::ph_location_label("img-right"))
   
+
+  ###
+  ### Personnel Groupings ----
+  ###
+  i = "0007"
+  
+#  i = "0007"
+  franchise_personnel_groupings_total <- rfl_personnel %>% 
+    dplyr::filter(franchise_id == i)
+  
+  franchise_personnel_groupings_annotations <- rfl_personnel_annotations2 %>% 
+    dplyr::filter(franchise_id == i)
+  
+  var.spacing <- 0.06
+  
+  franchise_personnel_groupings_points <- franchise_personnel_groupings_annotations %>% 
+    tidyr::gather(position, count, c("RB", "WR", "TE")) %>% 
+    dplyr::slice(rep(row_number(), count)) %>% 
+    dplyr::group_by(season, unit, personnel, grouping, position) %>%
+    dplyr::mutate(
+      prio = dplyr::row_number(),
+      middle = count / 2,
+      x = (xcenter + (var.spacing * prio)),
+      xoffset = x - ((var.spacing * count) / 2) - 0.034, # wert durch rumprobieren
+      is_to_big = ifelse(
+        xoffset > xmax | xoffset < xmin, 1, 0
+      ),
+      y = case_when(
+        position == "RB" ~ ycenter - var.spacing,
+        position == "WR" ~ ycenter + var.spacing,
+        TRUE ~ ycenter
+      )
+    ) %>% 
+    dplyr::group_by(season, unit, personnel, grouping) %>% 
+    dplyr::mutate(is_to_big = sum(is_to_big, na.rm = TRUE)) %>% 
+    dplyr::filter(is_to_big <= 0) %>% 
+    dplyr::ungroup()
+  
+
+  plot_personnell_groupings(
+    data = subset(franchise_personnel_groupings_total, unit == "offense")
+  ) +
+    #geom_treemap_subgroup2_text(place = "centre", grow = T, alpha = 0.5, colour =
+    #                         "black", fontface = "italic", min.size = 0) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    
+    geom_point(
+      data = subset(franchise_personnel_groupings_points, unit == "offense" & position == "WR"),
+      aes(x = xoffset, y = y, color = grouping),
+      size = 1.3,
+      shape = 16
+    ) +
+    
+    geom_point(
+      data = subset(franchise_personnel_groupings_points, unit == "offense" & position == "TE"),
+      aes(x = xoffset, y = y, color = grouping),
+      size = 1.3,
+      shape = 15
+    ) +
+    
+    geom_point(
+      data = subset(franchise_personnel_groupings_points, unit == "offense" & position == "RB"),
+      aes(x = xoffset, y = y, color = grouping),
+      size = 1.3,
+      shape = 17
+    )
+  
+    #geom_treemap_text(data = subset(franchise_personnel_groupings_annotations, unit = "offense"), aes(label = personnel), color = "white", place = "top")
+    
+    geom_text(data = subset(franchise_personnel_groupings_labels, unit == "offense"), aes(label = annotate_season, x = 0.2, y = annotate_ystart), vjust = 1)
+  
+    geom_point(
+      data = subset(franchise_personnel_groupings_annotations, unit == "offense"),
+      aes(x = annotate_xstart, y = 0.2, fill = grouping),
+      color = var.colorBlue,
+      size = plot.line_width_l
+    )
+
+#}
+
+```
+
+# export
+```{r include=FALSE}
+
+    dplyr::group_by(season, unit) %>% 
+    dplyr::mutate(
+      # default dimensions of each area
+      default_width = xmax - xmin,
+      default_height = ymax- ymin,
+      
+      # multiplikator um default width auf 1 zu normalisieren
+      width_fraction = 1 / sum(default_width),
+      height_fraction = 1 / sum(default_height),
+      
+      new_width = default_width * width_fraction,
+      new_height = default_height * height_fraction
+    )
+
+print(output, paste0("output/rfl-season-report-", var.lastSeason, ".pptx"))
+
   # points
   ## points by unit
   chart1 <- ggplot(seasonTotals, aes(x = points_for)) +
@@ -1636,17 +1842,7 @@ i = "0007"
   
 
   
-
-
-
-
-#}
-
-```
-
-# export
-```{r include=FALSE}
-print(output, paste0("output/rfl-season-report-", var.lastSeason, ".pptx"))
+  
 
 template %>% 
   officer::layout_properties()

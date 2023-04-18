@@ -40,7 +40,7 @@ plotDefaults <- list(
     axis.text = element_text(size = plot.theme_text_shadow_size, color = plot.theme_text_shadow_color, family = plot.theme_text_shadow_family),
 
     panel.background = element_blank(),
-    panel.grid.major = element_line(color = var.colorLightblue, size = plot.line_width),
+    panel.grid.major = element_line(color = var.colorLightblue, linewidth = plot.line_width),
 
     text = element_text(color = var.colorBlue, family = var.fontText),
 
@@ -109,3 +109,34 @@ plotHeatmap <- list(
     legend.key.size = unit(12, "pt"),
   )
 )
+
+# Plots ----
+## Personnel Groupings ----
+plot_personnell_groupings <- function(data) {
+  ggplot(data, aes(area = count, fill = grouping, subgroup = personnel, subgroup2 = grouping)) +
+    plotDefaultsMinimal +
+    facet_wrap(~season, ncol = 4) +
+    geom_treemap() +
+    #geom_treemap_subgroup_border(color = "red", size = 2) +
+    geom_treemap_subgroup2_border(color = var.colorBlue, size = 3) +
+    paletteer::scale_fill_paletteer_d("ggthemr::light") +
+    paletteer::scale_color_paletteer_d("ggthemr::light", direction = -1) +
+    plot_geom_xsmall_text(aes(label = season), x = 0.05, y = 0.05, vjust = 0, hjust = 0, color = var.colorAccent) +
+    theme(
+      aspect.ratio = 1,
+      panel.spacing = unit(1, "lines")
+      #strip.text = element_text(color = plot.theme_text_shadow_color, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family)
+    )
+}
+
+# geoms
+plot_geom_large_text <- function(color = var.colorAccent, ...) {
+  geom_text(color = color, size = plot.geom_text_large_size, family = plot.geom_text_large_family, ...)
+}
+
+plot_geom_xsmall_text <- function(...) {
+  geom_text(size = plot.geom_text_xsmall_size, family = plot.geom_text_xsmall_family, ...)
+}
+
+
+
