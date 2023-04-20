@@ -6,11 +6,13 @@ library(ggplot2)
 library(treemapify)
 library(sysfonts)
 library(showtext)
+library(gt)
+library(gtExtras)
+library(webshot2)
 
 # data
 data <- readr::read_csv("data.csv")
 annotations <- readr::read_csv("annotations.csv")
-  dplyr::mutate(shape = factor(shape, levels = c("QB", "RB", "WR", "TE", "PK", "DT", "DE", "LB", "CB", "S")))
   
 title <- "Personnel Groupings
 used by Jena Dragons"
@@ -27,10 +29,10 @@ These requirements provide ample room for individual decisions, which I
 wanted to visualize. The result will be part of the comprehensive league report
 for last season.",
   x = 0,
-  y = 0.6
+  y = 0.59
 )
 
-caption <- "@JakobEschler jakob-eschler.de jak3sch"
+caption <- 'Twitter: @JakobEschler - Website: jakob-eschler.de - Github: jak3sch'
 
 # start recording
 camcorder::gg_record(
@@ -51,9 +53,6 @@ color_accent <- "#feca57"
 colors <- c("#2e86de", "#ee5253", "#10ac84",  "#ff9f43")
 colors_shape <- c("#ff9ff3", "#5f27cd", "#feca57", "#54a0ff")
 
-plot_width <- 297
-plot_height <- 210
-
 sysfonts::font_add_google("Vidaloka", family = "accent")
 sysfonts::font_add_google("Open Sans", family = "base", bold.wt = 800)
 showtext::showtext_auto()
@@ -61,13 +60,6 @@ showtext::showtext_auto()
 plot_reset <- theme(
   plot.background = element_rect(color = NA, fill = color_bg),
   plot.margin = ggplot2::margin(c(0, 0, 0, 0))
-)
-
-plot_theme <- list(
-  ggplot2::theme_void(),
-  theme(
-    #plot.background = element_rect(fill = color_bg, color = NA)
-  )
 )
 
 ## plot helper ----
@@ -160,24 +152,98 @@ for(pos in as.vector(unique(annotations$position))) {
 
 # layout ----
 ## right ----
+### tables ----
+gt_default <- function(df) {
+  df %>%
+    gt::gt(rowname_col = "personnel") %>% 
+    gt::cols_hide(grouping) %>%
+    gt::tab_options(
+      table.background.color = color_bg,
+      table.font.names = "Open Sans",
+      table.border.top.style = "hidden",
+      table.border.right.style = "hidden",
+      table.border.bottom.style = "hidden",
+      table.border.left.style = "hidden",
+      column_labels.hidden = TRUE
+    ) %>% 
+    gt::data_color(
+      method = "numeric",
+      palette = c(color_bg, color_accent)
+    )
+}
+
+gt_to_png <- function(filter) {
+  gt <- table_data %>% 
+    dplyr::filter(grouping %in% {{filter}}) %>% 
+    gt_default()
+  
+  tmp <- tempfile(fileext = '.png') #generate path to temp .png file
+  gt::gtsave(gt, tmp, expand = 0, vwidth = 550) #save gt table as png
+  table_png <- png::readPNG(tmp, native = TRUE) # read tmp png file
+  
+  return(table_png)
+}
+
+table_data <- data %>% 
+  dplyr::group_by(unit, grouping, personnel) %>% 
+  dplyr::summarise(count = sum(count), .groups = "drop") %>% 
+  dplyr::group_by(unit, grouping) %>% 
+  dplyr::arrange(dplyr::desc(count)) %>% 
+  dplyr::mutate(
+    unit = stringr::str_to_title(unit),
+    grouping_clean = dplyr::case_when(
+      grouping %in% c("3", "4") ~ paste(grouping, "WR"),
+      grouping == "252" ~ "2DL, 5LB, 2 DB",
+      grouping == "243" ~ "2DL, 4LB, 3 DB",
+      grouping == "234" ~ "2DL, 3LB, 4 DB",
+      grouping == "225" ~ "2DL, 2LB, 5 DB",
+    )
+  ) %>% 
+  dplyr::group_by(unit, grouping_clean)
+  
+table_1_img <- gt_to_png(c("4", "3"))
+table_2_img <- gt_to_png(c("252"))
+table_3_img <- gt_to_png(c("243"))
+table_4_img <- gt_to_png(c("234", "225"))
+
+table_layout <- "
+  1356
+  1356
+  1356
+  1356
+  1456
+  2456
+"
+
+tables <- patchwork::wrap_elements(table_1_img) +
+  patchwork::plot_spacer() +
+  table_2_img +
+  patchwork::plot_spacer() +
+  table_3_img +
+  table_4_img +
+  patchwork::plot_layout(design = table_layout) &
+  plot_reset
+
+## combine ####
 grid_subtitle <- function(text) {
   grid::grobTree(
     grid::textGrob(
       label = {{text}},
       #y = 0.2,
-      vjust = 0,
+      vjust = 1,
       gp = grid::gpar(col = color_accent, fontsize = 26, fontfamily = "accent", fill = color_bg, lwd = 0)
     )
   )
 }
 
-right <- wrap_elements(patchwork::plot_spacer()) +
+right <- wrap_elements(tables) +
+  #patchwork::plot_spacer() +
   grid_subtitle("Offense")+
   offense +
-  patchwork::plot_spacer() +
+  #patchwork::plot_spacer() +
   grid_subtitle("Defense") +
   defense +
-  patchwork::plot_layout(ncol = 1, heights = c(0.6, 0.05, 1, 0.005, 0.05, 1)) +
+  patchwork::plot_layout(ncol = 1, heights = c(0.6, 0.05, 1, 0.05, 1)) +
   plot_reset
 
 right
@@ -247,7 +313,7 @@ guides <- ggplot() +
   ) +
   theme_void() +
   theme(
-    plot.caption = ggplot2::element_text(
+    plot.caption = ggtext::element_markdown(
       size = 16,
       vjust = 0,
       hjust = 0,
@@ -255,7 +321,6 @@ guides <- ggplot() +
       family = "base",
     )
   ) +
-  
   patchwork::inset_element(example, top = 0.7, bottom = 0.37, left = 0, right = 1, align_to = "plot", on_top = FALSE)
 
 ## left ----
@@ -294,28 +359,21 @@ left <- patchwork::wrap_elements(
         color = color_light
       )
     ) +
-    patchwork::plot_spacer() +
+    #patchwork::plot_spacer() +
     guides +
-    patchwork::plot_layout(ncol = 1, heights = c(1, 0.2, 1.2)) &
+    patchwork::plot_layout(ncol = 1, heights = c(1, 1)) &
     plot_reset
 )
 
 # final ----
-design <- "
+page_layout <- "
   1111222
 "
 
 left + right +
-  patchwork::plot_layout(design = design) +
-  patchwork::plot_layout(widths = c(rep(plot_width, 2)), heights = plot_height) &
+  patchwork::plot_layout(design = page_layout) +
+  patchwork::plot_layout(widths = c(rep(297, 2)), heights = 210) &
   theme(
     plot.margin = ggplot2::margin(c(6, 6, 6, 6), unit = "mm"),
     plot.background = element_rect(color = NA, fill = color_bg)
   )
-
-
-preview_width <- 1270
-preview_height <- 890
-dpi <- 72
-
-ggplot2::ggsave("mein_plot.jpg", final, width = plot_width, height = plot_height, units = "mm", dpi = 300) # Um den Plot als PDF zu speichern
