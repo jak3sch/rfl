@@ -110,7 +110,7 @@ elo <- purrr::map_df(2016:var.lastSeason, function(x) {
 }) %>%
   dplyr::arrange(season, week, franchise_id)
 
-# personnel groupings
+# personnel groupings ----
 rfl_personnel_raw <- starter %>%
   dplyr::filter(starter_status == "starter" & !pos %in% c("QB", "PK")) %>%
   dplyr::group_by(franchise_id, season, week, pos) %>%
@@ -126,19 +126,39 @@ rfl_personnel_raw <- starter %>%
     defense_parent = paste0(DT+DE,LB,CB+S), # DL, LB, DB
     defense = paste0(DT, DE, LB, CB, S)
   ) %>%
-  tidyr::gather(unit, personnel, dplyr::ends_with("parent")) %>%
+  tidyr::gather(unit, grouping, dplyr::ends_with("parent")) %>%
   dplyr::mutate(unit = gsub("_parent", "", unit)) %>%
-  tidyr::gather(key, grouping, c(offense, defense)) %>%
+  tidyr::gather(key, personnel, c(offense, defense)) %>%
   dplyr::filter(unit == key) %>%
   dplyr::select(-key)
 
 rfl_personnel <- rfl_personnel_raw %>%
-  dplyr::group_by(franchise_id, season, unit, personnel, grouping) %>%
+  dplyr::group_by(franchise_id, season, unit, grouping, personnel) %>%
   dplyr::summarise(count = dplyr::n(), .groups = "drop")
 
+rfl_personnel_group_order <- rfl_personnel %>%
+  dplyr::group_by(franchise_id, unit, grouping) %>%
+  dplyr::summarise(count = sum(count), .groups = "drop") %>%
+  dplyr::group_by(franchise_id, unit) %>%
+  dplyr::arrange(dplyr::desc(count)) %>%
+  dplyr::mutate(grouping_order = dplyr::row_number()) %>% # für fill value in plots
+  dplyr::ungroup()
+  
+rfl_personnel <- rfl_personnel %>%
+  dplyr::left_join(rfl_personnel_group_order %>% dplyr::select(-count), by = c("franchise_id", "unit", "grouping")) %>% 
+  
+  # above league data hinzufügen
+  dplyr::group_by(season, unit, grouping, personnel) %>% 
+  dplyr::mutate(season_league_avg = round(mean(count), 1)) %>% 
+  dplyr::mutate(count_above_league_avg = paste(count - season_league_avg)) %>% 
+  dplyr::select(-season_league_avg) %>% 
+  dplyr::ungroup()
+  
 # Erstellen Sie eine Liste mit allen eindeutigen Kombinationen von franchise_id, season und unit in Ihrem DataFrame
 combinations <- rfl_personnel %>%
-  distinct(franchise_id, season, unit)
+  dplyr::distinct(franchise_id, season, unit)
+
+rfl_personnel_annotations_loop <- dplyr::tibble()
 
 # Schleife über jede Kombination und wenden Sie die Funktion an und fügen Sie das Ergebnis dem result_df hinzu
 for (i in 1:nrow(combinations)) {
@@ -146,13 +166,13 @@ for (i in 1:nrow(combinations)) {
   tmp.season <- combinations[i, "season"]$season
   tmp.unit <- combinations[i, "unit"]$unit
 
-  df <- rfl_personnel_groupings %>%
+  df <- rfl_personnel %>%
     filter(franchise_id == tmp.franchise_id, season == tmp.season, unit == tmp.unit)
 
   treemapify_result <- treemapify(
     df,
     area = "count",
-    subgroup = "personnel", subgroup2 = "grouping"
+    subgroup = "grouping", subgroup2 = "personnel"
   ) %>%
   dplyr::mutate(
     xcenter = xmax - ((xmax - xmin) / 2),
@@ -160,14 +180,19 @@ for (i in 1:nrow(combinations)) {
   )
 
   # Fügen Sie das Ergebnis dem result_df hinzu
-  rfl_personnel_annotations <- bind_rows(rfl_personnel_annotations, treemapify_result)
+  rfl_personnel_annotations_loop <- bind_rows(rfl_personnel_annotations_loop, treemapify_result)
 }
 
-rm(combinations, tmp.franchise_id, tmp.season, tmp.unit, treemapify_result, i)
+# treemampify daten zu rfl personnel hinzufühen, um positionierung für avove legue avg zu haben
+rfl_personnel <- rfl_personnel %>% 
+  dplyr::left_join(rfl_personnel_annotations_loop %>% dplyr::select(1:5, 8:13), by = c("franchise_id", "season", "unit", "grouping", "personnel"))
 
-rfl_personnel_annotations2 <- rfl_personnel_annotations %>%
-  dplyr::left_join(rfl_personnel, by = c("franchise_id", "season", "unit", "personnel", "grouping")) %>%
-  dplyr::left_join(rfl_personnel_raw %>% dplyr::select(franchise_id, unit, grouping, RB, WR, TE), by = c("franchise_id", "unit", "grouping"), multiple = "all") %>%
+## annotations ----
+var.spacing <- 0.08
+
+rfl_personnel_annotations <- rfl_personnel %>% 
+  dplyr::select(-count_above_league_avg) %>% 
+  dplyr::left_join(rfl_personnel_raw %>% dplyr::select(franchise_id, unit, personnel, CB:WR), by = c("franchise_id", "unit", "personnel"), multiple = "all", relationship = "many-to-many") %>% 
 
 #  dplyr::mutate(
 #    cols = 4,
@@ -182,6 +207,50 @@ rfl_personnel_annotations2 <- rfl_personnel_annotations %>%
 #    first_empty_season_col = col[which.max(season)] + 1, # finde zeile mit höchster season und returne col value
 #    first_empty_season_row = row[which.max(season)],
 #  ) %>%
-  dplyr::group_by(franchise_id, unit, grouping) %>%
+  dplyr::group_by(franchise_id, unit, personnel) %>%
   dplyr::arrange(dplyr::desc(count)) %>%
-  dplyr::filter(dplyr::row_number() == 1)  # filtere die größte kachel für jedes grouping eines teams
+  dplyr::filter(dplyr::row_number() == 1) %>%   # filtere die größte kachel für jedes grouping eines teams
+
+  # füge anzahl an icons hinzu
+  tidyr::gather(position, count, CB:WR) %>%
+  dplyr::filter(
+    position %in% c("RB", "WR", "TE") & unit == "offense" |
+    position %in% c("DT", "DE", "LB", "CB", "S") & unit == "defense"
+  ) %>% 
+  #dplyr::filter(franchise_id == "0003") %>%
+  dplyr::slice(rep(row_number(), count)) %>%
+  dplyr::group_by(franchise_id, season, unit, grouping, personnel, position) %>%
+  dplyr::mutate(
+    #shape = factor(position, levels = var.posOrder), # factor der positions um shape im plot manuell zu vergeben
+    order = dplyr::row_number(),
+    middle = count / 2,
+    x = (xcenter + (var.spacing * order)),
+    xoffset = x - ((var.spacing * count) / 2) - 0.025, # wert durch rumprobieren
+    y = case_when(
+      position %in% c("RB", "DE") ~ ycenter - var.spacing,
+      position %in% c("WR", "CB") ~ ycenter + var.spacing,
+      position == "DT" ~ ycenter - (var.spacing * 2),
+      position == "S" ~ ycenter + (var.spacing * 2),
+      TRUE ~ ycenter
+    ),
+    yoffset = case_when(
+      stringr::str_detect(personnel, "^0.*[1-9]$") ~ y - (var.spacing / 2), # kein DT, aber S (beginnt mit 0, endet aber mit zahl)
+      stringr::str_detect(personnel, "^[1-9].*0$") ~ y + (var.spacing / 2), # DT, aber kein S (beginnt mit zahl, aber endet mit 0)
+      TRUE ~ y
+    ),
+    is_to_big = ifelse(
+      xoffset > xmax - (var.spacing *2) | xoffset < xmin - (var.spacing * 2) | y > ymax - (var.spacing * 2) | y < ymin - (var.spacing * 2), 1, 0
+    )
+  ) %>%
+  dplyr::group_by(franchise_id, season, unit, grouping, personnel) %>%
+  dplyr::mutate(is_to_big = sum(is_to_big, na.rm = TRUE)) %>%
+
+  # größte kachel für annotation der punkte
+  dplyr::group_by(franchise_id, unit) %>%
+  dplyr::mutate(
+    A = (xmax - xmin) * (ymax - ymin),
+    is_biggest = ifelse(A == max(A), 1, 0)
+  ) %>%
+  dplyr::ungroup()
+
+rm(combinations, tmp.franchise_id, tmp.season, tmp.unit, treemapify_result, i, rfl_personnel_annotations_loop)

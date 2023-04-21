@@ -112,7 +112,7 @@ plotHeatmap <- list(
 
 # Plots ----
 ## Personnel Groupings ----
-plot_personnell_groupings <- function(data) {
+plot_personnell_groupings <- function(data, title, subtitle = NULL) {
   ggplot(data, aes(area = count, fill = grouping, subgroup = personnel, subgroup2 = grouping)) +
     plotDefaultsMinimal +
     facet_wrap(~season, ncol = 4) +
@@ -122,11 +122,31 @@ plot_personnell_groupings <- function(data) {
     paletteer::scale_fill_paletteer_d("ggthemr::light") +
     paletteer::scale_color_paletteer_d("ggthemr::light", direction = -1) +
     plot_geom_xsmall_text(aes(label = season), x = 0.05, y = 0.05, vjust = 0, hjust = 0, color = var.colorAccent) +
+    labs(
+      title = toupper({{title}}),
+      subtitle = {{subtitle}}
+    ) +
     theme(
       aspect.ratio = 1,
-      panel.spacing = unit(1, "lines")
+      panel.spacing = unit(1, "lines"),
+      legend.position = "top",
+      legend.justification = "right"
       #strip.text = element_text(color = plot.theme_text_shadow_color, size = plot.theme_text_shadow_size, family = plot.theme_text_shadow_family)
-    )
+    ) +
+    scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+    scale_shape_manual(values = c(2, 1, 5, 3, 4, 5, 6, 7, 8, 9, 10)) + # RB, WR, TE
+    guides(fill = "none", color = "none", shape = guide_legend())
+}
+
+## add position_points
+plot_personnell_groupings_points <- function(data, pos) {
+  geom_point <- geom_point(
+    data = subset({{data}}, position == {{pos}} & is_to_big < 1),
+    aes(x = xoffset, y = yoffset, color = grouping, shape = factor(shape)),
+    size = 1.4,
+    stroke = 0.8
+  )
 }
 
 # geoms
