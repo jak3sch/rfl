@@ -106,7 +106,7 @@ points <- function(data, pos) {
   geom_point <- ggplot2::geom_point(
     data = subset({{data}}, position == {{pos}} & is_to_big < 1),
     aes(x = xoffset, y = yoffset, shape = position, color = as.factor(grouping_order)),
-    size = 1,
+    size = 1.3,
     alpha = 0.9
   )
 }
@@ -234,12 +234,15 @@ grid_subtitle <- function(text) {
   )
 }
 
-right <- patchwork::wrap_elements(tables) +
+right <- ggplot2::ggplot() +
+  ggplot2::theme_void() +
   offense +
+  ggplot2::ggplot() +
+  ggplot2::theme_void() +
   defense +
-  patchwork::plot_layout(ncol = 1, heights = c(0.22, 0.39, 0.39)) +
-  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Offense")), top = 2.15, left = 0, right = 0.25, bottom = 1.8) +
-  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Defense")), top = 1.05, left = 0, right = 0.25, bottom = 0.5)
+  patchwork::plot_layout(ncol = 1, heights = c(0.17, 0.4095, 0.0005, 0.4095)) +
+  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Offense")), top = 2.35, left = 0, right = 0.25, bottom = 2) +
+  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Defense")), top = 1.06, left = 0, right = 0.25, bottom = 0.5)
 
 ## left ----
 ### guide ----
@@ -272,7 +275,7 @@ guides <- ggplot2::ggplot() +
   
   # tiles annotation
   example_annotation(
-    xstart = 2.36,
+    xstart = 2.39,
     xend = 2.65,
     ystart = 0.5,
     yend = 0.4,
@@ -303,7 +306,7 @@ guides <- ggplot2::ggplot() +
   
   # abv. league avg annotation
   example_annotation(
-    xstart = 2.35,
+    xstart = 2.4,
     xend = 2.6,
     ystart = 0.67,
     yend = 0.6,
@@ -383,14 +386,12 @@ final <- left + right +
   patchwork::plot_layout(design = page_layout) +
   patchwork::plot_layout(widths = c(rep(297, 2)), heights = 210) &
   ggplot2::theme(
-    plot.margin = ggplot2::margin(c(6, 5, 6, 5.7), unit = "mm"),
+    plot.margin = ggplot2::margin(c(6, 4.5, 5.7, 5.7), unit = "mm"),
     plot.background = element_rect(color = NA, fill = color_bg)
   )
 
 final
 # export ----
-ggplot2::ggsave("plot.png", final, width = 297, height = 210, units = "mm")
-
 camcorder::gg_playback(
   name = "plot.gif",
   device = "png",
@@ -401,3 +402,5 @@ camcorder::gg_playback(
   image_resize = 800,
   stoprecording = TRUE
 )
+
+ggplot2::ggsave("plot.png", final, width = 297, height = 210, units = "mm")
