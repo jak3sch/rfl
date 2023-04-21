@@ -11,8 +11,8 @@ Website: [jakob-eschler.de](https://jakob-eschler.de)
 Github: [jak3sch](https://github.com/jak3sch)
 
   
-### Plot
-<img src="https://github.com/jak3sch/rfl/blob/main/reports/season-review/output/plots/team-personnel-grouping/plot.png?raw=true" width="100">
+### Result
+<img src="https://github.com/jak3sch/rfl/blob/main/reports/season-review/output/plots/team-personnel-grouping/plot.png?raw=true" width="100%">
 
 ### Timelaps
 <img src="https://github.com/jak3sch/rfl/blob/main/reports/season-review/output/plots/team-personnel-grouping/plot.gif?raw=true" width="60%">
