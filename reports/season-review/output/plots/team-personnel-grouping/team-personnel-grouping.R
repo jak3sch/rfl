@@ -10,15 +10,18 @@ library(gt)
 library(gtExtras)
 library(webshot2)
 
-# data
-data <- readr::read_csv("data.csv")
+# data ----
+data <- readr::read_csv("data.csv") %>% 
+  dplyr::group_by(unit) %>% 
+  dplyr::group_modify(~ dplyr::add_row(.x, .before = 0)) %>% 
+  dplyr::mutate(season = ifelse(dplyr::row_number() == 1, 2015, season))
 annotations <- readr::read_csv("annotations.csv")
-  
+
 title <- "Personnel Groupings
 used by Jena Dragons"
 subtitle <- "Visualization of the used fantasy football lineup
 variations between 2016 and 2022"
-  
+
 copy <- dplyr::tibble(
   content = "Since the launch of the Rocketbeans Football League (RFL) in 2016, numerous
 matchups have been played. The lineup rules call for 1 QB, 2 RB, 2 WR, 1 TE,
@@ -34,17 +37,15 @@ for last season.",
 
 caption <- 'Twitter: @JakobEschler - Website: jakob-eschler.de - Github: jak3sch'
 
-# start recording
+# start recording ----
 camcorder::gg_record(
   dir = file.path("recording"), # where to save the recording
   device = "png", # device to use to save images
-  width = 13, # width of saved image
-  height = 6, # height of saved image
-  units = "in", # units for width and height
+  width = 297, # width of saved image
+  height = 210, # height of saved image
+  units = "mm", # units for width and height
   dpi = 300 # dpi to use when saving image
 )
-
-camcorder::gg_stop_recording()
 
 # plot ----
 color_bg <- "#222f3e"
@@ -63,29 +64,33 @@ plot_reset <- theme(
 )
 
 ## plot helper ----
-plot <- function(data, title = NULL) {
+plot <- function(data) {
   ggplot2::ggplot(data, aes(area = count, fill = as.factor(grouping_order), subgroup = grouping, subgroup2 = personnel)) +
     ggplot2::facet_wrap(~season, ncol = 4) +
-
     treemapify::geom_treemap() +
     treemapify::geom_treemap_subgroup2_border(color = color_bg, size = 3) +
-
-    ggplot2::geom_text(aes(label = season), x = 0.05, y = 0.05, vjust = 0, hjust = 0, family = "base", fontface = "bold", color = color_bg, size = 3.2) +
-
+    
+    ggplot2::geom_text(data = subset(data, season != 2015), aes(label = season), x = 0.05, y = 0.05, vjust = 0, hjust = 0, family = "base", fontface = "bold", color = color_bg, size = 4.5) +
+    ggplot2::geom_text(data = subset(data, xmax - xmin > 0.1), aes(label = ifelse(count_above_league_avg > 0, paste0("+", count_above_league_avg), count_above_league_avg), x = xmax - 0.05, y = ymax - 0.05), hjust = 1, vjust = 1, family = "base", fontface = "bold", color = color_bg, size = 4.5) +
+    
     ggplot2::scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
     ggplot2::scale_fill_manual(values = colors) +
     ggplot2::scale_color_manual(values = colors_shape) +
     ggplot2::scale_shape_manual(values = c(17, 15, 19, 17)) +
     ggplot2::guides(fill = "none", color = "none", shape = guide_legend()) +
-
+    ggplot2::coord_fixed() +
+    
+    ggplot2::labs(
+      x = NULL,
+      y = NULL
+    ) +
+    
     ggplot2::theme_void() +
     plot_reset +
     ggplot2::theme (
-      #plot.margin = ggplot2::margin(t = 1, unit = "cm"),
-      #aspect.ratio = 1,
       legend.position = "none",
-      panel.spacing = ggplot2::unit(1, "lines"),
+      panel.spacing = ggplot2::unit(3, "mm"),
       strip.background = ggplot2::element_blank(),
       strip.text = ggplot2::element_blank(),
       plot.title = ggplot2::element_text(
@@ -93,14 +98,6 @@ plot <- function(data, title = NULL) {
         color = color_accent,
         family = "accent"
       )
-    ) +
-    
-    ggplot2::coord_fixed() +
-
-    ggplot2::labs(
-      title = {{title}},
-      x = NULL,
-      y = NULL
     )
 }
 
@@ -109,8 +106,7 @@ points <- function(data, pos) {
   geom_point <- ggplot2::geom_point(
     data = subset({{data}}, position == {{pos}} & is_to_big < 1),
     aes(x = xoffset, y = yoffset, shape = position, color = as.factor(grouping_order)),
-    size = 1.4,
-    stroke = 0.8,
+    size = 1,
     alpha = 0.9
   )
 }
@@ -200,13 +196,15 @@ table_data <- data %>%
     )
   ) %>% 
   dplyr::group_by(unit, grouping_clean)
-  
+
+
 table_1_img <- gt_to_png(c("4", "3"))
 table_2_img <- gt_to_png(c("252"))
 table_3_img <- gt_to_png(c("243"))
 table_4_img <- gt_to_png(c("234", "225"))
 
 table_layout <- "
+  1356
   1356
   1356
   1356
@@ -224,31 +222,28 @@ tables <- patchwork::wrap_elements(table_1_img) +
   patchwork::plot_layout(design = table_layout) &
   plot_reset
 
-## combine ####
+### combine ----
 grid_subtitle <- function(text) {
   grid::grobTree(
     grid::textGrob(
       label = {{text}},
-      #y = 0.2,
       vjust = 1,
-      gp = grid::gpar(col = color_accent, fontsize = 26, fontfamily = "accent", fill = color_bg, lwd = 0)
+      hjust = 0.55,
+      gp = grid::gpar(col = color_accent, fontsize = 40, fontfamily = "accent", fill = color_bg, lwd = 0)
     )
   )
 }
 
-right <- wrap_elements(tables) +
-  #patchwork::plot_spacer() +
-  grid_subtitle("Offense")+
+right <- patchwork::wrap_elements(tables) +
   offense +
-  #patchwork::plot_spacer() +
-  grid_subtitle("Defense") +
   defense +
-  patchwork::plot_layout(ncol = 1, heights = c(0.6, 0.05, 1, 0.05, 1)) +
-  plot_reset
+  patchwork::plot_layout(ncol = 1, heights = c(0.22, 0.39, 0.39)) +
+  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Offense")), top = 2.15, left = 0, right = 0.25, bottom = 1.8) +
+  patchwork::inset_element(patchwork::wrap_elements(grid_subtitle("Defense")), top = 1.05, left = 0, right = 0.25, bottom = 0.5)
 
-right
-## guide ----
-example_annotation <- function(xstart, xend, ystart, yend, curve = -0.5, shape = 19, size = 2, stroke = 0, color = color_light, fill = NA, label = "Text", ...) {
+## left ----
+### guide ----
+example_annotation <- function(xstart, xend, ystart, yend, curve = -0.5, shape = 19, size = 1.5, stroke = 0, color = color_light, fill = NA, label = "Text", ...) {
   if(curve > 0 & xstart > xend) {
     hjust <- 1
     labelx <- xend - 0.07
@@ -259,36 +254,46 @@ example_annotation <- function(xstart, xend, ystart, yend, curve = -0.5, shape =
   
   list(
     ggplot2::geom_point(aes(x = xstart, y = ystart), shape = shape, size = size, color = color, stroke = stroke),
-    ggplot2::geom_curve(aes(x = xstart, xend = xend, y = ystart, yend = yend), curvature = curve, color = color_light, size = 0.5),
-    ggplot2::geom_text(aes(x = labelx, y = yend), label = label, color = color_light, size = 4, lineheight = 0.8, family = "base", vjust = 0.5, hjust = hjust, ...)
-  
+    ggplot2::geom_curve(aes(x = xstart, xend = xend, y = ystart, yend = yend), curvature = curve, color = color_light, linewidth = 0.3),
+    ggplot2::geom_text(aes(x = labelx, y = yend), label = label, color = color_light, size = 6, lineheight = 0.45, family = "base", vjust = 0.5, hjust = hjust, ...)
+    
   )
 }
 
-guides <- ggplot() +
-  # grouping annotation
+guides <- ggplot2::ggplot() +
+  # color annotation
   example_annotation(
-    xstart = 1.8,
-    xend = 2,
+    xstart = 2,
+    xend = 2.2,
     ystart = 0.65,
     yend = 0.85,
     label = "Colors stand for the grouping.\nFor offense that means number of started WR,\nfor the defense it is a 3 digit code consisting\nof the number of started DL, LB and DB (eg. 252)"
   ) +
   
-  # personnel annotation
+  # tiles annotation
   example_annotation(
-    xstart = 2.185,
-    xend = 2.55,
+    xstart = 2.36,
+    xend = 2.65,
     ystart = 0.5,
-    yend = 0.55,
+    yend = 0.4,
     size = 6,
     curve = -0.2,
     label = "Tiles stand for started personnel."
   ) +
   
+  # symbols annotation
+  example_annotation(
+    xstart = 2.05,
+    xend = 1.8,
+    ystart = 0.48,
+    yend = 0.6,
+    curve = 0.3,
+    label = "Symbols on the largest areas illustrate the personnel.\nFrom top to bottom:\nOffense: WR, TE, RB\nDefense: S, CB, LB, DE, DT\nThe number of symbols in one row stands for the\nnumber of started players of that position."
+  ) +
+  
   # season annotation
   example_annotation(
-    xstart = 1.87,
+    xstart = 2.07,
     xend = 2.2,
     ystart = 0.39,
     yend = 0.2,
@@ -296,43 +301,45 @@ guides <- ggplot() +
     label = "Number stands\nfor the played\nseason."
   ) +
   
-  # symbols annotation
+  # abv. league avg annotation
   example_annotation(
-    xstart = 1.85,
-    xend = 1.6,
-    ystart = 0.48,
+    xstart = 2.35,
+    xend = 2.6,
+    ystart = 0.67,
     yend = 0.6,
-    curve = 0.3,
-    label = "Symbols on the largest areas illustrate the personnel.\nFrom top to bottom:\nOffense: WR, TE, RB\nDefense: S, CB, LB, DE, DT\nThe number of symbols in one row stands for the\nnumber of started players of that position."
+    curve = 0.4,
+    label = "Number stands for the started\npersonnel above league average."
   ) +
-
-  scale_x_continuous(limits = c(0, 4), expand = c(0, 0)) +
-  scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
-  labs(
+  
+  ggplot2::scale_x_continuous(limits = c(0, 4), expand = c(0, 0)) +
+  ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
+  
+  ggplot2::labs(
     caption = caption
   ) +
-  theme_void() +
-  theme(
+  
+  ggplot2::theme_void() +
+  ggplot2::theme(
     plot.caption = ggtext::element_markdown(
-      size = 16,
+      size = 30,
       vjust = 0,
       hjust = 0,
       color = color_light,
       family = "base",
     )
   ) +
-  patchwork::inset_element(example, top = 0.7, bottom = 0.37, left = 0, right = 1, align_to = "plot", on_top = FALSE)
+  patchwork::inset_element(example, top = 0.7, bottom = 0.37, left = 0.1, right = 1, align_to = "plot", on_top = FALSE)
 
-## left ----
+### combine ----
 left <- patchwork::wrap_elements(
   ggplot(copy, aes(x = x, y = y, label = content)) +
     ggplot2::geom_text(
-      size = 6.5,
+      size = 11,
       hjust = 0,
       vjust = 1,
       color = color_light,
       family = "base",
-      lineheight = 0.9
+      lineheight = 0.4
     ) +
     ggplot2::scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     ggplot2::scale_y_continuous(limits = c(0, 0.75), expand = c(0, 0)) +
@@ -341,25 +348,27 @@ left <- patchwork::wrap_elements(
       subtitle = subtitle
     ) +
     ggplot2::theme_void() +
+    
     ggplot2::theme(
+      plot.margin = ggplot2::margin(0),
       plot.title = ggplot2::element_text(
-        size = 60,
+        size = 120,
         hjust = 0,
         family = "accent",
         color = color_accent,
-        lineheight = 0.6,
-        margin = ggplot2::margin(b = 4, unit = "mm")
+        lineheight = 0.3,
+        margin = ggplot2::margin(b = 8, unit = "mm")
       ),
       plot.subtitle = ggplot2::element_text(
-        size = 24,
+        size = 42,
         family = "base",
         face = "bold",
         hjust = 0,
-        lineheight = 0.8,
+        lineheight = 0.4,
         color = color_light
       )
     ) +
-    #patchwork::plot_spacer() +
+    
     guides +
     patchwork::plot_layout(ncol = 1, heights = c(1, 1)) &
     plot_reset
@@ -367,13 +376,28 @@ left <- patchwork::wrap_elements(
 
 # final ----
 page_layout <- "
-  1111222
+  111222
 "
 
-left + right +
+final <- left + right +
   patchwork::plot_layout(design = page_layout) +
   patchwork::plot_layout(widths = c(rep(297, 2)), heights = 210) &
-  theme(
-    plot.margin = ggplot2::margin(c(6, 6, 6, 6), unit = "mm"),
+  ggplot2::theme(
+    plot.margin = ggplot2::margin(c(6, 5, 6, 5.7), unit = "mm"),
     plot.background = element_rect(color = NA, fill = color_bg)
   )
+
+final
+# export ----
+ggplot2::ggsave("plot.png", final, width = 297, height = 210, units = "mm")
+
+camcorder::gg_playback(
+  name = "plot.gif",
+  device = "png",
+  first_image_duration = 5,
+  last_image_duration = 10,
+  frame_duration = .5,
+  background = color_bg,
+  image_resize = 800,
+  stoprecording = TRUE
+)
