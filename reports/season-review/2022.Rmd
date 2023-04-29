@@ -1,0 +1,28 @@
+---
+title: "RFL Season Review"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval = FALSE, include = FALSE)
+```
+
+```{r}	
+library(tidyverse)
+library(sysfonts)
+library(showtext)
+```
+
+```{r}
+var_season_first <- 2016
+var_season_last <- 2022
+var_mfl_league_id <- 63018
+```
+
+```{r}
+source("R/data/league.R", local = knitr::knit_global())
+source("R/data/franchises.R", local = knitr::knit_global())
+source("R/data/starter.R", local = knitr::knit_global())
+```
