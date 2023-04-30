@@ -1,0 +1,22 @@
+image: rocker/tidyverse:4.0.2
+
+stages:
+  - erstellung-csv
+  - artifact-to-git
+
+erstellung-csv:
+  stage: erstellung-csv
+  script:
+    - Rscript rfl-war.R
+  artifacts:
+    paths:
+      - output.csv
+  only:
+    - shedule
+
+artifact-to-git:
+  stage: artifact-to-git
+  script:
+    - bash artifact-to-git.sh
+  only:
+    - shedule
