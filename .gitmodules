@@ -1,0 +1,3 @@
+[submodule "war"]
+	path = war
+	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/war.git
