@@ -9,6 +9,6 @@ erstellung-csv:
     - Rscript rfl-war.R
   artifacts:
     paths:
-      - "output_$(paste0('rfl-war-', format(Sys.Date(), '%Y'), '.csv'))"
+      - output.csv
   only:
     - main
