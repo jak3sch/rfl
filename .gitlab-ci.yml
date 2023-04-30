@@ -1,3 +1,5 @@
+image: rocker/tidyverse:4.0.2
+
 stages:
   - erstellung-csv
 
