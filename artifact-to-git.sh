@@ -12,7 +12,7 @@ curl --user "$GITLAB_USER:$GITLAB_PASSWORD" \
 git pull $REPO_URL main
 
 # Hinzufügen der CSV-Datei zum Git-Index
-git add data/war/output.csv
+git add /builds/jakob-eschler/data-science/fantasy-football/rfl/data/war/output.csv
 
 # Committen der Änderungen
 git commit -m "Automatisches Hinzufügen der CSV-Datei"
