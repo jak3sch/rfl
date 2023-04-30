@@ -12,11 +12,11 @@ erstellung-csv:
     paths:
       - output.csv
   only:
-    - shedule
+    - main
 
 artifact-to-git:
   stage: artifact-to-git
   script:
     - bash artifact-to-git.sh
   only:
-    - shedule
+    - main
