@@ -9,7 +9,7 @@ erstellung-csv:
     - Rscript rfl-war.R
   artifacts:
     paths:
-      - output.csv
+      - data/war/output.csv
   only:
     - main
 

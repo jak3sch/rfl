@@ -6,13 +6,13 @@ REPO_URL="https://$GITLAB_USER:$GITLAB_PASSWORD@gitlab.com/jakob-eschler/data-sc
 # CSV-Datei herunterladen
 curl --user "$GITLAB_USER:$GITLAB_PASSWORD" \
      "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=$CI_JOB_NAME" \
-     --output output.csv
+     --output data/war/output.csv
 
 # Aktuellen Stand des Remote-Repositories herunterladen
 git pull $REPO_URL main
 
 # Hinzufügen der CSV-Datei zum Git-Index
-git add output.csv
+git add data/war/output.csv
 
 # Committen der Änderungen
 git commit -m "Automatisches Hinzufügen der CSV-Datei"
