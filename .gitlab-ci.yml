@@ -1,11 +1,10 @@
-image: rocker/tidyverse:4.0.2
-
 stages:
   - erstellung-csv
   - artifact-to-git
 
 erstellung-csv:
   stage: erstellung-csv
+  image: rocker/tidyverse:4.0.2
   script:
     - Rscript rfl-war.R
   artifacts:
@@ -16,6 +15,7 @@ erstellung-csv:
 
 artifact-to-git:
   stage: artifact-to-git
+  image: docker:latest
   script:
     - bash artifact-to-git.sh
   only:
