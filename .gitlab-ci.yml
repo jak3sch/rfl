@@ -15,8 +15,9 @@ erstellung-csv:
 
 artifact-to-git:
   stage: artifact-to-git
-  image: docker:latest
+  image: curlimages/curl:latest
   script:
+    - apk add git
     - sh artifact-to-git.sh
   only:
     - main
