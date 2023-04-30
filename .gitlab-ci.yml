@@ -15,9 +15,11 @@ erstellung-csv:
 
 artifact-to-git:
   stage: artifact-to-git
-  image: curlimages/curl:latest
+  image: docker:latest
+  services:
+    - docker:dind
   script:
-    - apk add git
+    - docker run --rm -v $(pwd):/app -w /app alpine:latest apk add git
     - sh artifact-to-git.sh
   only:
     - main
