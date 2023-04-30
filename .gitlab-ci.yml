@@ -22,6 +22,8 @@ artifact-to-git:
     - apk add --update curl && rm -rf /var/cache/apk/*
     - apk add git
   script:
+    - git config --global user.email "mail@jakob-eschler.de"
+    - git config --global user.name "Jakob Eschler"
     - sh artifact-to-git.sh
   only:
     - main
