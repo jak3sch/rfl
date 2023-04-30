@@ -197,4 +197,5 @@ war <- starter %>%
   dplyr::left_join(starter_by_week %>% select(player_id, pos) %>% distinct(), by = "player_id", multiple = "all", relationship = "many-to-many") %>%
   dplyr::select(player_id, player_name, pos, points, war)
 
-write.table(war, paste0("data/war/rfl-war-", last_season, ".csv"), row.names = FALSE, col.names = TRUE, sep = "; ")
+# write.table(war, paste0("data/war/rfl-war-", last_season, ".csv"), row.names = FALSE, col.names = TRUE, sep = "; ")
+write.table(war, "output.csv", row.names = FALSE, col.names = TRUE, sep = "; ")

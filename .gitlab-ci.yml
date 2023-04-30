@@ -1,0 +1,12 @@
+stages:
+  - erstellung-csv
+
+erstellung-csv:
+  stage: erstellung-csv
+  script:
+    - Rscript rfl-war.R
+  artifacts:
+    paths:
+      - "output_$(paste0('rfl-war-', format(Sys.Date(), '%Y'), '.csv'))"
+  only:
+    - master
