@@ -24,6 +24,7 @@ artifact-to-git:
   script:
     - git config --global user.email "mail@jakob-eschler.de"
     - git config --global user.name "Jakob Eschler"
+    - git config pull.rebase true
     - sh artifact-to-git.sh
   only:
     - main
