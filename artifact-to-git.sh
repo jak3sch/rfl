@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Remote-Repository URL
-REPO_URL="https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl.git"
+REPO_URL="https://$GITLAB_USER:$GITLAB_PASSWORD@gitlab.com/jakob-eschler/data-science/fantasy-football/rfl.git"
 
 # CSV-Datei herunterladen
 curl --user "$GITLAB_USER:$GITLAB_PASSWORD" \
