@@ -17,6 +17,6 @@ artifact-to-git:
   stage: artifact-to-git
   image: docker:latest
   script:
-    - bash artifact-to-git.sh
+    - sh artifact-to-git.sh
   only:
     - main
