@@ -4,3 +4,6 @@
 [submodule "starter"]
 	path = starter
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/starter.git
+[submodule "elo"]
+	path = elo
+	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/elo.git
