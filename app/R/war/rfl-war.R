@@ -170,7 +170,7 @@ replacement <- reactive({
 })
 
 ## WAR berechnung ----
-war <- reactive({
+player_war <- reactive({
   starter_by_week() %>% 
     dplyr::filter(!is.na(player_score)) %>%
     dplyr::group_by(player_id) %>% 

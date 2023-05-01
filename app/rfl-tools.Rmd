@@ -43,21 +43,22 @@ library(emoji)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
-var.mflLeagueID = 63018
-var.season = 2022
+var.mflLeagueID <- 63018
+var.season <- 2022
+var.mflApiBase <- "https://www45.myfantasyleague.com/2023/"
 
-var.colorBlue = "#00183C"
-var.colorRed = "#D03324"
-var.colorYellow = "#eb9b03"
-var.colorAccent = "#ffffff"
-var.fontText = "Open Sans"
-var.fontTextBold = "Open Sans Semibold"
-var.fontHeadline = "Open Sans Semibold"
+var.colorBlue <- "#00183C"
+var.colorRed <- "#D03324"
+var.colorYellow <- "#eb9b03"
+var.colorAccent <- "#ffffff"
+var.fontText <- "Open Sans"
+var.fontTextBold <- "Open Sans Semibold"
+var.fontHeadline <- "Open Sans Semibold"
 
 mflConnection <- ffscrapr::mfl_connect(season = var.season, league_id = var.mflLeagueID)
 
 ## player data ----
-players <- jsonlite::read_json("https://www55.myfantasyleague.com/2022/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1") %>% 
+players <- jsonlite::read_json(paste0(var.mflApiBase, "export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")) %>% 
   purrr::pluck("players", "player") %>% 
   dplyr::tibble() %>% 
   tidyr::unnest_wider(1) %>% 
@@ -70,6 +71,31 @@ players <- jsonlite::read_json("https://www55.myfantasyleague.com/2022/export?TY
 source("R/base-data.R", local = T)
 
 source("R/chunks/plotDefaults.R")
+
+gtDefaults <- function(df) {
+  df %>% 
+    gt::tab_options(
+      table.font.size = gt::px(14),
+      table.font.color = "#222f3e",
+      table.border.top.color = "white",
+      heading.border.bottom.color = "white",
+      heading.title.font.size = gt::px(40),
+      heading.title.font.weight = "light",
+      heading.subtitle.font.size = gt::px(16),
+      
+      column_labels.font.weight = "bold",
+      column_labels.padding = gt::px(10),
+      column_labels.padding.horizontal = gt::px(15),
+      table_body.border.bottom.color = "#c8d6e5",
+      column_labels.border.top.color = "white",
+      stub.border.color = "#c8d6e5",
+      column_labels.border.bottom.color = "#222f3e",
+      
+      #footnotes.padding = gt::px(100),
+      footnotes.padding.horizontal = gt::px(35),
+      footnotes.border.bottom.color = "#222f3e"
+    )
+}
 ```
 
 # Power Ranking {data-navmenu="Teams"}
@@ -231,27 +257,7 @@ gt::render_gt({
       placement = "left"
     ) %>% 
     
-    gt::tab_options(
-      table.font.size = gt::px(14),
-      table.font.color = "#222f3e",
-      table.border.top.color = "white",
-      heading.border.bottom.color = "white",
-      heading.title.font.size = gt::px(40),
-      heading.title.font.weight = "light",
-      heading.subtitle.font.size = gt::px(16),
-      
-      column_labels.font.weight = "bold",
-      column_labels.padding = gt::px(10),
-      column_labels.padding.horizontal = gt::px(15),
-      table_body.border.bottom.color = "#c8d6e5",
-      column_labels.border.top.color = "red",
-      stub.border.color = "#c8d6e5",
-      column_labels.border.bottom.color = "#222f3e",
-      
-      footnotes.padding = gt::px(100),
-      footnotes.padding.horizontal = gt::px(35),
-      footnotes.border.bottom.color = "#222f3e"
-    )
+    gtDefaults()
 })
 ```
 
@@ -326,12 +332,12 @@ renderPlot({
       plotDefaults +
       geom_hline(yintercept = 1500, color = var.colorRed, size = 0.5, alpha = 0.75) + # default elo
       
-      #geom_vline(xintercept = 13, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2017
-      #geom_vline(xintercept = 25, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2018
-      #geom_vline(xintercept = 37, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2019
-      #geom_vline(xintercept = 49, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2020
-      #geom_vline(xintercept = 61, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2021
-      #geom_vline(xintercept = max(running_elo$game) - nflreadr::get_current_week() - 1, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2022
+      geom_vline(xintercept = 13, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2017
+      geom_vline(xintercept = 25, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2018
+      geom_vline(xintercept = 37, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2019
+      geom_vline(xintercept = 49, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2020
+      geom_vline(xintercept = 61, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2021
+      geom_vline(xintercept = 74, color = var.colorRed, size = 0.5, alpha = 0.75) + # start 2022
       
       geom_point(color = var.colorAccent, alpha = 0.3) +
       geom_line(data = subset(running_elo, division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam), size = 1) +
@@ -428,83 +434,35 @@ DT::renderDataTable(
 )
 ```
 
-# Wins above Replacement {data-navmenu="Spieler"}
-
-## Inputs {.sidebar}
-
-```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
-sliderInput("selectSeason", "Saison:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
-sliderInput("selectWeek", "Wochen:", min = 1, max = 13, value = c(1, nflreadr::get_current_week() - 1))
-
-source("R/war/rfl-war.R", local = T)
-
-war_clean <- reactive({
-  war() %>% 
-    dplyr::left_join(
-      players %>% 
-        dplyr::select(player_name, player_id, pos) %>% 
-        dplyr::mutate(player_id = as.double(player_id)),
-      by = "player_id"
-    ) %>% 
-    dplyr::select(player_id, player_name, pos, points, war)
-})
-```
-
-> WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
-
-## Main
-### Wins Above Replacement (WAR)
-
-```{r dt-war, echo=FALSE, fig.height=9.5, message=FALSE, warning=FALSE}
-DT::renderDataTable({
-  DT::datatable(
-    war_clean() %>% 
-      dplyr::select(player_name, pos, points, war) %>% 
-      dplyr::mutate(
-        war = round(war, 2),
-        "WAR %" = scales::percent(war / max(war))
-      ) %>% 
-      dplyr::rename(
-        Spieler = player_name,
-        Pos = pos,
-        FPts = points,
-        WAR = war
-      ),
-    rownames = F, filter = "top", options = list(pageLength = 12, order = list(3, 'desc'))
-  )
-})
-```
- 
 # WAR nach Position {data-navmenu="Teams"}
 > Übersicht über die kummulierten WAR für die einzelnen Teams. Es fließen derzeit nur Spieler ein, die in dieser Saison mindestens einmal in der Liga gestartet wurden.
 
 ```{r war-teams, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
 DT::renderDataTable({
-  formattable::formattable(
-    roster %>% 
-      dplyr::left_join(
-        war_clean() %>%
-          dplyr::select(-pos, -player_name) %>% 
-          dplyr::mutate(player_id = as.character(player_id)),
-        by = "player_id"
-      ) %>% 
-      dplyr::group_by(franchise_id, pos) %>% 
-      dplyr::summarise(
-        war = round(sum(war, na.rm = T), 2),
-        .groups = "drop") %>% 
-      dplyr::group_by(franchise_id) %>% 
-      dplyr::mutate(total = sum(war, na.rm = T)) %>% 
-      dplyr::ungroup() %>% 
-      tidyr::spread(pos, war) %>% 
-      dplyr::left_join(
-        franchises %>% 
-          dplyr::select(franchise_id, franchise_name),
-        by = "franchise_id"
-      ) %>%
-      dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK)
-  ) %>% 
-    formattable::as.datatable(rownames = F, filter = "top", options = list(pageLength = 12, order = list(2, 'desc')))
-})
+  roster %>% 
+    dplyr::left_join(
+      war %>%
+        dplyr::filter(season == var.season) %>% 
+        dplyr::select(player_id, war) %>% 
+        dplyr::mutate(player_id = as.character(player_id)),
+      by = "player_id",
+      multiple = "all"
+    ) %>% 
+    dplyr::group_by(franchise_id, pos) %>% 
+    dplyr::summarise(
+      war = round(sum(war, na.rm = T), 2),
+      .groups = "drop") %>% 
+    dplyr::group_by(franchise_id) %>% 
+    dplyr::mutate(total = sum(war, na.rm = T)) %>% 
+    dplyr::ungroup() %>% 
+    tidyr::spread(pos, war) %>% 
+    dplyr::left_join(
+      franchises %>% 
+        dplyr::select(franchise_id, franchise_name),
+      by = "franchise_id"
+    ) %>%
+    dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK)
+}, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'desc')))
 
 # ToDo: WAR wird nur für spieler berechnet, die diese saison gestartet wurden
 # ToDo: Scaling und sortierung der color bars haut nicht hin
@@ -652,57 +610,95 @@ DT::renderDataTable({
 })
 
 ```
-  
 
-# True Positions Check {data-navmenu="Comissioner Tools"}
-### StickyPositions
-```{r global-true-positions, echo=FALSE, message=FALSE, warning=FALSE}
-# sticky positions
-sheet = RCurl::getForm("https://spreadsheets.google.com/spreadsheet/pub", 
-                       hl ="en_US", 
-                       key = "1rf5m-7DPzwfJViYNYZliBXVnaGuucrYAZhVCQlPTbI4", 
-                       output = "csv", 
-                       .opts = list(followlocation = TRUE, 
-                                    verbose = TRUE, 
-                                    ssl.verifypeer = FALSE)) 
+# Wins above Replacement {data-navmenu="Spieler"}
 
-stickyPostitions <- read.csv(textConnection(sheet)) %>% 
-  rename(
-    player_name = MFL.Name,
-    player_id = X,
-    true = TRUE.POSITION,
-    mfl = MFL.POSITION
+## Inputs {.sidebar}
+
+```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
+sliderInput("selectSeason", "Saison:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
+sliderInput("selectWeek", "Wochen:", min = 1, max = 13, value = c(1, nflreadr::get_current_week() - 1))
+
+source("R/war/rfl-war.R", local = T)
+
+war_clean <- reactive({
+  player_war() %>% 
+    dplyr::left_join(
+      players %>% 
+        dplyr::select(player_name, player_id, pos) %>% 
+        dplyr::mutate(player_id = as.double(player_id)),
+      by = "player_id"
+    ) %>% 
+    dplyr::select(player_id, player_name, pos, points, war)
+})
+```
+
+> WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
+
+## Main
+### Wins Above Replacement (WAR)
+
+```{r dt-war, echo=FALSE, fig.height=9.5, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  DT::datatable(
+    war_clean() %>% 
+      dplyr::select(player_name, pos, points, war) %>% 
+      dplyr::mutate(
+        war = round(war, 2),
+        "WAR %" = scales::percent(war / max(war))
+      ) %>% 
+      dplyr::rename(
+        Spieler = player_name,
+        Pos = pos,
+        FPts = points,
+        WAR = war
+      ),
+    rownames = F, filter = "top", options = list(pageLength = 12, order = list(3, 'desc'))
   )
-      
-# roster ----
-player <- ffscrapr::mfl_players(mflConnection) %>% 
-  select(player_id, pos) %>% 
-  mutate(player_id = as.integer(player_id))
-      
-# abgleich ----
-compare <- stickyPostitions %>% 
-  left_join(player, by = "player_id") %>% 
-  mutate(compare = ifelse(true == pos, 1, 0))
+})
+```
+ 
+# Trade Bait {data-navmenu="Spieler"}
+### Trade Bait
+```{r trade-bait, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/trade-bait/trade-bait.R", local = T)
 ```
 
+Column {.tabset}
+-------------------------------------
+### Nach Team
 
-    
-```{r dt-sticky-positions, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
-DT::renderDT(
-  stickyPostitions,
-  rownames = F, options = list(pageLength = 30)
-)
+```{css}
+.chart-shim {
+  overflow: auto;
+}
 ```
 
-> [Datenbank](https://docs.google.com/spreadsheets/d/1rf5m-7DPzwfJViYNYZliBXVnaGuucrYAZhVCQlPTbI4/edit#gid=662154673), anhand derer die True Positions vergeben werden
+```{r echo=FALSE, fig.height=40, message=FALSE, warning=FALSE}
+gt::render_gt({
+  trade_baits %>%
+    dplyr::group_by(franchise_name, inExchangeFor) %>%
+    create_gt() %>% 
+    gt::cols_move(columns = pos, after = player_name)
+})
 
-### MFL
-
-```{r dt-mfl-positions, echo=FALSE, message=FALSE, warning=FALSE}
-DT::renderDT(
-  compare %>% filter(compare == 0),
-  rownames = F, options = list(dom = 't')
-)
 ```
 
-> Spieler, die bei MFL noch nicht die korrekte Position haben
+### Nach Position
+
+```{r echo=FALSE, fig.height=40, message=FALSE, warning=FALSE}
+gt::render_gt({
+  trade_baits %>%
+    dplyr::group_by(pos) %>%
+    create_gt() %>% 
+    gt::cols_label(franchise_name = "Team") %>% 
+    gtExtras::gt_merge_stack(
+      col1 = franchise_name,
+      col2 = inExchangeFor,
+      palette = c("black", "black"),
+      small_cap = FALSE,
+      font_weight = c("normal", "normal")
+    )
+})
+
+```

@@ -55,3 +55,11 @@ roster <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.s
       select(player_id, player_name, pos),
     by = "player_id"
   )
+
+# war data ----
+war <- purrr::map_df(2016:var.season, function(x) {
+  readr::read_delim(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"), delim = "; "
+  ) %>%
+    dplyr::mutate(season = x)
+})
