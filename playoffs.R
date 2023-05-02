@@ -40,14 +40,17 @@ postseason <- postseason_raw %>%
             season > 2016 & postseason == "SBC" & wl == "L" ~ 2,
 
             # Spiel um Platz 3
-            season > 2016 & postseason == "SB" & round == 3 & wl == "W" ~ 3,
-            season > 2016 & postseason == "SB" & round == 3 & wl == "L" ~ 4,
+            season > 2016 & postseason == "SB" & round == 4 & wl == "W" ~ 3,
+            season > 2016 & postseason == "SB" & round == 4 & wl == "L" ~ 4,
 
-            # Halbfinale
-            season > 2016 & postseason == "SB" & round == 2 & wl == "L" ~ 5,
+            # Halbfinale (Championship)
+            season > 2016 & postseason == "SB" & round == 3 & wl == "L" ~ 5,
 
-            # Finale
-            season > 2016 & postseason == "SB" & round == 1 & wl == "L" ~ 6,
+            # Viertelfinale (Divisional)
+            season > 2016 & postseason == "SB" & round == 2 & wl == "L" ~ 6,
+            
+            # Achtelfinale (Wildcard)
+            season > 2016 & postseason == "SB" & round == 1 & wl == "L" ~ 7,
 
             # andere Bowls
             bowl %in% c("PB", "TB") & round == 4 & wl == "W" ~ 1,
@@ -65,8 +68,9 @@ postseason <- postseason_raw %>%
             season == 2016 & round == 2 & wl == "L" ~ 4,
             season == 2016 & round == 1 & wl == "L" ~ 5,
         )
-    ) %>%
-    dplyr::summarise(
+    ) %>% 
+  dplyr::filter(!is.na(result)) %>% 
+  dplyr::summarise(
         max_round = max(max_round, na.rm = TRUE),
         result = min(result, na.rm = TRUE),
         appearance = 1,
@@ -90,9 +94,12 @@ super_bowl <- postseason %>%
     dplyr::group_by(team_id) %>%
     dplyr::arrange(season) %>%
     dplyr::mutate(
-        next_appearance = lead(season)
+        next_appearance = lead(season),
+        result_color = dplyr::if_else(result > 3, 4, result),
+        result_color = factor(result_color, levels = c("1", "2", "3", "4")),
+        curvature = sqrt(next_appearance - season) / -3
     ) %>%
-    dplyr::select(season, team_id, total_appearances, result, next_appearance)
+    dplyr::select(season, team_id, total_appearances, result, result_color, next_appearance, curvature)
 
 ggplot(super_bowl, aes(x = season, fill = result, y = 0.1)) +
     facet_wrap(~team_id, scales = "free_y", ncol = 2) +
