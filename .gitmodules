@@ -7,3 +7,6 @@
 [submodule "elo"]
 	path = elo
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/elo.git
+[submodule "rflfastR"]
+	path = rflfastR
+	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/rflfastr.git
