@@ -13,16 +13,90 @@ knitr::opts_chunk$set(eval = FALSE, include = FALSE)
 library(tidyverse)
 library(sysfonts)
 library(showtext)
+library(ggplot2)
+library(treemapify)
+library(nflreadr)
+library(gt)
+library(rflfastR)
 ```
 
 ```{r}
 var_season_first <- 2016
-var_season_last <- 2022
+var_season_last <- nflreadr::most_recent_season()
 var_mfl_league_id <- 63018
+var_mfl_api_base <- paste0("https://www55.myfantasyleague.com/", var_season_last, "/")
 ```
 
 ```{r}
 source("R/data/league.R", local = knitr::knit_global())
 source("R/data/franchises.R", local = knitr::knit_global())
 source("R/data/starter.R", local = knitr::knit_global())
+source("R/plots/default.R", local = knitr::knit_global())
 ```
+
+```{r}
+template <- officer::read_pptx("template/rfl-report-template.pptx")
+output <- template
+```
+
+
+# Team Berichte
+```{r}
+source("R/plots/personnel.R", local = knitr::knit_global())
+
+i = "0007"
+for (i in latest_franchise_ids) {
+  current_franchise <- latest_franchises %>%
+    dplyr::filter(franchise_id == i)
+  
+  current_franchise_name <- current_franchise$franchise_name
+  
+  
+  ###
+  ### TITEL ----
+  ###
+  
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Team Report Titel") %>% 
+    officer::ph_with(value = franchise$franchise_name, location = officer::ph_location_label("title")) %>% 
+    officer::ph_with(value = paste(franchise$franchise_name, " MVP ", var.lastSeason, ": ", franchiseMVP$pos, " ", franchiseMVP$player_name, "\nEr erzielte ", franchiseMVP$points, " FPts und war damit für ", round(franchiseMVP$war, digits = 1), " Wins above replacement (WAR) verantwortlich.", sep = ""), location = officer::ph_location_label("mvp"))
+  
+  
+   ###
+  ### Perzentile ----
+  ###
+  
+  source("R/teams/percentiles.R", local = knitr::knit_global())
+  
+  
+  
+  output <- output %>% 
+    officer::add_slide(layout = "Bild") %>% 
+    officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+  
+  
+  
+  
+  
+  
+  
+  
+  source("R/teams/personnel.R", local = knitr::knit_global())
+
+  output <- output %>% 
+    officer::add_slide(layout = "Personnel Grouping") %>% 
+    officer::ph_with(value = "Personnel Groupings", location = officer::ph_location_label("title")) %>% 
+    officer::ph_with(value = paste("Visualisierung der gestarteten Fantasy Football Lineup Variationen zwischen", var_season_first, "und", var_season_last), location = officer::ph_location_label("caption")) %>% 
+    officer::ph_with(value = team_personnel_offense, location = officer::ph_location_label("img-left")) %>% 
+    officer::ph_with(value = team_personnel_defense, location = officer::ph_location_label("img-right")) %>% 
+    officer::ph_with(value = officer::external_img(table_img, width = 11.08, height = 16.75, unit = "cm"), location = officer::ph_location_label("table")) %>% 
+    officer::ph_with(value = paste(
+      "Farben symbolisieren Gruppen. In der Offense ist das die Anzahl der gestarteten WR, in der Defense ist es ein dreistelliger Code, bestehend aus gestarteten DL, LB and DB (z.B. 252)",
+      "Die Unterteilung der Kacheln sind verschiedene Variationen (Personnel) der Gruppen", sep = "\n"), location = officer::ph_location_label("legend"))
+}
+
+
+print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
+```
+
