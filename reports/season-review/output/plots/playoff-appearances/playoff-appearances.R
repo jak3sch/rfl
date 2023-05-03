@@ -1,12 +1,9 @@
 library(tidyverse)
 library(patchwork)
 library(camcorder)
-#library(ggtext)
 library(ggplot2)
 library(sysfonts)
 library(showtext)
-#library(gtExtras)
-library(webshot2)
 
 # data ----
 data <- readr::read_csv("data.csv")
@@ -21,9 +18,9 @@ copy <- dplyr::tibble(
   content = "The Rocketbeans Football League (RFL) consists of 36 teams playing in two
 conferences with three divisions each.
 
-The 3 division winners and the three next best teams play in the Superbowl for
-the league title, while the next best 12 teams play in the Probowl and the 12
-worst teams play in the Toiletbowl for the honor.",
+The 3 division winners and the three next best teams play in the Superbowl
+for the league title, while the next best 12 teams play in the Probowl and
+the 12 worst teams play in the Toiletbowl for the honor.",
   x = 0,
   y = 0.59
 )
@@ -72,10 +69,10 @@ plot_default <- list(
 # layout ----
 ## right ----
 right <- patchwork::wrap_elements(
-  ggplot2::ggplot(super_bowl, aes(x = season, color = result, y = 0.1)) +
+  ggplot2::ggplot(super_bowl, aes(x = season, color = po_finish, y = 0.1)) +
     ggplot2::facet_wrap(~franchise_name, scales = "free_y", ncol = 2, strip.position = "left", labeller = ggplot2::label_wrap_gen(width = 15)) +
-    ggplot2::geom_curve(aes(xend = next_appearance, color = result_color), curvature = -0.4, yend = 0.1, size = 0.3) +
-    ggplot2::geom_point(aes(size = result, color = result_color)) +
+    ggplot2::geom_curve(data = subset(super_bowl, season != next_appearance), aes(xend = next_appearance, color = result_color), curvature = -0.4, yend = 0.1, linewidth = 0.3) +
+    ggplot2::geom_point(aes(size = po_finish, color = result_color)) +
 
     ggplot2::scale_color_manual(values = colors) +
     ggplot2::scale_size_continuous(range = c(1.5, 0.5), guide = "none") +
@@ -100,19 +97,19 @@ right <- patchwork::wrap_elements(
 
 ## left ----
 ### other bowls ----
-other_bowls <- ggplot(data = subset(data, !(franchise_name %in% unique(super_bowl$franchise_name))), aes(x = season, y = franchise_name, size = result, color = factor(bowl, levels = c("SB", "PB", "TB")))) +
+other_bowls <- ggplot(data = subset(data, !(franchise_name %in% unique(super_bowl$franchise_name))), aes(x = season, y = franchise_name, size = po_finish, color = factor(bowl, levels = c("SB", "PB", "TB")))) +
   ggplot2::geom_rect(xmin = 2015, xmax = 2016.8, ymin = 0, ymax = 36, fill = color_bg, color = NA) +
 
-  ggplot2::geom_curve(data = subset(data, season == 2021 & bowl == "PB" & result == min(result)), aes(xend = season - 0.5, y = 16.5, yend = 12), curvature = 0.5, size = 0.3, color = color_light) +
+  ggplot2::geom_curve(data = subset(data, season == 2021 & bowl == "PB" & po_finish == min(po_finish)), aes(xend = season - 0.5, y = 16.5, yend = 12), curvature = 0.5, size = 0.3, color = color_light) +
   ggplot2::geom_point(position = ggplot2::position_nudge(y = 0.5)) +
   ggplot2::geom_text(
-    data = subset(data, season == 2021 & bowl == "PB" & result == min(result)),
+    data = subset(data, season == 2021 & bowl == "PB" & po_finish == min(po_finish)),
     aes(x = season - 0.5), y = 10,
     label = "Size of points\nstands for\nplacement in Bowl",
     size = 6, lineheight = 0.4, color = color_light, angle = 10, show.legend = FALSE) +
 
   ggplot2::scale_color_manual(labels = c("Super Bowl", "Pro Bowl", "Toilet Bowl"), values = c("#ff9f43", "#2e86de", "#ee5253")) +
-  ggplot2::scale_size_continuous(range = c(1.5, 0.3), guide = "none") +
+  ggplot2::scale_size_continuous(range = c(2, 0.5), guide = "none") +
   ggplot2::scale_x_continuous(limits = c(2015.8, 2022), expand = c(0, 0.05), breaks = 2017:2022) +
 
   ggplot2::labs(
@@ -121,7 +118,7 @@ other_bowls <- ggplot(data = subset(data, !(franchise_name %in% unique(super_bow
 
   plot_default +
   ggplot2::theme(
-    axis.text.y = ggplot2::element_text(color = color_light, size = 14, hjust = 1, vjust = -1.3, margin = ggplot2::margin(r = -1.9, unit = "cm")),
+    axis.text.y = ggplot2::element_text(color = color_light, size = 14, hjust = 1, vjust = -1.3, margin = ggplot2::margin(r = -1.9, unit = "cm"), family = "accent"),
     panel.grid.major.y = ggplot2::element_line(color = "#425B78", linewidth = 0.1),
     plot.caption = ggtext::element_markdown(
       size = 30,
@@ -176,15 +173,12 @@ left <- patchwork::wrap_elements(
     plot_reset
 )
 
-
 # final ----
 page_layout <- "
   1111222222
 "
 
-#final <-
-
-left + right +
+final <- left + right +
   patchwork::plot_layout(heights = c(1, 1)) +
   patchwork::plot_layout(widths = c(rep(297, 2)), heights = 210) &
   ggplot2::theme(
@@ -193,6 +187,7 @@ left + right +
   )
 
 final
+
 # export ----
 camcorder::gg_playback(
   name = "plot.gif",
@@ -204,7 +199,5 @@ camcorder::gg_playback(
   image_resize = 800,
   stoprecording = TRUE
 )
-
-gg_stop_recording()
 
 ggplot2::ggsave("plot.png", final, width = 297, height = 210, units = "mm")
