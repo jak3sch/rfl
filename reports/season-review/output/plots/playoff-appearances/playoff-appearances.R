@@ -7,8 +7,15 @@ library(showtext)
 
 # data ----
 data <- readr::read_csv("data.csv")
-super_bowl <- readr::read_csv("super_bowl.csv")
+super_bowl <- readr::read_csv("super_bowl.csv") %>%
+  dplyr::filter(season != next_appearance | season == 2022) %>%
+  dplyr::mutate(
+    next_appearance = ifelse(season == 2022 & next_appearance == season, NA, next_appearance),
+    years = next_appearance - season,
+    curvature = log(sin(years / 2)) - 0.2
+  )
 
+# plot content ----
 title <- "RFL Postseason
 Appearances"
 subtitle <- "Visualization of each teams appearances in the RFL
@@ -18,7 +25,7 @@ copy <- dplyr::tibble(
   content = "The Rocketbeans Football League (RFL) consists of 36 teams playing in two
 conferences with three divisions each.
 
-The 3 division winners and the three next best teams play in the Superbowl
+The thee division winners and the three next best teams play in the Superbowl
 for the league title, while the next best 12 teams play in the Probowl and
 the 12 worst teams play in the Toiletbowl for the honor.",
   x = 0,
@@ -68,10 +75,34 @@ plot_default <- list(
 
 # layout ----
 ## right ----
+### helper ----
+# render geom_curve with dynamic curvature
+curve_geom <- function(franchise_name, xstart, xend, curvature, color) {
+  ggplot2::geom_curve(
+    data = data.frame(franchise_name = {{franchise_name}}), # show curve only in facet of the current team
+    aes(x = {{xstart}}, xend = {{xend}}, color = {{color}}),
+    y = 0.1, curvature = {{curvature}}, yend = 0.1, linewidth = 0.3)
+}
+
+add_curves <- function(franchise_name) {
+  franchise_info <- super_bowl %>%
+    dplyr::filter(franchise_name == {{franchise_name}})
+
+  mapply(curve_geom, franchise_name = {{franchise_name}}, xstart = franchise_info$season, xend = franchise_info$next_appearance, curvature = franchise_info$curvature, color = franchise_info$result_color)
+}
+
+### base grid ----
+right <- ggplot2::ggplot(super_bowl, aes(x = season, color = result_color, y = 0.1)) +
+    ggplot2::facet_wrap(~franchise_name, scales = "free_y", ncol = 2, strip.position = "left", labeller = ggplot2::label_wrap_gen(width = 15))
+
+### add curves ----
+for (franchise in unique(super_bowl$franchise_name)) {
+  right <- right +
+    add_curves(franchise)
+}
+
 right <- patchwork::wrap_elements(
-  ggplot2::ggplot(super_bowl, aes(x = season, color = po_finish, y = 0.1)) +
-    ggplot2::facet_wrap(~franchise_name, scales = "free_y", ncol = 2, strip.position = "left", labeller = ggplot2::label_wrap_gen(width = 15)) +
-    ggplot2::geom_curve(data = subset(super_bowl, season != next_appearance), aes(xend = next_appearance, color = result_color), curvature = -0.4, yend = 0.1, linewidth = 0.3) +
+  right +
     ggplot2::geom_point(aes(size = po_finish, color = result_color)) +
 
     ggplot2::scale_color_manual(values = colors) +
