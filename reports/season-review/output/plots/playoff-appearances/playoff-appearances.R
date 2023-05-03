@@ -17,15 +17,15 @@ super_bowl <- readr::read_csv("super_bowl.csv") %>%
 
 # plot content ----
 title <- "RFL Postseason
-Appearances"
-subtitle <- "Visualization of each teams appearances in the RFL
-postseason between 2016 and 2022"
+Participation"
+subtitle <- "Visualization of each team's participations
+in the RFL postseason between 2016 and 2022"
 
 copy <- dplyr::tibble(
   content = "The Rocketbeans Football League (RFL) consists of 36 teams playing in two
 conferences with three divisions each.
 
-The thee division winners and the three next best teams play in the Superbowl
+The three division winners and the three next best teams play in the Superbowl
 for the league title, while the next best 12 teams play in the Probowl and
 the 12 worst teams play in the Toiletbowl for the honor.",
   x = 0,
