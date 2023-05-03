@@ -1,8 +1,8 @@
-# RFL Postseason Appearances
+# RFL Postseason Participations
 
 Recently I came across this [beautiful chart](https://www.informationisbeautifulawards.com/showcase/3310-a-history-of-the-fifa-world-cup) and thought, it would be a great inspirataion for my fantasy football league report.
 
-## Visualization of each teams appearances in the RFL postseason between 2016 and 2022
+## Visualization of each teams participation in the RFL postseason between 2016 and 2022
 
 The Rocketbeans Football League (RFL) consists of 36 teams playing in two conferences with three divisions each.
 

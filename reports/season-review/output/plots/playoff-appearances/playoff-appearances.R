@@ -77,18 +77,30 @@ plot_default <- list(
 ## right ----
 ### helper ----
 # render geom_curve with dynamic curvature
+
+# function for a single geom_curve()
 curve_geom <- function(franchise_name, xstart, xend, curvature, color) {
   ggplot2::geom_curve(
-    data = data.frame(franchise_name = {{franchise_name}}), # show curve only in facet of the current team
+    # since I use a facet plot, I need the geom only visible in a specific panel
+    data = data.frame(franchise_name = {{franchise_name}}),
     aes(x = {{xstart}}, xend = {{xend}}, color = {{color}}),
     y = 0.1, curvature = {{curvature}}, yend = 0.1, linewidth = 0.3)
 }
 
+# function to apply on the ggplot
 add_curves <- function(franchise_name) {
   franchise_info <- super_bowl %>%
     dplyr::filter(franchise_name == {{franchise_name}})
 
-  mapply(curve_geom, franchise_name = {{franchise_name}}, xstart = franchise_info$season, xend = franchise_info$next_appearance, curvature = franchise_info$curvature, color = franchise_info$result_color)
+  # use helper function to create a geom_curve() for each entry in the franchise_info df
+  mapply(
+    curve_geom,
+    franchise_name = {{franchise_name}},
+    xstart = franchise_info$season,
+    xend = franchise_info$next_appearance,
+    curvature = franchise_info$curvature,
+    color = franchise_info$result_color
+  )
 }
 
 ### base grid ----
