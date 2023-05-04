@@ -9,15 +9,37 @@ output:
 knitr::opts_chunk$set(eval = FALSE, include = FALSE)
 ```
 
-```{r}	
+```{r}
 library(tidyverse)
+library(officer)
+#library(ffscrapr)
+#library(scales)
+#library(paletteer)
+#library(viridis)
+#library(GGally)
+#library(ggrepel)
+#library(extrafont)
+#library(extrafontdb)
+#library(flextable)
+#library(stringr)
+#library(ggraph)
+#library(ggradar)
+#library(ggbump)
+#library(geomtextpath)
+#library(ggimage)
+#library(cropcircles)
+#library(magick)
+#library(glue)
+#library(grafify)
+#library(emoji)
+
 library(sysfonts)
 library(showtext)
 library(ggplot2)
 library(treemapify)
 library(nflreadr)
 library(gt)
-library(rflfastR)
+#library(rflfastR)
 ```
 
 ```{r}
@@ -37,6 +59,19 @@ source("R/plots/default.R", local = knitr::knit_global())
 ```{r}
 template <- officer::read_pptx("template/rfl-report-template.pptx")
 output <- template
+```
+
+# League
+## Playoff Participation
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+source("R/league/postseason-participation.R", local = knitr::knit_global())
+
+output <- output %>%
+  officer::add_slide(layout = "2 Bilder") %>% 
+  officer::ph_with(value = superbowl_plot, location = officer::ph_location_label("img-left")) %>% 
+  officer::ph_with(value = other_bowls_plot, location = officer::ph_location_label("img-right"))
+
+print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
 ```
 
 
@@ -97,6 +132,6 @@ for (i in latest_franchise_ids) {
 }
 
 
-print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
+
 ```
 
