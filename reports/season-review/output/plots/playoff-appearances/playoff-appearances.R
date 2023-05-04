@@ -7,13 +7,7 @@ library(showtext)
 
 # data ----
 data <- readr::read_csv("data.csv")
-super_bowl <- readr::read_csv("super_bowl.csv") %>%
-  dplyr::filter(season != next_appearance | season == 2022) %>%
-  dplyr::mutate(
-    next_appearance = ifelse(season == 2022 & next_appearance == season, NA, next_appearance),
-    years = next_appearance - season,
-    curvature = log(sin(years / 2)) - 0.2
-  )
+super_bowl <- readr::read_csv("super_bowl.csv")
 
 # plot content ----
 title <- "RFL Postseason
