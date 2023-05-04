@@ -26,8 +26,8 @@ superbowl <- postseason %>%
     bowl == "SB" & total_appearances > 1
   ) %>%
   dplyr::group_by(franchise_name, season) %>%
+  dplyr::filter(week == max(week)) %>% # letzte woche der PO
   dplyr::arrange(desc(po_finish)) %>%
-  #dplyr::filter(row_number() == 1)
   dplyr::mutate(
     result_color = dplyr::case_when(
       po_finish == 1 ~ "1st",
@@ -37,8 +37,7 @@ superbowl <- postseason %>%
     ),
     result_color = factor(result_color, levels = c("1st", "2nd", "3rd", "4th +"))
   ) %>%
-  dplyr::select(season, franchise_name, total_appearances, po_finish, result_color, next_appearance) %>% 
-  dplyr::filter(season != next_appearance | season == var_season_last) %>%
+  dplyr::select(season, franchise_name, total_appearances, po_finish, result_color, next_appearance) %>%
   dplyr::mutate(
     next_appearance = ifelse(season == var_season_last & next_appearance == season, NA, next_appearance),
     years = next_appearance - season,
@@ -60,7 +59,7 @@ curve_geom <- function(franchise_name, xstart, xend, curvature, color) {
 add_curves <- function(franchise_name) {
   franchise_info <- superbowl %>%
     dplyr::filter(franchise_name == {{franchise_name}})
-  
+
   # use helper function to create a geom_curve() for each entry in the franchise_info df
   mapply(
     curve_geom,
@@ -74,27 +73,27 @@ add_curves <- function(franchise_name) {
 
 ## superbowl ----
 superbowl_plot <- ggplot2::ggplot(superbowl, aes(x = season, color = result_color, y = 0.1)) +
-  ggplot2::facet_wrap(~franchise_name, scales = "free_y", ncol = 2, strip.position = "left", labeller = ggplot2::label_wrap_gen(width = 15))
+  ggplot2::facet_wrap(~franchise_name, scales = "free_y", ncol = 2, strip.position = "left", labeller = ggplot2::label_wrap_gen(width = 10))
 
 ### add curves ----
-for (franchise in unique(super_bowl$franchise_name)) {
+for (franchise in unique(superbowl$franchise_name)) {
   superbowl_plot <- superbowl_plot +
     add_curves(franchise)
 }
 
-superbowl_plot <- super_bowl_plot +
+superbowl_plot <- superbowl_plot +
   ggplot2::geom_point(aes(size = po_finish, color = result_color)) +
-  
-  ggplot2::scale_color_manual(values = colors) +
-  ggplot2::scale_size_continuous(range = c(1.5, 0.5), guide = "none") +
+
+  ggplot2::scale_color_manual(values = c(color_accent, color_light, "#ff9f43", color_muted)) +
+  ggplot2::scale_size_continuous(range = c(2, 0.5), guide = "none") +
   ggplot2::scale_y_continuous(limits = c(0, 0.8), expand = c(0, 0)) +
-  
+
   ggplot2::labs(
     title = "Superbowl Teilnahmen",
-    subtitle = "Die Grafik zeigt alle Teams mit mindestens zwei Super Bowl Teilnahmen.\nDie Länge der Bögen zeigt den Abstand zwischen den Teilnahmen, die Größe und Farbe der Punkte die Platzierung.",
+    subtitle = "Die Grafik zeigt alle Teams mit mindestens zwei Super Bowl Teilnahmen.\nDie Länge der Bögen zeigt den Abstand zwischen den Teilnahmen,\ndie Größe und Farbe der Punkte die Platzierung.",
     color = ""
   ) +
-  
+
   default_plot +
   ggplot2::theme(
     legend.position = "top",
@@ -104,26 +103,39 @@ superbowl_plot <- super_bowl_plot +
     panel.grid.major.y = ggplot2::element_blank(),
     axis.text.y = ggplot2::element_blank()
   )
-superbowl_plot
 
 ## other bowls ----
-other_bowls_plot <- ggplot(data = subset(postseason, !(franchise_name %in% unique(super_bowl$franchise_name))), aes(x = season, y = franchise_name, size = po_finish, color = factor(bowl, levels = c("SB", "PB", "TB")))) +
-  ggplot2::geom_rect(xmin = 2015, xmax = 2016.8, ymin = 0, ymax = 36, fill = color_bg, color = NA) +
+other_bowls <- postseason %>%
+  dplyr::filter(!(franchise_name %in% unique(superbowl$franchise_name))) %>%
+  dplyr::group_by(franchise_name, season) %>%
+  dplyr::filter(week == max(week)) # letzte woche der PO
+
+other_bowls_plot <- ggplot(other_bowls, aes(x = season, y = franchise_name, size = po_finish, color = factor(bowl, levels = c("SB", "PB", "TB")))) +
+  ggplot2::geom_rect(xmin = 2015, xmax = 2016.8, ymin = 0, ymax = 36, fill = color_bg, color = NA, linewidth = 0.3) +
   ggplot2::geom_point(position = ggplot2::position_nudge(y = 0.5)) +
-  
+  ggplot2::geom_point(
+    data = subset(other_bowls, po_finish == 1),
+    position = ggplot2::position_nudge(y = 0.5), shape = 21, size = 4, fill = NA) +
+
   ggplot2::scale_color_manual(labels = c("Super Bowl", "Pro Bowl", "Toilet Bowl"), values = c("#ff9f43", "#2e86de", "#ee5253")) +
-  ggplot2::scale_size_continuous(range = c(2, 0.5), guide = "none") +
-  ggplot2::scale_x_continuous(limits = c(2015.8, var_season_last), expand = c(0, 0.05), breaks = 2017:var_season_last) +
-  
+  ggplot2::scale_size_continuous(range = c(2.5, 1), guide = "none") +
+  ggplot2::scale_x_continuous(limits = c(2015.8, var_season_last + 0.05), expand = c(0, 0.05), breaks = 2017:var_season_last) +
+
   ggplot2::labs(
-    title = "Superbowl Teilnahmen",
-    subtitle = "Die Grafik zeigt alle Teams, die bislang nicht mindestens zwei Mal im Super Bowl Teilgenommen haben.\nDie Farbe der Punkte steht für den Bowl, an dem das Team teilgenommen hat, die Größe für die Platzierung (je größer, desto besser).",
+    title = "Postseason Ergebnisse",
+    subtitle = "Die Grafik zeigt alle Teams, die bislang nicht mindestens zwei Mal\nim Super Bowl Teilgenommen haben. Die Farbe der Punkte steht\nfür den Bowl, die Größe für die Platzierung (je größer, desto besser).",
     color = ""
   ) +
-  
+
   default_plot +
   ggplot2::theme(
     legend.position = "top",
-    axis.text.y = ggplot2::element_text(color = color_light, size = 14, hjust = 1, vjust = -1.3, margin = ggplot2::margin(r = -1.9, unit = "cm"), family = "accent"),
+    axis.text.y = ggplot2::element_text(hjust = 1, vjust = -2.3, margin = ggplot2::margin(r = -18, unit = "mm"), family = "accent"),
     panel.grid.major.x = ggplot2::element_blank()
   )
+
+# output ----
+output <- output %>%
+  officer::add_slide(layout = "2 Bilder") %>%
+  officer::ph_with(value = superbowl_plot, location = officer::ph_location_label("img-left")) %>%
+  officer::ph_with(value = other_bowls_plot, location = officer::ph_location_label("img-right"))

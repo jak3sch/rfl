@@ -136,8 +136,8 @@ league_awards_plot <- ggplot2::ggplot(league_awards, aes(x = category_f, y = pct
   ggplot2::geom_col(mapping = ggplot2::aes(alpha = group), fill = color_light, width = 0.97, position = "dodge") +
 
   # custom grid lines and annotations
-  ggplot2::geom_text(label = "FPts\nPctl", x = 5.85, y = -4.4, color = color_light, size = 5, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
-  ggplot2::geom_text(label = "WAR\nPctl", x = 6.15, y = 1.4, color = color_light, size = 5, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_text(label = "FPts", x = 5.85, y = -4.4, color = color_light, size = 5, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_text(label = "WAR", x = 6.15, y = 1.4, color = color_light, size = 5, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
   ggplot2::geom_segment(data = segments, mapping = aes(x = x1, xend = x2, y = y1, yend = y2, color = color), linewidth = 0.3) +
   ggplot2::scale_color_identity()
 

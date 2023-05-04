@@ -23,29 +23,28 @@ default_plot <- list(
       color = color_accent,
       lineheight = 0.3,
       family = "accent",
-      margin = ggplot2::margin(b = 2, unit = "mm")
+      margin = ggplot2::margin(b = 4, unit = "mm")
     ),
     plot.title.position = "plot",
     plot.subtitle = ggplot2::element_text(
-      size = 31,
+      size = 28,
       family = "base",
-      face = "bold",
       hjust = 0.5,
       lineheight = 0.4,
       color = color_light,
       margin = ggplot2::margin(b = 6, unit = "mm")
     ),
-    
+
     legend.position = "none",
-    legend.text = ggplot2::element_text(color = color_light),
-    
+    legend.text = ggplot2::element_text(color = color_light, size = 14),
+
     panel.spacing = ggplot2::unit(3, "mm"),
     panel.grid.major = ggplot2::element_line(color = color_muted, linewidth = 0.1),
-    
+
     strip.background = ggplot2::element_blank(),
     strip.text = ggplot2::element_text(color = color_light, family = "accent", size = 14, lineheight = 0.35),
-    
+
     axis.text = ggplot2::element_text(color = color_light, family = "base", size = 16),
-    axis.text.x = ggplot2::element_text(vjust = -2)
+    axis.text.x = ggplot2::element_text(vjust = -4)
   )
 )

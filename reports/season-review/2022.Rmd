@@ -25,9 +25,9 @@ library(officer)
 #library(ggraph)
 #library(ggradar)
 #library(ggbump)
-#library(geomtextpath)
-#library(ggimage)
-#library(cropcircles)
+library(geomtextpath)
+library(ggimage)
+library(cropcircles)
 #library(magick)
 #library(glue)
 #library(grafify)
@@ -53,6 +53,7 @@ var_mfl_api_base <- paste0("https://www55.myfantasyleague.com/", var_season_last
 source("R/data/league.R", local = knitr::knit_global())
 source("R/data/franchises.R", local = knitr::knit_global())
 source("R/data/starter.R", local = knitr::knit_global())
+source("R/data/war.R", local = knitr::knit_global())
 source("R/plots/default.R", local = knitr::knit_global())
 ```
 
@@ -61,22 +62,25 @@ template <- officer::read_pptx("template/rfl-report-template.pptx")
 output <- template
 ```
 
-# League
+# Liga
+## Auszeichnungen
+### Spieler Awards
+```{r}
+
+```
+
+
 ## Playoff Participation
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 source("R/league/postseason-participation.R", local = knitr::knit_global())
-
-output <- output %>%
-  officer::add_slide(layout = "2 Bilder") %>% 
-  officer::ph_with(value = superbowl_plot, location = officer::ph_location_label("img-left")) %>% 
-  officer::ph_with(value = other_bowls_plot, location = officer::ph_location_label("img-right"))
-
-print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
 ```
 
 
 # Team Berichte
 ```{r}
+
+print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
+
 source("R/plots/personnel.R", local = knitr::knit_global())
 
 i = "0007"
