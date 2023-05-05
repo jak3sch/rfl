@@ -10,8 +10,20 @@ library(cropcircles)
 library(ggnewscale)
 
 # data ----
-data <- readr::read_csv("data.csv")
-super_bowl <- readr::read_csv("super_bowl.csv")
+league_awards <- readr::read_csv("league_awards.csv", col_types = "iiccccdddccccdcccc") %>%
+  dplyr::mutate(
+    category_f= factor(
+      category,
+      levels = c("points_total_pctl", "points_award_pctl", "points_season_pctl", "war_season_pctl", "war_award_pctl", "war_total_pctl")
+    ),
+    award_f = factor(award, c("MVP", "OPOY", "DPOY", "CPOY", "APOY", "GPOY", "OROY", "DROY"))
+  ) %>%
+  dplyr::rename(award_rank = rank)
+
+awards_2022 <- league_awards %>%
+  dplyr::filter(season == 2022 & award_rank == 1)
+league_position_mvps <- readr::read_csv("league_position_mvps.csv") %>%
+  dplyr::rename(award_rank = rank)
 
 # plot content ----
 title <- "RFL Player\nAwards 2022"
@@ -46,6 +58,7 @@ camcorder::gg_record(
 color_bg <- "#222f3e"
 color_light <- "#c8d6e5"
 color_accent <- "#feca57"
+color_muted <- "#425B78"
 
 sysfonts::font_add_google("Vidaloka", family = "accent")
 sysfonts::font_add_google("Open Sans", family = "base", bold.wt = 800)
@@ -80,7 +93,7 @@ plot_default <- list(
 
 plot_default_bar <- list(
   geom_text(mapping = ggplot2::aes(label = war), vjust = 1.7, size = 10, color = color_bg, family = "accent"),
-  geom_text(aes(label = paste0("#", rank)), vjust = 5, color = color_bg, size = 6, family = "base"),
+  #geom_text(aes(label = paste0("#", award_rank)), vjust = 5, color = color_bg, size = 6, family = "base"),
   geom_text(aes(label = sapply(display_name, function(x) paste(strwrap(x, width = 5), collapse = "\n"))), vjust = -0.5, hjust = 0.5, size = 7, family = "base", color = color_light, lineheight = 0.3),
   geom_hline(yintercept = 0, color = color_light, size = 0.3),
   nflplotR::geom_nfl_headshots(aes(player_gsis = gsis_id), y = 0, height = 0.25, vjust = 0),
@@ -91,8 +104,8 @@ plot_default_bar <- list(
 ## right ----
 ### league awards ----
 #### helper ----
-player_annotaions <- function(player_id) {
-  player_data <- league_awards %>%
+player_annotaions <- function() {
+  player_data <- awards_2022 %>%
     dplyr::group_by(gsis_id) %>%
     dplyr::filter(dplyr::row_number() == 1)
 
@@ -129,7 +142,7 @@ segments <- data.frame(
 )
 
 #### plot ----
-league_awards_plot <- ggplot2::ggplot(league_awards, aes(x = category_f, y = pctl)) +
+league_awards_plot <- ggplot2::ggplot(awards_2022, aes(x = category_f, y = pctl)) +
   ggplot2::facet_wrap(~ award_f, ncol = 4) +
   ggplot2::coord_polar(start = -3.15, clip = "off") +
 
@@ -143,7 +156,7 @@ league_awards_plot <- ggplot2::ggplot(league_awards, aes(x = category_f, y = pct
 
 for (player in unique(league_awards$gsis_id)) {
   league_awards_plot <- league_awards_plot +
-    player_annotaions(player)
+    player_annotaions()
 }
 
 league_awards_plot <- league_awards_plot +
@@ -154,7 +167,7 @@ league_awards_plot <- league_awards_plot +
 
   # player
   ggimage::geom_image(
-    data = league_awards %>% dplyr::group_by(gsis_id) %>% dplyr::filter(dplyr::row_number() == 1),
+    data = awards_2022 %>% dplyr::group_by(gsis_id) %>% dplyr::filter(dplyr::row_number() == 1),
     mapping = ggplot2::aes(image = cropcircles::circle_crop(headshot)),
     y = -1.5,
     asp = 1, size = 0.395
@@ -179,12 +192,12 @@ league_awards_plot <- league_awards_plot +
   )
 
 ### best players ----
-position_mvps_plot <- ggplot2::ggplot(league_position_mvps, aes(x = factor(rank, levels = c(2,1,3)), y = colHeight)) +
-  ggplot2::facet_wrap(~factor(pos, pos_order), ncol = 4, strip.position = "bottom") +
+position_mvps_plot <- ggplot2::ggplot(league_position_mvps, aes(x = factor(award_rank, levels = c(2,1,3)), y = colHeight)) +
+  ggplot2::facet_wrap(~factor(pos, c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB")), ncol = 4, strip.position = "bottom") +
   ggplot2::geom_col(aes(fill = pos)) +
 
   ggplot2::labs(
-    title = paste("The Most Valuable Players", var_season_last),
+    title = "The Most Valuable Players 2022",
     subtitle = "The players with the most wins above replacement in their position group."
   ) +
 
@@ -199,7 +212,6 @@ position_mvps_plot <- ggplot2::ggplot(league_position_mvps, aes(x = factor(rank,
     panel.spacing = ggplot2::unit(5, "mm")
   )
 
-
 ### combine ----
 right <- patchwork::wrap_elements(
   league_awards_plot +
@@ -212,16 +224,21 @@ right <- patchwork::wrap_elements(
 
 ## left ----
 ### Recent MVPs ----
-recent_mvps_plot <- ggplot2::ggplot(data = subset(league_awards_data, award == "MVP" & rank == 1), aes(x = season, y = war, fill = pos)) +
+recent_mvps <- league_awards %>%
+  dplyr::filter(award == "MVP" & award_rank == 1) %>%
+  dplyr::select(season, gsis_id, display_name, pos, war) %>%
+  dplyr::distinct()
+
+recent_mvps_plot <- ggplot2::ggplot(recent_mvps, aes(x = season, y = war, fill = pos)) +
   ggplot2::geom_col() +
 
   plot_default_bar +
 
-  ggplot2::scale_x_continuous(breaks = c(var_season_first:var_season_last)) +
-  ggplot2::scale_y_continuous(limits = c(0, 3.5)) +
+  ggplot2::scale_x_continuous(breaks = c(2016:2022)) +
+  ggplot2::scale_y_continuous(limits = c(0, 6)) +
 
   ggplot2::labs(
-    title = paste0("League MVPs ", var_season_first, "-", var_season_last),
+    title = "League MVPs 2016-2022",
     subtitle = "The player with the most WAR for each season.",
     caption = caption,
     fill = ""

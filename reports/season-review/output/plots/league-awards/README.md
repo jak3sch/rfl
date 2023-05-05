@@ -12,8 +12,8 @@ Github: [jak3sch](https://github.com/jak3sch)
 
 ### Result
 
-<img src="https://github.com/jak3sch/rfl/blob/main/reports/league-awards/output/plots/playoff-appearances/plot.png?raw=true" width="100%">
+<img src="https://github.com/jak3sch/rfl/blob/main/reports/season-review/output/plots/league-awards/plot.png?raw=true" width="100%">
 
 ### Timelaps
 
-<img src="https://github.com/jak3sch/rfl/blob/main/reports/league-awards/output/plots/playoff-appearances/plot.gif?raw=true" width="60%">
+<img src="https://github.com/jak3sch/rfl/blob/main/reports/league-awards/output/plots/league-awards/plot.gif?raw=true" width="60%">
