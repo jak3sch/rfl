@@ -16,4 +16,4 @@ Github: [jak3sch](https://github.com/jak3sch)
 
 ### Timelaps
 
-<img src="https://github.com/jak3sch/rfl/blob/main/reports/league-awards/output/plots/league-awards/plot.gif?raw=true" width="60%">
+<img src="https://github.com/jak3sch/rfl/blob/main/reports/season-review/output/plots/league-awards/plot.gif?raw=true" width="60%">
