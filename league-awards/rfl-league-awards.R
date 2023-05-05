@@ -12,9 +12,9 @@ fantasyPoints <- readRDS(url(paste0("https://github.com/jak3sch/rfl/blob/main/da
   )
 
 ## WAR ----
-franchiseWARPlayerRaw <- readr::read_delim(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), delim = "; ", col_types = "cccnn") %>%
+franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), col_types = "icccdd") %>% 
   dplyr::left_join(
-    readr::read_delim(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason - 1, ".csv"), delim = "; ", col_types = "cccnn") %>%
+    readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason - 1, ".csv"), col_types = "icccdd") %>%
       dplyr::select(player_id, war) %>%
       dplyr::rename(war_last_season = war),
     by = "player_id"
@@ -183,9 +183,7 @@ combined_league_awards <- rbind(league_mvp, league_opoy, league_dpoy, league_air
   dplyr::mutate(season = var.lastSeason) %>%
   dplyr::select(season, dplyr::ends_with("id"), dplyr::ends_with("name"), pos:label)
 
-read_data <- read.csv("data/awards/rfl-player-awards.csv") %>%
+read_data <- readr::read_csv("data/awards/rfl-player-awards.csv") %>%
   dplyr::filter(season < var.lastSeason)
 
-write.csv(rbind(read_data, combined_league_awards), "data/awards/rfl-player-awards.csv", row.names = FALSE)
-
-rm(var.lastSeason, fantasyPoints, franchiseWARPlayerRaw, franchiseWARPlayer, pbp, playerStatsOffense, playerStatsDefense, orderCols, dplyr::starts_with("league"))
+readr::write_csv(rbind(read_data, combined_league_awards), "data/awards/rfl-player-awards.csv")
