@@ -37,7 +37,7 @@ copy <- dplyr::tibble(
 WAR will tell fantasy managers how many more head-to-head
 matchups they should expect to win in a season from starting
 a particular player vs. that player’s expected replacement-level
-fill-in.',
+fill-in. (fantasypoints.com)',
   x = 0,
   y = 0.59
 )
