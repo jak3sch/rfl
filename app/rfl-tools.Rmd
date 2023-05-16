@@ -617,20 +617,8 @@ DT::renderDataTable({
 
 ```{r inputs-war, echo=FALSE, message=FALSE, warning=FALSE}
 sliderInput("selectSeason", "Saison:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
-sliderInput("selectWeek", "Wochen:", min = 1, max = 13, value = c(1, nflreadr::get_current_week() - 1))
 
 source("R/war/rfl-war.R", local = T)
-
-war_clean <- reactive({
-  player_war() %>% 
-    dplyr::left_join(
-      players %>% 
-        dplyr::select(player_name, player_id, pos) %>% 
-        dplyr::mutate(player_id = as.double(player_id)),
-      by = "player_id"
-    ) %>% 
-    dplyr::select(player_id, player_name, pos, points, war)
-})
 ```
 
 > WAR beschreibt, wie viele head-to-head Matchups mehr ein Owner erwarten kann zu gewinnen, wenn er einen bestimmten Spieler aufstellt. Als Vergleichswert wird ein Replacement-Level berechnet. [Mehr dazu gibts hier zu lesen](https://www.fantasypoints.com/nfl/articles/season/2021/fantasy-war-part-1-theory) 
@@ -641,12 +629,7 @@ war_clean <- reactive({
 ```{r dt-war, echo=FALSE, fig.height=9.5, message=FALSE, warning=FALSE}
 DT::renderDataTable({
   DT::datatable(
-    war_clean() %>% 
-      dplyr::select(player_name, pos, points, war) %>% 
-      dplyr::mutate(
-        war = round(war, 2),
-        "WAR %" = scales::percent(war / max(war))
-      ) %>% 
+    player_war() %>% 
       dplyr::rename(
         Spieler = player_name,
         Pos = pos,

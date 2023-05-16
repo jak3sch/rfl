@@ -5,9 +5,9 @@ account: jakesch
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6785434
-bundleId: 7158842
+bundleId: 7223814
 url: https://jakesch.shinyapps.io/rfl-tools/
-when: 1682935717.21934
-lastSyncTime: 1682935717.21935
+when: 1684229958.95483
+lastSyncTime: 1684229958.95484
 asMultiple: FALSE
 asStatic: FALSE

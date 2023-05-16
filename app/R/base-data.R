@@ -37,7 +37,8 @@ franchises <- league %>%
 ## starter data ----
 starter <- purrr::map_df(2016:var.season, function(x) {
   readr::read_csv(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv")
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"),
+    col_types = "iiccdcccni"
   )
 })
 
@@ -46,9 +47,9 @@ roster <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.s
   purrr::pluck("rosters", "franchise") %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
-  tidyr::unnest(2) %>%
+  tidyr::unnest(player) %>%
   dplyr::rename(franchise_id = id) %>%
-  tidyr::unnest_wider(2) %>%
+  tidyr::unnest_wider(player) %>%
   dplyr::rename(player_id = id) %>%
   dplyr::left_join(
     players %>%
@@ -56,10 +57,12 @@ roster <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.s
     by = "player_id"
   )
 
+
 # war data ----
 war <- purrr::map_df(2016:var.season, function(x) {
-  readr::read_delim(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"), delim = "; "
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"),
+    col_types = "idccdd"
   ) %>%
     dplyr::mutate(season = x)
 })
