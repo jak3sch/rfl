@@ -696,12 +696,14 @@ sliderInput("selectPicks", "Picks:", min = 1, max = 252, value = c(1, 72), sep =
 source("R/drafts/rfl-drafts.R", local = T)
 ```
 
-## Main
+Column {.tabset}
+-------------------------------------
+### Spieler nach Runde
 
-```{r}
+```{r fig.height=12}
 renderPlot({
   rfl_drafts() %>% 
-    ggplot(ggplot2::aes(y = pos_rank, color = as.character(season))) +
+    ggplot2::ggplot(ggplot2::aes(y = pos_rank, color = as.character(season))) +
       ggplot2::facet_grid(season~position) +
       ggplot2::geom_segment(ggplot2::aes(x = first_pick, xend = third_pick, yend = pos_rank)) +
       ggplot2::geom_point(ggplot2::aes(x = first_pick)) +
@@ -712,10 +714,32 @@ renderPlot({
         x = "OVerall Pick",
         y = "Position Rank"
       ) +
+      plotDefaults +
       ggplot2::theme(
         legend.position = "none"
-      ) +
-      plotDefaults
+      )
 }, height = 1000)
+```
+
+### Positionen nach Runde
+
+```{r fig.height=12}
+renderPlot({
+  rfl_drafts() %>% 
+  dplyr::group_by(season, round, position) %>% 
+  dplyr::summarise(count = n(), .groups = "drop") %>% 
+  ggplot2::ggplot(ggplot2::aes(x = round, y = position, alpha = count)) +
+    ggplot2::facet_wrap(~season, ncol = 4) +
+    ggplot2::geom_tile(fill = var.colorYellow) +
+    ggplot2::labs(
+      x = "Runde",
+      y = ""
+    ) +
+    plotDefaults +
+    ggplot2::theme(
+        legend.position = "none"
+      )
+}, height = 1000)
+  
 ```
 
