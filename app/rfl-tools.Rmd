@@ -685,3 +685,38 @@ gt::render_gt({
 })
 
 ```
+
+
+
+rfl_draft_history <- rbind(rfl_drafts, draft_data) %>% 
+  dplyr::group_by(season, mfl_id) %>% 
+  dplyr::arrange(overall) %>% 
+  dplyr::mutate(
+    first_pick = overall[1],
+    second_pick = overall[2],
+    third_pick = overall[3]
+  ) %>%
+  dplyr::group_by(mfl_id) %>% 
+  dplyr::filter(dplyr::row_number() == 1) %>% 
+  dplyr::select(season, overall, mfl_id, position, first_pick, second_pick, third_pick) %>% 
+  dplyr::group_by(season, position) %>% 
+  dplyr::arrange(first_pick) %>% 
+  dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(overall <= 36 & position == "TE")
+
+ggplot(rfl_draft_history, aes(y = pos_rank, color = as.character(season))) +
+  facet_wrap(~season) +
+  geom_segment(aes(x = first_pick, xend = third_pick, yend = pos_rank)) +
+  geom_point(aes(x = first_pick)) +
+  geom_point(aes(x = second_pick)) +
+  geom_point(aes(x = third_pick)) +
+  scale_y_reverse() +
+  labs(
+    title = paste("First Round", rfl_draft_history$position[1]),
+    x = "OVerall Pick",
+    y = "Position Rank"
+  ) +
+  theme(
+    legend.position = "none"
+  )
