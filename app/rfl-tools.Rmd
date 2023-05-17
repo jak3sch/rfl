@@ -686,37 +686,36 @@ gt::render_gt({
 
 ```
 
+# Draft {data-navmenu="Draft"}
 
+## Inputs {.sidebar}
 
-rfl_draft_history <- rbind(rfl_drafts, draft_data) %>% 
-  dplyr::group_by(season, mfl_id) %>% 
-  dplyr::arrange(overall) %>% 
-  dplyr::mutate(
-    first_pick = overall[1],
-    second_pick = overall[2],
-    third_pick = overall[3]
-  ) %>%
-  dplyr::group_by(mfl_id) %>% 
-  dplyr::filter(dplyr::row_number() == 1) %>% 
-  dplyr::select(season, overall, mfl_id, position, first_pick, second_pick, third_pick) %>% 
-  dplyr::group_by(season, position) %>% 
-  dplyr::arrange(first_pick) %>% 
-  dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::filter(overall <= 36 & position == "TE")
+```{r inputs-draft, echo=FALSE, message=FALSE, warning=FALSE}
+sliderInput("selectPicks", "Picks:", min = 1, max = 252, value = c(1, 72), sep = "")
 
-ggplot(rfl_draft_history, aes(y = pos_rank, color = as.character(season))) +
-  facet_wrap(~season) +
-  geom_segment(aes(x = first_pick, xend = third_pick, yend = pos_rank)) +
-  geom_point(aes(x = first_pick)) +
-  geom_point(aes(x = second_pick)) +
-  geom_point(aes(x = third_pick)) +
-  scale_y_reverse() +
-  labs(
-    title = paste("First Round", rfl_draft_history$position[1]),
-    x = "OVerall Pick",
-    y = "Position Rank"
-  ) +
-  theme(
-    legend.position = "none"
-  )
+source("R/drafts/rfl-drafts.R", local = T)
+```
+
+## Main
+
+```{r}
+renderPlot({
+  rfl_drafts() %>% 
+    ggplot(ggplot2::aes(y = pos_rank, color = as.character(season))) +
+      ggplot2::facet_grid(season~position) +
+      ggplot2::geom_segment(ggplot2::aes(x = first_pick, xend = third_pick, yend = pos_rank)) +
+      ggplot2::geom_point(ggplot2::aes(x = first_pick)) +
+      ggplot2::geom_point(ggplot2::aes(x = second_pick)) +
+      ggplot2::geom_point(ggplot2::aes(x = third_pick)) +
+      ggplot2::scale_y_reverse() +
+      ggplot2::labs(
+        x = "OVerall Pick",
+        y = "Position Rank"
+      ) +
+      ggplot2::theme(
+        legend.position = "none"
+      ) +
+      plotDefaults
+}, height = 1000)
+```
+
