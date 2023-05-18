@@ -1,7 +1,8 @@
 library(tidyverse)
 library(nflreadr)
 
-var_draft_season <- 2022
+var_draft_season <- 2023
+var_draft_round <- "01"
 
 draft_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", var_draft_season, "/export?TYPE=draftResults&L=63018&APIKEY=&JSON=1"))$draftResults$draftUnit$draftPick %>%
   dplyr::tibble() %>%
@@ -34,6 +35,7 @@ draft_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", v
       TRUE ~ 0
     )
   ) %>%
-  dplyr::select(season, overall, round, pick, franchise, mfl_id, gsis_id, player_name, position, team, is_rookie)
+  dplyr::select(season, overall, round, pick, franchise, mfl_id, gsis_id, player_name, position, team, is_rookie) %>%
+  dplyr::filter(round == var_draft_round)
 
 readr::write_csv(draft_data, "data/drafts/rfl-draft.csv", append = TRUE)
