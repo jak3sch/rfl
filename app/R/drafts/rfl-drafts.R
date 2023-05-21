@@ -2,7 +2,7 @@ rfl_drafts <- reactive({
   rfl_drafts <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/drafts/rfl-draft.csv", col_types = "iicccccccci") %>%
     dplyr::filter(
       !is.na(position),
-      #overall >= input$selectPicks[1] & overall <= input$selectPicks[2]
+      overall >= input$selectPicks[1] & overall <= input$selectPicks[2]
     ) %>%
     dplyr::group_by(season, mfl_id) %>%
     dplyr::arrange(overall) %>%
@@ -13,7 +13,7 @@ rfl_drafts <- reactive({
     ) %>%
     dplyr::group_by(mfl_id) %>%
     dplyr::filter(dplyr::row_number() == 1) %>%
-    dplyr::select(season, overall, round, mfl_id, position, first_pick, second_pick, third_pick) %>%
+    dplyr::select(season, overall, round, pick, mfl_id, position, first_pick, second_pick, third_pick) %>%
     dplyr::group_by(season, position) %>%
     dplyr::arrange(first_pick) %>%
     dplyr::mutate(pos_rank = dplyr::row_number()) %>%
