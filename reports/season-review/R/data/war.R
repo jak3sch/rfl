@@ -1,10 +1,9 @@
 war <- purrr::map_df(var_season_first:var_season_last, function(x) {
-  readr::read_delim(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"),
-    delim = "; "
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv")
   ) %>%
     dplyr::mutate(season = x)
-}) %>%
+})
   # pctl
   dplyr::mutate(
     points_total_pctl = dplyr::percent_rank(points),
