@@ -1,9 +1,10 @@
 war <- purrr::map_df(var_season_first:var_season_last, function(x) {
   readr::read_csv(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv")
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"),
+    col_types = "iiccdd"
   ) %>%
     dplyr::mutate(season = x)
-})
+}) %>%
   # pctl
   dplyr::mutate(
     points_total_pctl = dplyr::percent_rank(points),
@@ -19,4 +20,9 @@ war <- purrr::map_df(var_season_first:var_season_last, function(x) {
     points_season_pctl = dplyr::percent_rank(points),
     war_season_pctl = dplyr::percent_rank(war)
   ) %>%
-  dplyr::ungroup()
+  dplyr::ungroup() %>%
+  dplyr::left_join(
+    nfl_players %>%
+      dplyr::select(mfl_id, display_name),
+    by = c("player_id" = "mfl_id")
+  )

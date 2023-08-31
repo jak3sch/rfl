@@ -1,13 +1,17 @@
 starter <- purrr::map_df(2016:var_season_last, function(x) {
   readr::read_csv(
-    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv")
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"), show_col_types = FALSE
   )
 }) %>%
   dplyr::left_join(latest_franchises %>% select(franchise_id, franchise_name), by = "franchise_id")
 
+
+
 # personnel groupings ----
 rfl_personnel_raw <- starter %>%
   dplyr::filter(starter_status == "starter" & !pos %in% c("QB", "PK")) %>%
+  dplyr::group_by(franchise_id, season, week, pos, player_id) %>%
+  dplyr::filter(dplyr::row_number() == 1) %>%
   dplyr::group_by(franchise_id, season, week, pos) %>%
   dplyr::summarise(count = dplyr::n(), .groups = "drop") %>%
   tidyr::spread(pos, count) %>%
@@ -16,7 +20,7 @@ rfl_personnel_raw <- starter %>%
     dplyr::across(
       c("RB", "WR", "TE", "DT", "DE", "LB", "CB", "S"),
       ~ ifelse(is.na(.), 0, .)),
-    offense_parent = WR, # number of WR
+    offense_parent = paste0(RB,TE), #RB, TE
     offense = paste0(RB,WR,TE),
     defense_parent = paste0(DT+DE,LB,CB+S), # DL, LB, DB
     defense = paste0(DT, DE, LB, CB, S)

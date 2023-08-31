@@ -7,9 +7,21 @@ showtext::showtext_auto()
 color_bg <- "#222f3e"
 color_light <- "#c8d6e5"
 color_accent <- "#feca57"
+color_warning <- "#ee5253"
 color_muted <- "#425B78"
 colors <- c("#2e86de", "#ee5253", "#10ac84",  "#ff9f43", "#f368e0", "#0abde3", "#feca57", "#1dd1a1", "#8395a7", "#5f27cd")
 colors_contrast <- c("#ff9ff3", "#5f27cd", "#feca57", "#1dd1a1", "#54a0ff", "#c8d6e5", "#10ac84", "#ff9f43", "#00d2d3", "#ff6b6b")
+
+colors_position <- c(
+  "QB" = "#FC2B6D",
+  "RB" = "#20CEB8",
+  "WR" = "#59A7FF",
+  "TE" = "#FEAE58",
+  "PK" = "#c8d6e5",
+  "DL" = "#BD66FF",
+  "LB" = "#A3ACFF",
+  "DB" = "#FD7DB6"
+)
 
 # Plots ----
 default_plot <- list(
@@ -36,7 +48,9 @@ default_plot <- list(
     ),
 
     legend.position = "none",
-    legend.text = ggplot2::element_text(color = color_light, size = 14),
+    legend.text = ggplot2::element_text(color = color_light, size = 20),
+    legend.title = element_text(color = color_light, size = 20),
+    legend.key.size = unit(3, "mm"),
 
     panel.spacing = ggplot2::unit(3, "mm"),
     panel.grid.major = ggplot2::element_line(color = color_muted, linewidth = 0.1),
@@ -45,6 +59,26 @@ default_plot <- list(
     strip.text = ggplot2::element_text(color = color_light, family = "accent", size = 14, lineheight = 0.35),
 
     axis.text = ggplot2::element_text(color = color_light, family = "base", size = 16),
-    axis.text.x = ggplot2::element_text(vjust = -4)
+    axis.text.x = ggplot2::element_text(vjust = -4),
+    plot.caption = ggplot2::element_text(color = color_light, size = 14, margin = ggplot2::margin(t = 30)),
   )
 )
+
+default_plot_minimal <- list(
+  default_plot,
+  ggplot2::theme(
+    axis.text.x = ggplot2::element_blank(),
+    axis.text.y = ggplot2::element_blank(),
+    panel.grid.major = ggplot2::element_blank()
+  )
+)
+
+# geoms
+plot_geom_large_text <- function(color = color_light, ...) {
+  geom_text(color = color, size = 6, family = "accent", ...)
+}
+
+plot_geom_xsmall_text <- function(...) {
+  geom_text(size = 2, family = "accent", ...)
+}
+

@@ -119,7 +119,7 @@ other_bowls_plot <- ggplot(other_bowls, aes(x = season, y = franchise_name, size
 
   ggplot2::scale_color_manual(labels = c("Super Bowl", "Pro Bowl", "Toilet Bowl"), values = c("#ff9f43", "#2e86de", "#ee5253")) +
   ggplot2::scale_size_continuous(range = c(2.5, 1), guide = "none") +
-  ggplot2::scale_x_continuous(limits = c(2015.8, var_season_last + 0.05), expand = c(0, 0.05), breaks = 2017:var_season_last) +
+  ggplot2::scale_x_continuous(limits = c(2015.8, var_season_last + 0.05), expand = c(0, 0, 0.05, 0), breaks = 2017:var_season_last) +
 
   ggplot2::labs(
     title = "Postseason Ergebnisse",

@@ -1,8 +1,16 @@
+# plot ----
+plot_defaults_mvp_bar <- list(
+  geom_text(mapping = ggplot2::aes(label = war), vjust = 1.7, size = 10, color = color_bg, family = "accent"),
+  geom_text(aes(label = sapply(display_name, function(x) paste(strwrap(x, width = 5), collapse = "\n"))), vjust = -0.5, hjust = 0.5, size = 7, family = "base", color = color_light, lineheight = 0.3),
+  geom_hline(yintercept = 0, color = color_light, linewidth = 0.3),
+  nflplotR::geom_nfl_headshots(aes(player_gsis = gsis_id), y = 0, height = 0.25, vjust = 0),
+  ggplot2::scale_fill_manual(values = colors_position, guide = "none")
+)
+
 # data ----
-league_awards_data <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/awards/rfl-player-awards.csv") %>%
+league_awards_data <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/awards/rfl-player-awards.csv", col_types = "iiccccdddccc") %>%
   dplyr::left_join(nflreadr::load_players() %>% dplyr::select(gsis_id, headshot), by = "gsis_id")
 
-## MVPs ----
 league_awards <- league_awards_data %>%
   dplyr::mutate(
     points_total_pctl = dplyr::percent_rank(points),
@@ -19,92 +27,146 @@ league_awards <- league_awards_data %>%
     war_season_pctl = dplyr::percent_rank(war)
   ) %>%
   dplyr::ungroup() %>%
-  dplyr::filter(season == var_season_last & rank == 1) %>%
   tidyr::gather(category, pctl, dplyr::ends_with("pctl")) %>%
   dplyr::mutate(
     group = dplyr::case_when(
-      grepl("season", category) ~ paste0("All award candidates ", var_season_last),
-      grepl("award", category) ~ paste0("All candidates for the same award ", var_season_first, "-", var_season_last),
-      TRUE ~ paste0("All award candidates ", var_season_first, "-", var_season_last),
-      #grepl("season", category) ~ paste0("Alle Spieler der Saison ", var_season_last),
-      #grepl("award", category) ~ paste0("Alle Spieler des gleichen Awards ", var_season_first, "-", var_season_last),
-      #TRUE ~ paste0("Alle Spieler ", var_season_first, "-", var_season_last)
+      grepl("season", category) ~ paste0("Alle Award Anwärter der Saison ", var_season_last),
+      grepl("award", category) ~ paste0("Alle Spieler des gleichen Awards ", var_season_first, "-", var_season_last),
+      TRUE ~ paste0("Alle Award Anwärter ", var_season_first, "-", var_season_last)
     ),
     category_f= factor(
       category,
-      levels = c("points_total_pctl", "points_award_pctl", "points_season_pctl", "war_season_pctl", "war_award_pctl", "war_total_pctl"),
-    #labels =  c(
-    #  paste0("Liga\n", substr(var_season_first, 3, 4), "-", substr(var_season_last, 3, 4)),
-    #  paste0("Pos\n", substr(var_season_first, 3, 4), "-", substr(var_season_last, 3, 4)),
-    #  var_season_last,
-    #  var_season_last,
-    #  paste0("Pos\n", substr(var_season_first, 3, 4), "-", substr(var_season_last, 3, 4)),
-    #  paste0("Liga\n", substr(var_season_first, 3, 4), "-", substr(var_season_last, 3, 4))
-    #)
+      levels = c("points_total_pctl", "points_award_pctl", "points_season_pctl", "war_season_pctl", "war_award_pctl", "war_total_pctl")
     ),
     award_f = factor(award, c("MVP", "OPOY", "DPOY", "CPOY", "APOY", "GPOY", "OROY", "DROY")),
     subline = dplyr::case_when(
-      award == "MVP" ~ "Most WAR",
-      award == "OPOY" ~ "Most WAR: Offense non-MVP",
-      award == "DPOY" ~ "Most WAR: Defense non-MVP",
-      award == "CPOY" ~ "Highest WAR change to previous\nseason and ended season on IR",
-      award == "APOY" ~ "Most Fantasy Points\nthrough the air (QB)",
-      award == "GPOY" ~ "Fantasy Points\non the air",
-      award == "OROY" ~ "Most WAR: Offensive Rookie",
-      award == "DROY" ~ "Most WAR: Defensive Rookie",
-      #award == "MVP" ~ "Die meisten WAR",
-      #award == "OPOY" ~ "Die meisten WAR: Offense non-MVP",
-      #award == "DPOY" ~ "Die meisten WAR: Defense non-MVP",
-      #award == "CPOY" ~ "Die größte WAR Veränderung zum Vorjahr\nund Vorsaison auf IR beendet",
-      #award == "APOY" ~ "Die meisten Fantasy Punkte\ndurch die Luft (QB)",
-      #award == "GPOY" ~ "Die meisten Fantasy Punkte\nam Boden",
-      #award == "OROY" ~ "Die meisten WAR: Offense Rookie",
-      #award == "DROY" ~ "Die meisten WAR: Defense Rookie",
+      award == "MVP" ~ "Die meisten WAR",
+      award == "OPOY" ~ "Die meisten WAR: Offense non-MVP",
+      award == "DPOY" ~ "Die meisten WAR: Defense non-MVP",
+      award == "CPOY" ~ "Die größte WAR Veränderung zum Vorjahr\nund Vorsaison auf IR beendet",
+      award == "APOY" ~ "Die meisten Fantasy Punkte\ndurch die Luft (QB)",
+      award == "GPOY" ~ "Die meisten Fantasy Punkte\nam Boden",
+      award == "OROY" ~ "Die meisten WAR: Offense Rookie",
+      award == "DROY" ~ "Die meisten WAR: Defense Rookie",
     ),
   )
 
+league_awards_last_season <- league_awards %>%
+  dplyr::filter(season == var_season_last & rank == 1)
+
 # plots ----
+## helper ----
+player_annotaions <- function() {
+  player_data <- league_awards_last_season %>%
+    dplyr::group_by(gsis_id) %>%
+    dplyr::filter(dplyr::row_number() == 1)
+
+  player_annotations <- list(
+    # award title
+    ggplot2::geom_text(
+      data = player_data,
+      mapping = ggplot2::aes(label = award),
+      x = 3.5, y = 1.28, hjust = 0.5, color = color_accent, family = "accent", size = 8
+    ),
+    # player name
+    ggplot2::geom_text(
+      data = player_data,
+      mapping = ggplot2::aes(label = display_name),
+      x = 3.5, y = -3.5, hjust = 0.5, color = color_light, family = "accent", size = 10
+    ),
+    # award description
+    ggplot2::geom_text(
+      data = player_data,
+      mapping = ggplot2::aes(label = subline),
+      x = 3.5, y = -4.05, vjust = 1, hjust = 0.5, color = color_muted, family = "base", size = 8, lineheight = 0.35
+    )
+  )
+
+  return(player_annotations)
+}
+
 ## awards last season ----
 segments <- data.frame(
-  x1 = c(rep(0.4, 3), 1, 4),
+  x1 = c(rep(0.5, 3), 1, 4),
   x2 = c(rep(6.5, 3), 3, 6),
   y1 = c(0.25, 0.50, 0.75, 1.35, 1.35),
   y2 = c(0.25, 0.50, 0.75, 1.35, 1.35),
-  color = c(rep(color_muted, 3), rep(color_accent, 2))
+  color = c(rep(color_bg, 3), rep(color_accent, 2))
 )
 
-#chart <-
+league_awards_plot <- ggplot2::ggplot(league_awards_last_season, aes(x = category_f, y = pctl)) +
+  ggplot2::facet_wrap(~ award_f, ncol = 3) +
+  ggplot2::coord_polar(start = -3.15, clip = "off") +
 
-ggplot(league_awards, aes(x = category_f, y = pctl)) +
-  ggplot2::facet_wrap(~ award_f, ncol = 4) +
-  geom_col(mapping = aes(fill = group), width = 0.97) +
-  coord_polar(start = -3.1, clip = "off") +
-  theme_void() +
-  scale_y_continuous(limits = c(-1.5, 1.2)) +
-  scale_x_discrete(expand = ggplot2::expansion(add = 4)) +
-  geom_textpath(mapping = aes(label = category_f, y = 1), size = 3, vjust = 1)+
-  geom_segment(data = segments, mapping = aes(x = x1, xend = x2, y = y1, yend = y2), linewidth = 0.3) +
+  ggplot2::geom_col(mapping = ggplot2::aes(alpha = group), fill = color_light, width = 0.97, position = "dodge") +
 
-  ggplot2::geom_point(aes(stroke = war_pct, size = war), color = color_accent, size = 35) +
-  #geom_image(aes(image = cropcircles::circle_crop(headshot, border_size = 20, border_colour = color_bg)), asp = 1.13, size = 0.4) +
+  # custom grid lines and annotations
+  ggplot2::geom_text(label = "FPts", x = 5.85, y = -4.4, color = color_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_text(label = "WAR", x = 6.15, y = 1.4, color = color_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_segment(data = segments, mapping = aes(x = x1, xend = x2, y = y1, yend = y2, color = color), linewidth = 0.3) +
+  ggplot2::scale_color_identity()
 
-  ggplot2::geom_text(aes(label = display_name), x = 0.5, y = 3, hjust = 0.5, vjust = 1, color = color_accent, size = 4.7) +
-  ggplot2::geom_text(aes(label = toupper(label)), x = 0.5, y = 2.55, hjust = 0.5, vjust = 1) +
+for (player in unique(league_awards$gsis_id)) {
+  league_awards_plot <- league_awards_plot +
+    player_annotaions()
+}
 
-  ggplot2::geom_text(aes(label = subline), x = 0.5, y = -0.7, hjust = 0.5, vjust = 1, color = color_light) +
+league_awards_plot <- league_awards_plot +
+  ggnewscale::new_scale_color() +
 
-  ggplot2::scale_x_continuous(limits = c(0,1)) +
-  ggplot2::scale_y_continuous(limits = c(-1,3)) +
-  ggplot2::labs(
-    title = toupper(paste("Spieler-Awards", var_season_last)),
-    subtitle = "Die wertvollsten Spieler nach Kategorie",
+  # player background
+  ggplot2::geom_point(mapping = aes(color = pos), y = -1.5, size = 21.5) +
+
+  # player
+  ggimage::geom_image(
+    data = league_awards_last_season %>% dplyr::group_by(gsis_id) %>% dplyr::filter(dplyr::row_number() == 1),
+    mapping = ggplot2::aes(image = cropcircles::circle_crop(headshot)),
+    y = -1.5,
+    asp = 1, size = 0.39
   ) +
+
+  ggplot2::scale_color_manual(values = colors_position, guide = "none") +
+  ggplot2::scale_alpha_manual(values = c(0.3, 1, 0.6)) +
+  ggplot2::scale_y_continuous(limits = c(-1.5, 1.35)) +
+  ggplot2::scale_x_discrete(expand = ggplot2::expansion(add = 2.5)) +
+
+  ggplot2::labs(
+    title = paste("Spieler Auszeichnungen", var_season_last),
+    subtitle = "Die Grafik zeigt die besten Spieler in ihrer Kategorie. Die Balken stehen für die Perzentile,\nin denen der Spieler zwischen den Top-3 (Award Anwärter) ihrer Kategorie gerankt ist.",
+    alpha = ""
+  ) +
+
+  default_plot_minimal +
   ggplot2::theme(
-    plot.margin = margin(15, 15, 30, 15),
     legend.position = "top",
-    panel.spacing = unit(1, "lines")
+    strip.text = ggplot2::element_blank(),
+    panel.spacing.x = ggplot2::unit(5, "mm"),
+    panel.spacing.y = ggplot2::unit(0, "mm")
   )
 
-output <- output %>%
-  officer::add_slide(layout = "Bild") %>%
-  officer::ph_with(value = chart, location = officer::ph_location_label("img"))
+# recent mvps ----
+recent_mvps <- league_awards %>%
+  dplyr::filter(award == "MVP" & rank == 1) %>%
+  dplyr::select(season, gsis_id, display_name, pos, war) %>%
+  dplyr::distinct()
+
+recent_mvps_plot <- ggplot2::ggplot(recent_mvps, aes(x = season, y = war, fill = pos)) +
+  ggplot2::geom_col() +
+
+  plot_defaults_mvp_bar +
+
+  ggplot2::scale_x_continuous(breaks = c(var_season_first:var_season_last)) +
+  ggplot2::scale_y_continuous(limits = c(0, max(recent_mvps$war) + 1)) +
+
+  ggplot2::labs(
+    title = paste0("Liga MVPs ", var_season_first, "-", var_season_last),
+    subtitle = "Die Grafik zeigt die Spieler mit den meisten WAR einer jeden Saison.",
+    fill = ""
+  ) +
+
+  default_plot_minimal +
+  ggplot2::theme(
+    axis.text.x = ggplot2::element_text(color = color_light, family = "accent", size = 20),
+  )
+
+rm(player_annotaions, segments, player)
