@@ -1,0 +1,704 @@
+---
+title: "Trade Calculator"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+```{r include=FALSE}
+library(tidyverse)
+library(nflreadr)
+#library(ffscrapr)
+library(ggplot2)
+library(ggpubr)
+library(gt)
+#library(stats)
+#library(scales)
+#library(parameters)
+#library(psych)
+```
+
+```{r include=FALSE}
+last_season <- nflreadr::most_recent_season()
+
+league_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", last_season, "/export?TYPE=league&L=63018&APIKEY=&JSON=1"))
+```
+
+## Ziel
+
+Ziel dieses Prozesses soll es sein, einen Trade Calculatot für die RFL zu haben, anhand dessen der Wert für Spieler und Draftpicks abgeschätzt werden kann.
+
+
+### Spieler Values
+
+Basis der Kalkulationen sind WAR (Wins Above Replacement). WAR beschreiben den Einfluss eines einzelnen Spielers auf das Ergebnis des gesamten Fantasy Lineups. Je höher die WAR eines Spielers, desto wertvoller ist er.
+
+### Pick Values
+
+Um den Wert von Draftpicks zu bestimmen wird zum einen geschaut, welche WAR die Spieler erzielten, die mit den gleichen Picks ausgewählt wurden und zum anderen für welche Spieler sie bisher getradet wurden. 
+
+**Der Wert von Assets ist immer schwankend und wird sich mit jeder Transaktion ändern.**
+
+## WAR
+
+Um den Wert von Spielern nicht nur anhand seiner aktuellen Perfromance zu bewerten, werden auch vergangene WAR mit eingerechnet. Aber wie predictive sind WAR überhaupt? Dazu schauen wir mal, in wie weit sich die aktuellen WAR mit denen der Vergangenheit erklären lassen. Auf der y-Achse haben wir immer die WAR der Saison, die wir betrachten und auf der x-Achse die WAR der Saison - n. n ist dabei immer ein Zeitraum von einem Jahr zurück. Im ersten Plot schauen wir also auf die WAR der aktuellen und der letzten Saison, im letzten Plot auf die aktuelle und die Saison vor 5 Jahren.
+
+```{r echo=FALSE, fig.height=12, fig.width=20, message=FALSE, warning=FALSE}
+player_war_raw <- purrr::map_df(2016:last_season, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv")
+  ) %>% 
+    dplyr::mutate(season = x)
+})
+
+league_drafts_raw <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/drafts/rfl-draft.csv", col_types = "iicccdcccci")
+
+
+first_year_war <- league_drafts_raw %>% 
+  dplyr::filter(is_rookie == 1) %>% 
+  dplyr::left_join(
+    player_war_raw %>% 
+      dplyr::filter(season >= 2017) %>% 
+      dplyr::group_by(player_id) %>% 
+      dplyr::arrange(season) %>% 
+      dplyr::mutate(years_in_league = paste0("y_in_league_", dplyr::row_number())) %>% 
+      dplyr::select(years_in_league, player_id, war),
+    by = c("mfl_id" = "player_id")
+  ) %>% 
+  tidyr::spread(years_in_league, war) %>% 
+  dplyr::select(-"<NA>") %>% 
+  dplyr::mutate(
+    war_avg_2 = (y_in_league_1 + y_in_league_2) / 2,
+    war_avg_3 = (y_in_league_1 + y_in_league_2 + y_in_league_3) / 3,
+    war_avg_4 = (y_in_league_1 + y_in_league_2 + y_in_league_3 + y_in_league_4) / 4,
+    war_avg_5 = (y_in_league_1 + y_in_league_2 + y_in_league_3 + y_in_league_4 + y_in_league_5) / 5
+  ) %>% 
+  dplyr::select(-dplyr::starts_with("y_in_league")) %>% 
+  tidyr::gather(years_in_league, war, dplyr::starts_with("war_avg"))
+
+ggplot2::ggplot(first_year_war, aes(x = years_in_league, y = war)) +
+  facet_wrap(~position) +
+  geom_point()
+
+player_war <- player_war_raw %>% 
+  dplyr::group_by(player_id, player_name) %>% 
+  dplyr::mutate(
+    war_n = dplyr::lag(war),
+    war_2n = dplyr::lag(war, n = 2),
+    war_3n = dplyr::lag(war, n = 3),
+    war_4n = dplyr::lag(war, n = 4),
+    war_5n = dplyr::lag(war, n = 5)
+  ) %>% 
+  tidyr::gather(key, war_n, dplyr::starts_with("war_")) %>% 
+  dplyr::mutate(key = factor(key, c("war_n", "war_2n", "war_3n", "war_4n", "war_5n")))
+
+ggplot2::ggplot(player_war, aes(x = war_n, y = war), add = "reg.line") +
+  ggplot2::facet_grid(pos ~ key) +
+  ggplot2::geom_point() +
+  ggpubr::stat_regline_equation(
+    aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")),
+    formula = y ~ x
+  ) +
+  ggplot2::stat_smooth(method = "lm", formula = y ~ x) +
+  ggplot2::labs(
+    x = "WAR Saison - n",
+    y = "WAR Saison"
+  ) +
+  ggplot2::theme_bw()
+```
+Wir sehen, dass sich die Positionen sehr unterscheiden, aber maximal -2 Jahre ein sinnvoller Zeitraum ist. Die restlichen Daten haben eine zu geringe Korrelation.
+
+Die Formeln, um den Wert der Spieler zu bestimmen, lauten also:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+player_war_n <- player_war %>% 
+  dplyr::filter(key == "war_n")
+
+player_war_2n <- player_war %>% 
+  dplyr::filter(key == "war_2n")
+
+get_corr <- function(position, n = 1) {
+  if (n == 1) {
+    tmp_data <- player_war_n %>%
+      dplyr::filter(pos == position)
+  } else if (n == 2) {
+    tmp_data <- player_war_2n %>%
+      dplyr::filter(pos == position)
+  }
+  
+  tmp_corr <- lm(tmp_data$war ~ tmp_data$war_n)
+  
+  tmp_intercept <- coef(tmp_corr)[1]
+  tmp_rsq <- coef(tmp_corr)[2]
+  
+  return(list(intercept = tmp_intercept, rsq = tmp_rsq))
+}
+
+## QB ----
+intercept_qb_n <- get_corr("QB")$intercept
+rsq_qb_n <- get_corr("QB")$rsq
+
+intercept_qb_2n <- get_corr("QB", 2)$intercept
+rsq_qb_2n <- get_corr("QB", 2)$rsq
+
+## RB ----
+intercept_rb_n <- get_corr("RB")$intercept
+rsq_rb_n <- get_corr("RB")$rsq
+
+## WR ----
+intercept_wr_n <- get_corr("WR")$intercept
+rsq_wr_n <- get_corr("WR")$rsq
+
+intercept_wr_2n <- get_corr("WR", 2)$intercept
+rsq_wr_2n <- get_corr("WR", 2)$rsq
+
+## TE ----
+intercept_te_n <- get_corr("TE")$intercept
+rsq_te_n <- get_corr("TE")$rsq
+
+intercept_te_2n <- get_corr("TE", 2)$intercept
+rsq_te_2n <- get_corr("TE", 2)$rsq
+
+## PK ----
+intercept_pk_n <- get_corr("PK")$intercept
+rsq_pk_n <- get_corr("PK")$rsq
+
+intercept_pk_2n <- get_corr("PK", 2)$intercept
+rsq_pk_2n <- get_corr("PK", 2)$rsq
+
+## DL ----
+intercept_dl_n <- get_corr("DL")$intercept
+rsq_dl_n <- get_corr("DL")$rsq
+
+intercept_dl_2n <- get_corr("DL", 2)$intercept
+rsq_dl_2n <- get_corr("DL", 2)$rsq
+
+## LB ----
+intercept_lb_n <- get_corr("LB")$intercept
+rsq_lb_n <- get_corr("LB")$rsq
+
+formulas <- dplyr::tibble(
+  Pos = c("QB", "RB", "WR", "TE", "PK", "DL", "LB", "DB"),
+  "n" = c(2, 1, 2, 2, 2, 2, 1, 0),
+  Formel = c(
+    paste0("WAR + (", intercept_qb_n, " + ", rsq_qb_n, " * WAR n-1) + (", intercept_qb_2n, " + ", rsq_qb_2n, " * WAR n-2)"),
+    paste0("WAR + (", intercept_rb_n, " + ", rsq_rb_n, " * WAR n-1)"),
+    paste0("WAR + (", intercept_wr_n, " + ", rsq_wr_n, " * WAR n-1) + (", intercept_wr_2n, " + ", rsq_wr_2n, " * WAR n-2)"),
+    paste0("WAR + (", intercept_te_n, " + ", rsq_te_n, " * WAR n-1) + (", intercept_te_2n, " + ", rsq_te_2n, " * WAR n-2)"),
+    paste0("WAR + (", intercept_pk_n, " + ", rsq_pk_n, " * WAR n-1) + (", intercept_pk_2n, " + ", rsq_pk_2n, " * WAR n-2)"),
+    paste0("WAR + (", intercept_dl_n, " + ", rsq_dl_n, " * WAR n-1) + (", intercept_dl_2n, " + ", rsq_dl_2n, " * WAR n-2)"),
+    paste0("WAR + (", intercept_lb_n, " + ", rsq_lb_n, " * WAR n-1)"),
+    "WAR"
+  )
+)
+
+formulas %>% 
+  gt::gt()
+```
+
+
+Betrachten wir die derzeit wertvollsten Spieler jeder Positionsgruppe:
+
+```{r echo=FALSE, fig.height=10, fig.width=20, message=FALSE, warning=FALSE}
+player_war_values <- player_war %>% 
+  dplyr::filter(key %in% c("war_n", "war_2n")) %>% 
+  tidyr::spread(key, war_n) %>% 
+  dplyr::mutate(
+    player_war_value = dplyr::case_when(
+      pos == "QB" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
+      pos == "RB" ~ war + ifelse(intercept_qb_n + rsq_qb_n * is.na(war_n), 0, war_n),
+      pos == "WR" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
+      pos == "TE" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
+      pos == "PK" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
+      pos == "DL" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
+      pos == "LB" ~ war + ifelse(intercept_qb_n + rsq_qb_n * is.na(war_n), 0, war_n),
+      pos == "DB" ~ war
+    )
+  ) %>%
+  dplyr::group_by(season, pos) %>%
+  dplyr::mutate(
+    player_war_value_pct = player_war_value / max(player_war_value)
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::filter(season == last_season)
+
+player_war_values %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(dplyr::desc(player_war_value)) %>% 
+  dplyr::filter(dplyr::row_number() == 1) %>%
+  ggplot2::ggplot(aes(x = reorder(player_name, dplyr::desc(player_war_value)), y = player_war_value, fill = pos)) +
+  ggplot2::geom_col(size = 5) +
+  ggplot2::labs(
+    x = "Saison",
+    y = "Wert"
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "top",
+  )
+```
+
+Wir sehen, dass die Values so, nicht wirklich nutzbar sind - denn Wenn der Top-DL Spieler genauso viel Wert ist, wie der Top Kicker, haben wir ein Problem. Hier kommt Positional Value ins Spiel.
+
+## Positional Value
+
+```{r include=FALSE}
+player_scores_list <- list()
+
+var_prev_season <- last_season - 1
+
+for (season in var_prev_season:last_season) {
+  df <- readRDS(url(paste0("https://github.com/jak3sch/rfl/blob/main/data/playerscores/rfl-playerscores-", season, ".rds?raw=true")))
+  player_scores_list[[season]] <- df
+}
+
+player_scores <- do.call(rbind, player_scores_list) %>% 
+  dplyr::mutate(
+    pos = dplyr::case_when(
+      pos %in% c("DT", "DE") ~ "DL",
+      pos %in% c("CB", "S") ~ "DB",
+      TRUE ~ pos
+    )
+  ) %>% 
+  dplyr::group_by(player_id, player_name, pos) %>% 
+  dplyr::summarise(points = mean(as.numeric(points), na.rm = TRUE), .groups = "drop")
+
+total_starter <- league_data %>%
+  purrr::pluck("league", "starters", "count")
+
+idp_starter <- league_data %>%
+  purrr::pluck("league", "starters", "idp_starters")
+
+```
+
+In der Liga starten insgesamt folgende Spieler:
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+league_starter <- league_data$league$starters$position %>% 
+  tidyr::tibble() %>% 
+  tidyr::unnest_wider(1) %>% 
+  dplyr::mutate(
+    limit = stringr::str_split(limit, "-"),
+    starter = purrr::map_chr(limit, ~ .x[1]),
+    flex = purrr::map_chr(limit, ~ .x[2]),
+    flex = ifelse(is.na(flex), 0, flex),
+    name = dplyr::case_when(
+      name == "DT+DE" ~ "DL",
+      name == "CB+S" ~"DB",
+      TRUE ~ name
+    )
+  ) %>% 
+  dplyr::select(-limit) %>% 
+  dplyr::rename(position = name)
+
+league_starter %>% 
+  gt::gt()
+```
+Betrachten wir die durchschnittlichen Fantasy Punkte der Spieler für die letzten beiden Jahre. Wir beschränken und auf diesen Zeitraum um mögliche Trends genauer abbilden zu können.
+
+Dazu sortieren wir die Spieler innerhalb ihrer Positionsgruppe absteigend nach WAR und bilden einmal den Durchschnitt aller Starter und einmal aller Flex-Spieler.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+positional_value2 <- player_war_values %>% 
+  dplyr::group_by(pos) %>%
+  dplyr::arrange(dplyr::desc(player_war_value)) %>% 
+  dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
+  dplyr::select(-player_id, -player_name) %>% 
+  dplyr::left_join(
+    league_starter,
+    by = c("pos" = "position"),
+    multiple = "all"
+  ) %>% 
+  dplyr::filter(
+    pos_rank <= as.numeric(starter) * 12 | pos_rank <= as.numeric(flex) * 12
+  ) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::mutate(avg_flex_war = mean(player_war_value, na.rm = TRUE)) %>% 
+  dplyr::filter(pos_rank <= as.numeric(starter) * 12) %>% 
+  dplyr::mutate(avg_starter_war = mean(player_war_value, na.rm = TRUE)) %>% 
+  dplyr::filter(dplyr::row_number() == 1) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::select(pos, dplyr::starts_with("avg_")) %>% 
+  dplyr::mutate(positional_war_value = avg_starter_war - avg_flex_war)
+
+positional_value %>% 
+  gt::gt()
+
+positional_value2 %>% 
+  gt::gt()
+  
+```
+
+
+## Player Value
+
+Führen wir die Daten zusammen.
+
+ 1. Wir haben den Wert des Spielers an sich, gemessen in WAR unter Berücksichtigung der letzten Jahre (siehe oben)
+ 2. Wir haben den Wert der Positionsgruppe, gemessen in WAR der letzten beiden Jahre
+ 3. Wir haben den Wert des Spielers relativ zu seiner Positionsgruppe. Dazu schauen wir, wie viel Prozent der WAR des besten Spielers der Positionsgruppe der betreffende Spieler auf einer Skala von 0 bis 1 hat.
+ 
+ Keinen Einfluss haben (derzeit):
+  - Alter des Spielers (aging curve einberechnen)
+
+Aus allem ergibt sich die Formel:
+
+**player_value = (player_war_value + positional_war_value) * player_war_value_pct**
+
+```{r echo=FALSE}
+player_values <- player_war_values %>% 
+  dplyr::select(season, player_id, player_name, pos, player_war_value, player_war_value_pct) %>% 
+  dplyr::mutate(
+    player_war_value_pct = (player_war_value_pct - min(player_war_value_pct)) / (max(player_war_value_pct) - min(player_war_value_pct)) # wert zwishcen 0 und 1 erzeugen
+  ) %>% 
+  dplyr::left_join(
+    positional_value2 %>% 
+      dplyr::select(pos, positional_war_value),
+    by = "pos", multiple = "all"
+  ) %>% 
+  dplyr::left_join(
+    formulas %>% 
+      dplyr::select(-Formel),
+    by = c("pos" = "Pos")
+  ) %>% 
+  dplyr::mutate(player_value = round((player_war_value + positional_war_value * n) * player_war_value_pct, 2))
+
+player_values %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(dplyr::desc(player_value)) %>% 
+  dplyr::filter(dplyr::row_number() == 1) %>%
+  ggplot2::ggplot(aes(x = reorder(player_name, dplyr::desc(player_value)), y = player_value, fill = pos)) +
+  ggplot2::geom_col(size = 5) +
+  ggplot2::labs(
+    x = "Saison",
+    y = "Wert"
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "top",
+  )
+```
+
+
+## Picks
+
+Der Wert von Draftpicks wird anhand der WAR der Spieler berechnet, die in vorherigen Drafts gepickt wurden. Dazu ermitteln wir von jedem Draftpick die durchschnittlichen WAR der ersten 3 Jahre nach dem Draft. Dann sortieren wir die Picks absteigend nach den durchschnittlichen WAR und erhalten eine Reihenfolge, in der die Spieler optimalerweise hätten gepickt werden sollen und damit auch den Wert der Picks. Dann ermitteln wir den durschnitt aus allen Drafts, die bereits mindestens eine Saisons zurückliegen.
+
+```{r}
+pick_values <- league_drafts_raw %>% 
+  dplyr::filter(is_rookie == 1) %>% 
+  dplyr::left_join(
+    player_war_raw %>% 
+      dplyr::filter(season >= 2017) %>% 
+      dplyr::group_by(player_id) %>% 
+      dplyr::arrange(season) %>% 
+      dplyr::mutate(years_in_league = dplyr::row_number()) %>% 
+      dplyr::filter(years_in_league <= 3) %>% 
+      dplyr::group_by(player_id) %>% 
+      dplyr::summarise(war_3y_avg = mean(war, na.rm = TRUE)) %>% 
+      dplyr::select(player_id, war_3y_avg),
+    by = c("mfl_id" = "player_id")
+  ) %>% 
+  dplyr::filter(!is.na(war_3y_avg)) %>% 
+  dplyr::select(-overall:-franchise) %>% 
+  dplyr::distinct() %>% 
+  dplyr::group_by(season) %>% 
+  dplyr::arrange(dplyr::desc(war_3y_avg)) %>% 
+  dplyr::mutate(overall_war = dplyr::row_number()) %>% 
+  dplyr::group_by(overall_war) %>% 
+  dplyr::summarise(pick_value = mean(war_3y_avg)) %>% 
+  dplyr::filter(!is.na(pick_value)) %>% 
+  dplyr::arrange(dplyr::desc(pick_value)) %>% # dadurch, dass in manchen drafts nicht alle picks gemacht wurden, kommt es hier zu fehlern. deshalb wird neu sortiert
+  dplyr::mutate(overall_war = dplyr::row_number()) %>%
+  dplyr::mutate(
+    pick_value_norm = round((-1 * min(pick_value)) + pick_value, 2),
+    pick_value_pct = pick_value_norm / max(pick_value_norm)
+  )
+
+ggplot2::ggplot(pick_values, ggplot2::aes(x = overall_war, y = pick_value_norm)) +
+  geom_line() +
+  labs(
+    x = "Overall Clean",
+    y = "Avg. WAR der ersten 3 Jahre seit 2017"
+  )
+```
+Da es 3 Kopien pro Spieler gibt, erstellen wir noch eine Matrix für alle Picks.
+
+```{r}
+pick_values_overall <- tibble(
+  overall = 1:252,
+  overall_clean = ceiling(overall / 3)
+) %>% 
+  dplyr::left_join(
+    pick_values,
+    by = c("overall_clean" = "overall_war")
+  ) %>% 
+  dplyr::select(-pick_value) %>% 
+  dplyr::rename(pick_value = pick_value_norm) %>% 
+  dplyr::mutate(
+    round = ceiling(overall / 36),
+  ) %>% 
+  dplyr::group_by(round) %>% 
+  dplyr::mutate(
+    round_avg = round(mean(pick_value), 2),
+    pick = dplyr::row_number(),
+    pick_readable = paste0("Pick ", round, ".", pick),
+    round = dplyr::case_when(
+      round == 1 ~ "1st",
+      round == 2 ~ "2nd",
+      round == 3 ~ "3rd",
+      TRUE ~ paste0(round, "th")
+    ),
+    time = dplyr::case_when(
+      pick <= 12 ~ paste("Early", round),
+      pick <= 24 ~ paste("Mid", round),
+      pick <= 36 ~ paste("Late", round)
+    )
+  ) %>% 
+  dplyr::ungroup()
+
+ggplot2::ggplot(pick_values_overall, ggplot2::aes(x = overall, y = pick_value)) +
+  geom_line() +
+  labs(
+    x = "Overall Pick",
+    y = "Avg. WAR der ersten 3 Jahre seit 2017"
+  )
+```
+In dem Prozess gehen wir davon aus, dass die Spieler mit den selben WAR immer 3 mal hintereinander gedraftet werden. Das bedeutet, dass eine Pick-Gruppe von 3 aufeinander folgenden Picks den selben Value hat.
+
+```{r}
+trade_values <- player_values %>% 
+  dplyr::mutate(
+    asset = paste0(player_name, " (", pos, ")")
+  ) %>% 
+  dplyr::rename(value = player_value) %>% 
+  dplyr::select(asset, value) %>% 
+  dplyr::bind_rows(
+    pick_values_overall %>% 
+      dplyr::select(pick_readable, pick_value) %>% 
+      dplyr::rename(asset = pick_readable, value = pick_value)
+  ) %>% 
+  dplyr::bind_rows(
+    pick_values_overall %>% 
+      dplyr::select(time, pick_value) %>% 
+      dplyr::distinct() %>% 
+      dplyr::rename(asset = time, value = pick_value)
+  )
+
+readr::write_csv(trade_values, "../data/trade-calculator/trade-values.csv")
+```
+
+
+### Future Picks
+
+- Alle Jahre haben gleiche Wertigkeit
+- Nicht definierte Runden Picks (zB next Years 1st) erhalten einen gemittelten Wert der gesamten Runde.
+
+## Trades
+
+```{r echo=FALSE}
+trades <- purrr::map_df(2016:last_season, function(x) {
+  jsonlite::read_json(
+    glue::glue("https://www45.myfantasyleague.com/{x}/export?TYPE=transactions&L=63018&APIKEY=aRNp3s%2BWvuWsx12mPlrBYDoeErox&W=&TRANS_TYPE=TRADE&FRANCHISE=&DAYS=&COUNT=&JSON=1")
+  )$transactions$transaction %>% 
+    dplyr::tibble() %>% 
+    tidyr::unnest_wider(1) %>% 
+    dplyr::mutate(season= x)
+})
+
+trade_values <- trades %>% 
+  dplyr::filter(
+    grepl("_", franchise1_gave_up) | grepl("_", franchise2_gave_up)
+  ) %>% 
+  dplyr::mutate(id = dplyr::row_number()) %>% 
+  dplyr::select(id, season, ends_with("gave_up")) %>% 
+  tidyr::separate_rows(franchise1_gave_up, sep = ",") %>% 
+  tidyr::separate_rows(franchise2_gave_up, sep = ",") %>% 
+  dplyr::mutate(
+    f1_traded_pick_list = ifelse(grepl("_", franchise1_gave_up), stringr::str_split(franchise1_gave_up, "_"), NA)
+  )
+```
+
+
+```{r eval=FALSE, include=FALSE}
+conn <- ffscrapr::ff_connect("mfl", 63018, 2021)
+
+fpts_ytd <- purrr::map_df(2019:2021, function(x) {
+  ffscrapr::ff_playerscores(conn, x, "YTD")
+})
+
+fpts_ppg <- purrr::map_df(2019:2021, function(x) {
+  ffscrapr::ff_playerscores(conn, x, "AVG")
+})
+
+fpts_weekly <- list.files( path = "../data/playerscores/", pattern = "*.rds", full.names = TRUE ) %>%
+  purrr::map_dfr(readRDS) %>% 
+  dplyr::filter(season >= 2019 & season <= 2021)
+
+players <- fpts_ytd %>%
+  dplyr::left_join(
+    fpts_ppg %>% 
+      dplyr::select(season, player_id, points) %>% 
+      dplyr::rename(ppg = points),
+    by = c("season", "player_id")
+  ) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::filter(points >= max(points) * 0.2 & !is.na(ppg)) %>% 
+  dplyr::ungroup()
+```
+
+Nur Spieler mit mind. 20% der Total Points von max Pts der Positionsgruppe
+
+# Positional Value
+```{r eval=FALSE, include=FALSE}
+players %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::summarise(ppg = round(mean(ppg), 2), .groups = "drop") %>% 
+  ggplot2::ggplot(aes(x = reorder(pos, desc(ppg)), y = ppg)) +
+  ggplot2::geom_col() +
+  ggplot2::geom_text(aes(label = ppg), vjust = 1.5, color = "white") +
+  labs(x = "", y = "PPG")
+```
+## Tiers
+### Was sind Tiers?
+Die Gliederung von Spielern in Tiers beschreibt das Zusammenfassen einer beliebigen Anzahl von Spielern der gleichen Positionsgruppe in eine Gruppe (Tier). Ein Tier soll alle darin enthaltenen Spieler möglichst genau in ihrer Fantasy Production beschreiben. Das 1. Tier beinhaltet immer die wertvollsten Spieler einer Positionsgruppe.
+
+### Wie werden Tiers definiert?
+Es gibt keinen Konsens wie Tiers eingeteilt werden. Da wir den generellen Wert einer Positionsgruppe ermitteln wollen, wird mit den Daten aus den letzten drei Jahren gearbeitet.
+
+Wir werden die Points per Game (PPG) und die Varianz der PPG nutzen. Varianz beschreibt dabei die Beständigkeit, in der ein Spieler seine PPG erzielt hat. Hohe Varianz bedeutet, dass der Spieler oft sehr weit über oder unter seinem Durchschnitt perormt hat (unbeständig). Eine niedrige Varianz bedeutet im Umkehrschluss, der Spieler hat konstant seinen Durchschnitt an Fantasy Punkten erzielt (beständig).
+
+```{r eval=FALSE, include=FALSE}
+player_deviation <- players %>% 
+  dplyr::left_join(
+    fpts_weekly %>% 
+      dplyr::select(player_id, points) %>% 
+      dplyr::group_by(player_id) %>% 
+      dplyr::summarise(sd = sd(points), .groups = "drop") %>%
+      dplyr::ungroup(),
+    by = "player_id"
+  ) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::mutate(
+    sd_normal = -2 + ((sd - min(sd)) * (2 - -2)) / (max(sd) - min(sd)),
+    ppg_normal = -2 + ((ppg - min(ppg)) * (2 - -2)) / (max(ppg) - min(ppg)),
+  ) %>% 
+  dplyr::ungroup()
+
+ggplot2::ggplot(player_deviation, aes(x = ppg_normal, y = sd_normal)) +
+  ggplot2::facet_wrap(vars(pos), ncol = 2) +
+  ggplot2::geom_point()
+```
+There are a couple things to note about this graph. First you will observe that both axes are on a scale of -2 to +2. That is because we have normalized the data. This allowed a cleaner read and puts the data on a similar scale. A player that has a value of 0 on the horizontal axis, means that player has a very average PPG. Someone to the far right means they have a much higher PPG than the average, and conversely, the far left means much lower than average. Similarly, a player at the 0 line on the vertical axis means that they have average consistency. Someone higher up in the graph, has higher variance that the average QB (less consistent than the average QB), and someone near the bottom has a lower variance than the average QB (more consistent than the average QB)
+
+Essentially, the farther right a player is, the higher his PPG is, and the farther left the lower his PPG is. The higher up a player is, the more variance he has (which makes him less consistent), and the lower down, the less variance he has (which makes him more consistent). The ideal player would be on the bottom right - high PPG and low variance and hence high consistency.
+
+#### Cluster
+The natural next step to this plot, is identifying “clusters”, or simply put, groups within this plot that are very similar. We could intuitively try to group some of the high performers with average consistency, like Patrick Mahomes and Matt Ryan together, and do the same for above average performers with low consistency (Fitzpatrick, Trubisky, Brees.) We would then have to find every one of these clusters and group players manually. While this is doable and intuitively makes sense, there is another way around it. There are certain algorithms that we can use that can help us identify the optimal number of cluster, and what those clusters are.
+
+In this analysis, we will make use of one of these algorithms, called a K-means. As mentioned, the K-means algorithm will identify how many clusters there are in our data, and build those clusters, grouping players with similar PPG and Standard Deviation. See below for the results.
+
+```{r eval=FALSE, include=FALSE}
+#library(factoextra)
+#library(broom)
+
+players_by_position <- function(pos) {
+  player_deviation %>% 
+    dplyr::filter(pos == {{pos}}) %>% 
+    dplyr::select(ppg, sd)
+}
+
+find_cluster <- function(pos) {
+  parameters::n_clusters(players_by_position(pos),
+    package = c("easystats", "NbClust", "mclust"),
+    standardize = F
+  )
+}
+
+#get_k <- function(df) {
+#  df %>% 
+#    dplyr::group_by(n_Clusters) %>% 
+#    dplyr::summarise(count = dplyr::n()) %>% 
+#    dplyr::filter(count == max(count))
+#}
+
+#qb_kcluster <- tibble(k = 1:10) %>% 
+#  mutate(
+#    kclust = map(k, ~ kmeans(cluster_qb, .x)),
+#    glanced = map(kclust, glance)
+#  )
+
+#qb_kcluster %>% 
+#  unnest(glanced) %>% 
+#  ggplot(aes(k, tot.withinss)) +
+#  geom_line() +
+#  geom_point(size = 2)
+```
+
+:::: {style="display: flex;"}
+::: {}
+##### Quarterbacks
+
+```{r eval=FALSE, include=FALSE}
+qb <- player_deviation %>% 
+  dplyr::filter(pos == "QB")
+
+qb_cluster <- stats::hclust(stats::dist(players_by_position("QB"), method = "euclidean"), method = "ward.D2")
+
+{plot(qb_cluster, hang = -1)
+stats::rect.hclust(qb_cluster, k = 12)}
+
+qb$cluster <- stats::cutree(qb_cluster, k = 12)
+
+qb %>% 
+  dplyr::group_by(cluster) %>% 
+  dplyr::summarise(
+    ppg = round(mean(ppg), 2),
+    count = dplyr::n(),
+    .groups = "drop"
+  ) %>% 
+  ggplot2::ggplot(aes(x = cluster, y = ppg)) +
+  ggplot2::geom_col() +
+  ggplot2::geom_text(aes(label = paste(ppg, "\n", count)), vjust = 1.5, color = "white") +
+  labs(x = "Tier", y = "PPG")
+```
+:::
+
+::: {}
+```{r eval=FALSE, include=FALSE}
+qb %>% 
+  ggplot2::ggplot(aes(x = ppg, group = cluster, color = factor(cluster))) +
+  ggplot2::geom_density()
+
+qb %>%
+  dplyr::group_by(cluster) %>% 
+  dplyr::summarise(
+    ppg = round(mean(ppg), 2),
+    sd = round(mean(sd), 2),
+    count = dplyr::n(),
+    .groups = "drop"
+  )
+
+
+  ggplot2::ggplot(aes(x = cluster))
+```
+:::
+
+::::
+
+```{r eval=FALSE, include=FALSE}
+library(ggiraph)
+
+test <- ggplot2::ggplot(qb, aes(x = ppg_normal, y = sd_normal, color = factor(cluster), fill = factor(cluster))) +
+  geom_point_interactive(aes(tooltip = paste(player_name, season), data_id = paste0(player_id, season)), size = 3, alpha = 0.4, shape = 21, stroke = 1)
+#  ggplot2::geom_point(size = 3, alpha = 0.4, shape = 21, stroke = 1)
+
+
+ggiraph::girafe(ggobj = test)
+```
+
+
+# https://rpubs.com/scunden/positional-value
+# https://statsandr.com/blog/clustering-analysis-k-means-and-hierarchical-clustering-by-hand-and-in-r/#consensus-based-algorithm
+
