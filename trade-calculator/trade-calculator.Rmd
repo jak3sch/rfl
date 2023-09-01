@@ -207,12 +207,12 @@ player_war_values <- player_war %>%
   dplyr::mutate(
     player_war_value = dplyr::case_when(
       pos == "QB" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
-      pos == "RB" ~ war + ifelse(intercept_qb_n + rsq_qb_n * is.na(war_n), 0, war_n),
-      pos == "WR" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
-      pos == "TE" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
-      pos == "PK" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
-      pos == "DL" ~ war + ifelse(is.na(war_n), 0, intercept_qb_n + rsq_qb_n * war_n) + ifelse(is.na(war_2n), 0, intercept_qb_2n + rsq_qb_2n * war_2n),
-      pos == "LB" ~ war + ifelse(intercept_qb_n + rsq_qb_n * is.na(war_n), 0, war_n),
+      pos == "RB" ~ war + ifelse(is.na(war_n), 0, intercept_rb_n + rsq_rb_n * war_n),
+      pos == "WR" ~ war + ifelse(is.na(war_n), 0, intercept_wr_n + rsq_wr_n * war_n) + ifelse(is.na(war_2n), 0, intercept_wr_2n + rsq_wr_2n * war_2n),
+      pos == "TE" ~ war + ifelse(is.na(war_n), 0, intercept_te_n + rsq_te_n * war_n) + ifelse(is.na(war_2n), 0, intercept_te_2n + rsq_te_2n * war_2n),
+      pos == "PK" ~ war + ifelse(is.na(war_n), 0, intercept_pk_n + rsq_pk_n * war_n) + ifelse(is.na(war_2n), 0, intercept_pk_2n + rsq_pk_2n * war_2n),
+      pos == "DL" ~ war + ifelse(is.na(war_n), 0, intercept_dl_n + rsq_dl_n * war_n) + ifelse(is.na(war_2n), 0, intercept_dl_2n + rsq_dl_2n * war_2n),
+      pos == "LB" ~ war + ifelse(is.na(war_n), 0, intercept_lb_n + rsq_lb_n * war_n),
       pos == "DB" ~ war
     )
   ) %>%
@@ -239,21 +239,25 @@ player_war_values %>%
   )
 ```
 
-Wir sehen, dass die Values so, nicht wirklich nutzbar sind - denn Wenn der Top-DL Spieler genauso viel Wert ist, wie der Top Kicker, haben wir ein Problem. Hier kommt Positional Value ins Spiel.
+Wir sehen, dass die Values so nicht wirklich nutzbar sind - denn wenn Kicker nicht den geringsten Value haben, haben wir ein Problem. Da kommt Positional Value ins Spiel.
 
 ## Positional Value
+### Anteil an den Lineup Punkten
+
+Für den Positional Value schauen wir auf die Starter aller Fantasy Matchups der letzten zwei Jahre. Wir beschränken und auf diesen Zeitraum um mögliche Trends genauer abbilden zu können. Wir schauen wie groß der Einfluss der einzelnen Positionsgruppe an den Gesamtpunkten des Teams war.
 
 ```{r include=FALSE}
-player_scores_list <- list()
 
 var_prev_season <- last_season - 1
 
-for (season in var_prev_season:last_season) {
-  df <- readRDS(url(paste0("https://github.com/jak3sch/rfl/blob/main/data/playerscores/rfl-playerscores-", season, ".rds?raw=true")))
-  player_scores_list[[season]] <- df
-}
+starter_data_raw <- purrr::map_df(var_prev_season:last_season, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"), col_types = "iiccicccni"
+  )
+})
 
-player_scores <- do.call(rbind, player_scores_list) %>% 
+positional_value <- starter_data_raw %>% 
+  dplyr::filter(starter_status == "starter") %>% 
   dplyr::mutate(
     pos = dplyr::case_when(
       pos %in% c("DT", "DE") ~ "DL",
@@ -261,83 +265,67 @@ player_scores <- do.call(rbind, player_scores_list) %>%
       TRUE ~ pos
     )
   ) %>% 
-  dplyr::group_by(player_id, player_name, pos) %>% 
-  dplyr::summarise(points = mean(as.numeric(points), na.rm = TRUE), .groups = "drop")
-
-total_starter <- league_data %>%
-  purrr::pluck("league", "starters", "count")
-
-idp_starter <- league_data %>%
-  purrr::pluck("league", "starters", "idp_starters")
-
-```
-
-In der Liga starten insgesamt folgende Spieler:
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-league_starter <- league_data$league$starters$position %>% 
-  tidyr::tibble() %>% 
-  tidyr::unnest_wider(1) %>% 
+  dplyr::group_by(season, week, franchise_id, player_id) %>%
+  dplyr::filter(dplyr::row_number() == 1) %>% # entferne doppelte spieler von double header matchups
+  dplyr::group_by(season, week, franchise_id) %>% 
+  dplyr::mutate(franchise_points = sum(player_score, na.rm = TRUE)) %>%
+  dplyr::group_by(season, week, franchise_id, pos) %>% 
   dplyr::mutate(
-    limit = stringr::str_split(limit, "-"),
-    starter = purrr::map_chr(limit, ~ .x[1]),
-    flex = purrr::map_chr(limit, ~ .x[2]),
-    flex = ifelse(is.na(flex), 0, flex),
-    name = dplyr::case_when(
-      name == "DT+DE" ~ "DL",
-      name == "CB+S" ~"DB",
-      TRUE ~ name
-    )
-  ) %>% 
-  dplyr::select(-limit) %>% 
-  dplyr::rename(position = name)
-
-league_starter %>% 
-  gt::gt()
-```
-Betrachten wir die durchschnittlichen Fantasy Punkte der Spieler für die letzten beiden Jahre. Wir beschränken und auf diesen Zeitraum um mögliche Trends genauer abbilden zu können.
-
-Dazu sortieren wir die Spieler innerhalb ihrer Positionsgruppe absteigend nach WAR und bilden einmal den Durchschnitt aller Starter und einmal aller Flex-Spieler.
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-positional_value <- player_war_values %>% 
-  dplyr::group_by(pos) %>%
-  dplyr::arrange(dplyr::desc(player_war_value)) %>% 
-  dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
-  dplyr::select(-player_id, -player_name) %>% 
-  dplyr::left_join(
-    league_starter,
-    by = c("pos" = "position"),
-    multiple = "all"
-  ) %>% 
-  dplyr::filter(
-    pos_rank <= as.numeric(starter) * 12 | pos_rank <= as.numeric(flex) * 12
+    position_count = n(),
+    position_score = sum(player_score, na.rm = TRUE),
+    position_value = position_score / franchise_points
   ) %>% 
   dplyr::group_by(pos) %>% 
-  dplyr::mutate(avg_flex_war = mean(player_war_value, na.rm = TRUE)) %>% 
-  dplyr::filter(pos_rank <= as.numeric(starter) * 12) %>% 
-  dplyr::mutate(avg_starter_war = mean(player_war_value, na.rm = TRUE)) %>% 
-  dplyr::filter(dplyr::row_number() == 1) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::select(pos, dplyr::starts_with("avg_")) %>% 
-  dplyr::mutate(positional_war_value = avg_starter_war - avg_flex_war)
+  dplyr::summarise(
+    dplyr::across(position_count:position_value, mean, na.rm = TRUE),
+    .groups = "drop"
+  )
 
-positional_value %>% 
+ggplot2::ggplot(positional_value, ggplot2::aes(position_value, position_score, color = pos)) +
+  ggplot2::geom_point(ggplot2::aes(size = position_count))
+```
+
+### Positionsdichte
+
+Als zweiten Faktor für den Positional Value untersuchen wir die Dichte der Positionsgruppe. Dazu ranken wir die Positionsgruppe absteigend nach ihrem bereits berechneten WAR Value und filtern den letzten Starter heraus. Diesen bekommen wir durch die Anzahl der im Schnitt gestarteten Spieler pro Positionsgruppe.
+
+```{r}
+position_depth <- player_war_values %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(dplyr::desc(player_war_value)) %>% 
+  dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
+  dplyr::left_join(
+    positional_value %>% 
+      dplyr::select(pos, position_count),
+    by = "pos",
+    multiple = "all"
+  ) %>% 
+  dplyr::filter(pos_rank <= ceiling(position_count * 12)) %>% 
+  dplyr::filter(pos_rank == max(pos_rank)) %>% 
+  dplyr::rename(last_starter_war_value = player_war_value) %>% 
+  dplyr::select(pos, last_starter_war_value) %>% 
+  dplyr::ungroup()
+
+position_depth %>% 
+  dplyr::arrange(dplyr::desc(last_starter_war_value)) %>% 
   gt::gt()
 
 ```
+
 
 
 ## Player Value
 
-Führen wir die Daten zusammen.
+Führen wir die Daten zusammen:
 
- 1. Wir haben den Wert des Spielers an sich, gemessen in WAR unter Berücksichtigung der letzten Jahre (siehe oben)
- 2. Wir haben den Wert der Positionsgruppe, gemessen in WAR der letzten beiden Jahre
- 3. Wir haben den Wert des Spielers relativ zu seiner Positionsgruppe. Dazu schauen wir, wie viel Prozent der WAR des besten Spielers der Positionsgruppe der betreffende Spieler auf einer Skala von 0 bis 1 hat.
+ 1. Wir haben den Wert des Spielers an sich (*player_war_value*), gemessen in WAR unter Berücksichtigung der letzten Jahre (siehe oben)
+ 2. Wir haben den Wert der Positionsgruppe (*position_value*), gemessen in einem Prozentualem Anteil am Ergebnis des Teams
+ 3. Wir haben den Wert der Positionsgruppe, gemessen in WAR des letzten Starters (*last_starter_war_value*)
  
  Keinen Einfluss haben (derzeit):
   - Alter des Spielers (aging curve einberechnen)
+  - Umstände (zB Depth Chart Position, Spieler anderer Units, Coaching etc.)
+  - Vertrag des Spielers
 
 Aus allem ergibt sich die Formel:
 
@@ -345,28 +333,32 @@ Aus allem ergibt sich die Formel:
 
 ```{r echo=FALSE}
 player_values <- player_war_values %>% 
-  dplyr::select(season, player_id, player_name, pos, player_war_value, player_war_value_pct) %>% 
-  dplyr::mutate(
-    player_war_value_pct = (player_war_value_pct - min(player_war_value_pct)) / (max(player_war_value_pct) - min(player_war_value_pct)) # wert zwishcen 0 und 1 erzeugen
-  ) %>% 
+  dplyr::select(season, player_id, player_name, pos, player_war_value) %>% 
+  #dplyr::mutate(
+  #  player_war_value_pct = (player_war_value_pct - min(player_war_value_pct)) / (max(player_war_value_pct) - min(player_war_value_pct)) # wert zwishcen 0 und 1 erzeugen
+  #) %>% 
   dplyr::left_join(
-    positional_value2 %>% 
-      dplyr::select(pos, positional_war_value),
+    positional_value %>% 
+      dplyr::select(pos, position_value),
     by = "pos", multiple = "all"
   ) %>% 
   dplyr::left_join(
-    formulas %>% 
-      dplyr::select(-Formel),
-    by = c("pos" = "Pos")
+    position_depth,
+    by = "pos", multiple = "all"
   ) %>% 
-  dplyr::mutate(player_value = round((player_war_value + positional_war_value * n) * player_war_value_pct, 2))
+  dplyr::mutate(
+    #position_value = 1 - position_value, 
+    player_value = round((player_war_value * position_value) - last_starter_war_value, 2)
+  )
 
 player_values %>% 
   dplyr::group_by(pos) %>% 
   dplyr::arrange(dplyr::desc(player_value)) %>% 
-  dplyr::filter(dplyr::row_number() == 1) %>%
-  ggplot2::ggplot(aes(x = reorder(player_name, dplyr::desc(player_value)), y = player_value, fill = pos)) +
-  ggplot2::geom_col(size = 5) +
+  dplyr::mutate(rank = dplyr::row_number()) %>% 
+  dplyr::ungroup() %>% 
+  ggplot2::ggplot(aes(rank, player_value)) +
+  ggplot2::facet_wrap(~pos, ncol = 4) +
+  ggplot2::geom_line(size = 1)
   ggplot2::labs(
     x = "Saison",
     y = "Wert"
@@ -480,6 +472,9 @@ trade_values <- player_values %>%
       dplyr::group_by(time) %>% 
       dplyr::summarise(value = mean(pick_value), .groups = "drop") %>% 
       dplyr::rename(asset = time)
+  ) %>% 
+  dplyr::mutate(
+    value = round(value, 2)
   )
 
 readr::write_csv(trade_values, "../data/trade-calculator/trade-values.csv")
