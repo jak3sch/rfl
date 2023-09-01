@@ -20,7 +20,7 @@ library(gt)
 ```
 
 ```{r include=FALSE}
-last_season <- nflreadr::most_recent_season()
+last_season <- nflreadr::most_recent_season() - 1
 
 league_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", last_season, "/export?TYPE=league&L=63018&APIKEY=&JSON=1"))
 ```
@@ -300,7 +300,7 @@ Betrachten wir die durchschnittlichen Fantasy Punkte der Spieler für die letzte
 Dazu sortieren wir die Spieler innerhalb ihrer Positionsgruppe absteigend nach WAR und bilden einmal den Durchschnitt aller Starter und einmal aller Flex-Spieler.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
-positional_value2 <- player_war_values %>% 
+positional_value <- player_war_values %>% 
   dplyr::group_by(pos) %>%
   dplyr::arrange(dplyr::desc(player_war_value)) %>% 
   dplyr::mutate(pos_rank = dplyr::row_number()) %>% 
@@ -325,9 +325,6 @@ positional_value2 <- player_war_values %>%
 positional_value %>% 
   gt::gt()
 
-positional_value2 %>% 
-  gt::gt()
-  
 ```
 
 
@@ -410,13 +407,13 @@ pick_values <- league_drafts_raw %>%
   dplyr::summarise(pick_value = mean(war_3y_avg)) %>% 
   dplyr::filter(!is.na(pick_value)) %>% 
   dplyr::arrange(dplyr::desc(pick_value)) %>% # dadurch, dass in manchen drafts nicht alle picks gemacht wurden, kommt es hier zu fehlern. deshalb wird neu sortiert
-  dplyr::mutate(overall_war = dplyr::row_number()) %>%
+  dplyr::mutate(overall_war = dplyr::row_number()) %>% 
   dplyr::mutate(
     pick_value_norm = round((-1 * min(pick_value)) + pick_value, 2),
-    pick_value_pct = pick_value_norm / max(pick_value_norm)
+    pick_value_pct = pick_value / max(pick_value)
   )
 
-ggplot2::ggplot(pick_values, ggplot2::aes(x = overall_war, y = pick_value_norm)) +
+ggplot2::ggplot(pick_values, ggplot2::aes(x = overall_war, y = pick_value)) +
   geom_line() +
   labs(
     x = "Overall Clean",
@@ -434,8 +431,6 @@ pick_values_overall <- tibble(
     pick_values,
     by = c("overall_clean" = "overall_war")
   ) %>% 
-  dplyr::select(-pick_value) %>% 
-  dplyr::rename(pick_value = pick_value_norm) %>% 
   dplyr::mutate(
     round = ceiling(overall / 36),
   ) %>% 
@@ -482,8 +477,9 @@ trade_values <- player_values %>%
   dplyr::bind_rows(
     pick_values_overall %>% 
       dplyr::select(time, pick_value) %>% 
-      dplyr::distinct() %>% 
-      dplyr::rename(asset = time, value = pick_value)
+      dplyr::group_by(time) %>% 
+      dplyr::summarise(value = mean(pick_value), .groups = "drop") %>% 
+      dplyr::rename(asset = time)
   )
 
 readr::write_csv(trade_values, "../data/trade-calculator/trade-values.csv")
