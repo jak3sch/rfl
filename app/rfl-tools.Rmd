@@ -40,6 +40,7 @@ library(gtExtras)
 library(svglite)
 library(webshot2)
 library(emoji)
+library(ggridges)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
@@ -801,7 +802,6 @@ renderPlot({
   ggplot2::ggplot(ggplot2::aes(x = round, y = season, alpha = count)) +
     ggplot2::facet_wrap(~position, ncol = 4) +
     ggplot2::geom_tile(fill = var.colorYellow) +
-    ggplot2::scale_y_reverse(breaks = c(2017:max(rfl_drafts()$season))) +
     ggplot2::labs(
       x = "Runde",
       y = ""
@@ -810,7 +810,28 @@ renderPlot({
     ggplot2::theme(
         legend.position = "none"
       )
-}, height = 1200)
-  
+}, height = 1000)
+```
+
+### Positionen nach Pick
+
+```{r fig.height=12}
+renderPlot({
+  rfl_drafts() %>% 
+    ggplot2::ggplot(ggplot2::aes(x = overall, y = position)) +
+    ggplot2::geom_vline(xintercept = 37, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 73, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 109, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 145, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 181, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 216, color = var.colorAccent) +
+    ggridges::geom_density_ridges(fill = var.colorYellow) +
+    ggplot2::scale_x_continuous(limits = c(0, 252)) +
+    ggplot2::labs(
+      x = "Overall Pick",
+      y = ""
+    ) +
+    plotDefaults
+}, height = 1000)
 ```
 
