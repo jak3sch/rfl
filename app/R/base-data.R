@@ -1,5 +1,5 @@
 # league data ----
-league <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=league&L=63018&APIKEY=&JSON=1")) %>%
+league <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=league&L=63018&APIKEY=&JSON=1")) %>%
   purrr::pluck("league")
 
 ## franchise data ----
@@ -43,7 +43,7 @@ starter <- purrr::map_df(2016:var.season, function(x) {
 })
 
 ## roster data ----
-roster <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1")) %>%
+roster <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1")) %>%
   purrr::pluck("rosters", "franchise") %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
@@ -56,7 +56,6 @@ roster <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.s
       select(player_id, player_name, pos),
     by = "player_id"
   )
-
 
 # war data ----
 war <- purrr::map_df(2016:var.season, function(x) {
