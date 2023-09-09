@@ -644,14 +644,14 @@ DT::renderDataTable({
 
 # Trade Calculator (Beta) {data-navmenu="Trades"}
 
-```{r inputs-trade-calculator, message=FALSE, warning=FALSE, include=FALSE}
+```{r inputs-trade-calculator, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 source("R/trades/trade-calculator.R")
 ```
 
 ## Main
 ### Team 1
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 selectizeInput(
   "tradeCalculatorTeam1",
   "Wähle Assets",
@@ -682,7 +682,7 @@ gt::render_gt({
 
 ### Team 2
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 selectizeInput(
   "tradeCalculatorTeam2",
   "Wähle Assets",

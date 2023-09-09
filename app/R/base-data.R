@@ -35,7 +35,7 @@ franchises <- league %>%
   )
 
 ## starter data ----
-starter <- purrr::map_df(2016:var.season, function(x) {
+starter <- purrr::map_df(2016:2022, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"),
     col_types = "iiccdcccni"
@@ -58,7 +58,7 @@ roster <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=rosters&L=630
   )
 
 # war data ----
-war <- purrr::map_df(2016:var.season, function(x) {
+war <- purrr::map_df(2016:2022, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"),
     col_types = "idccdd"
