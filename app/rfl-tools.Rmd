@@ -40,11 +40,12 @@ library(gtExtras)
 library(svglite)
 library(webshot2)
 library(emoji)
+library(ggridges)
 ```
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
 var.mflLeagueID <- 63018
-var.season <- 2022
+var.season <- 2023
 var.mflApiBase <- "https://www45.myfantasyleague.com/2023/"
 
 var.colorBlue <- "#00183C"
@@ -731,6 +732,7 @@ renderPlot({
   ggplot2::ggplot(ggplot2::aes(x = round, y = position, alpha = count)) +
     ggplot2::facet_wrap(~season, ncol = 4) +
     ggplot2::geom_tile(fill = var.colorYellow) +
+    ggplot2::geom_text(aes(label = count), color = var.colorAccent) +
     ggplot2::labs(
       x = "Runde",
       y = ""
@@ -740,6 +742,27 @@ renderPlot({
         legend.position = "none"
       )
 }, height = 1000)
-  
+```
+
+### Positionen nach Pick
+
+```{r fig.height=12}
+renderPlot({
+  rfl_drafts() %>% 
+    ggplot2::ggplot(ggplot2::aes(x = overall, y = position)) +
+    ggplot2::geom_vline(xintercept = 37, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 73, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 109, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 145, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 181, color = var.colorAccent) +
+    ggplot2::geom_vline(xintercept = 216, color = var.colorAccent) +
+    ggridges::geom_density_ridges(fill = var.colorYellow) +
+    ggplot2::scale_x_continuous(limits = c(0, 252)) +
+    ggplot2::labs(
+      x = "Overall Pick",
+      y = ""
+    ) +
+    plotDefaults
+}, height = 1000)
 ```
 
