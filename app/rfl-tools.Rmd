@@ -46,7 +46,7 @@ library(ggridges)
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
 var.mflLeagueID <- 63018
 var.season <- 2023
-var.mflApiBase <- "https://www45.myfantasyleague.com/2023/"
+var.mflApiBase <- paste0("https://www45.myfantasyleague.com/", var.season)
 
 var.colorBlue <- "#00183C"
 var.colorRed <- "#D03324"
@@ -59,7 +59,7 @@ var.fontHeadline <- "Open Sans Semibold"
 mflConnection <- ffscrapr::mfl_connect(season = var.season, league_id = var.mflLeagueID)
 
 ## player data ----
-players <- jsonlite::read_json(paste0(var.mflApiBase, "export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")) %>% 
+players <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")) %>% 
   purrr::pluck("players", "player") %>% 
   dplyr::tibble() %>% 
   tidyr::unnest_wider(1) %>% 
@@ -641,10 +641,80 @@ DT::renderDataTable({
   )
 })
 ```
- 
-# Trade Bait {data-navmenu="Spieler"}
+
+# Trade Calculator (Beta) {data-navmenu="Trades"}
+
+```{r inputs-trade-calculator, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+source("R/trades/trade-calculator.R")
+```
+
+## Main
+### Team 1
+
+```{r eval=FALSE, include=FALSE}
+selectizeInput(
+  "tradeCalculatorTeam1",
+  "Wähle Assets",
+  choices = trade_values$asset,
+  multiple= TRUE,
+  options = list(
+    placeholder = "Assets wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+gt::render_gt({
+  trade_values %>% 
+    dplyr::filter(
+      asset %in% c(input$tradeCalculatorTeam1)
+    ) %>% 
+    gt::gt() %>% 
+    gt::grand_summary_rows(
+      columns = value,
+      fns = list(
+        sum ~ sum(.)
+      ),
+      fmt = ~ fmt_number(., use_seps = FALSE)
+    )
+})
+```
+
+
+### Team 2
+
+```{r eval=FALSE, include=FALSE}
+selectizeInput(
+  "tradeCalculatorTeam2",
+  "Wähle Assets",
+  choices = trade_values$asset,
+  multiple= TRUE,
+  options = list(
+    placeholder = "Assets wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+gt::render_gt({
+  trade_values %>% 
+    dplyr::filter(
+      asset %in% c(input$tradeCalculatorTeam2)
+    ) %>% 
+    gt::gt() %>% 
+    gt::grand_summary_rows(
+      columns = value,
+      fns = list(
+        sum ~ sum(.)
+      ),
+      fmt = ~ fmt_number(., use_seps = FALSE)
+    )
+})
+```
+
+
+
+# Trade Bait {data-navmenu="Trades"}
 ### Trade Bait
-```{r trade-bait, echo=FALSE, message=FALSE, warning=FALSE}
+```{r trade-bait, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 source("R/trade-bait/trade-bait.R", local = T)
 ```
 
@@ -701,7 +771,7 @@ Column {.tabset}
 -------------------------------------
 ### Spieler nach Runde
 
-```{r fig.height=12}
+```{r fig.height=14}
 renderPlot({
   rfl_drafts() %>% 
     ggplot2::ggplot(ggplot2::aes(y = pos_rank, color = as.character(season))) +
@@ -719,7 +789,7 @@ renderPlot({
       ggplot2::theme(
         legend.position = "none"
       )
-}, height = 1000)
+}, height = 1200)
 ```
 
 ### Positionen nach Runde
@@ -729,10 +799,9 @@ renderPlot({
   rfl_drafts() %>% 
   dplyr::group_by(season, round, position) %>% 
   dplyr::summarise(count = n(), .groups = "drop") %>% 
-  ggplot2::ggplot(ggplot2::aes(x = round, y = position, alpha = count)) +
-    ggplot2::facet_wrap(~season, ncol = 4) +
+  ggplot2::ggplot(ggplot2::aes(x = round, y = season, alpha = count)) +
+    ggplot2::facet_wrap(~position, ncol = 4) +
     ggplot2::geom_tile(fill = var.colorYellow) +
-    ggplot2::geom_text(aes(label = count), color = var.colorAccent) +
     ggplot2::labs(
       x = "Runde",
       y = ""
