@@ -10,3 +10,6 @@
 [submodule "rflfastR"]
 	path = rflfastR
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/rflfastr.git
+[submodule "true-standing"]
+	path = true-standing
+	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/true-standing.git
