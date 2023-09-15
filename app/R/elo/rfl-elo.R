@@ -1,4 +1,4 @@
-elo <- purrr::map_df(2016:2022, function(x) {
+elo <- purrr::map_df(2016:var.season, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-{x}.csv"),
     col_types = "ciiccnnnnnnn"
@@ -46,7 +46,7 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
   dplyr::select(-spread, -isHome, -result) %>%
   tidyr::unnest_wider(2) %>%
   dplyr::rename(opponent_id = id) %>%
-  dplyr::select(franchise_id, opponent_id) %>%
+  dplyr::select(franchise_id, opponent_id) %>% 
   dplyr::left_join(
     elo %>%
       dplyr::filter(season == max(season)) %>%
@@ -54,8 +54,7 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
       dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(franchise_elo = franchise_elo_pregame),
     by = "franchise_id",
     multiple = "all",
-    relationship = "many-to-many"
-  ) %>%
+  ) %>% 
   dplyr::left_join(
     elo %>%
       dplyr::filter(season == max(season)) %>%
@@ -63,7 +62,6 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
       dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(opponent_elo = franchise_elo_pregame),
     by = c("opponent_id" = "franchise_id"),
     multiple = "all",
-    relationship = "many-to-many"
   ) %>%
   dplyr::distinct() %>%
   dplyr::mutate(win_pct = 1 / (10^(-(franchise_elo - opponent_elo) / 400 ) + 1)) %>%

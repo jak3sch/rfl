@@ -1,11 +1,14 @@
-true_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/rfl-true-standing.csv", colClasses = c("franchise_id" = "character")) %>%
+true_standing <- read.csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/true-standing/true-standing-", var.season, ".csv"), colClasses = c("franchise_id" = "character")) %>%
   dplyr::left_join(
     franchises %>%
       dplyr::select(franchise_id, franchise_name, division_name),
     by = "franchise_id"
   )
 
-current_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/app/data/rfl-elo.csv", colClasses=c("franchise_id" = "character", "opponent_id" = "character", "franchise_elo_postgame" = "numeric", "franchise_score" = "numeric")) %>%
+current_standing <- readr::read_csv(
+  paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-", var.season, ".csv"),
+  col_types = "ciiccnnnnnnn"
+  ) %>%
   dplyr::filter(season == max(season)) %>%
   dplyr::mutate(
     winloss = ifelse(score_differential > 0, 1, 0)
@@ -22,7 +25,7 @@ current_standing <- read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main
     .groups = "drop"
   ) %>%
   dplyr::left_join(
-    read.csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/rfl-true-standing.csv", colClasses=c("franchise_id" = "character")) %>%
+    true_standing %>% 
       dplyr::group_by(franchise_id) %>%
       dplyr::arrange(week) %>%
       dplyr::summarise(
