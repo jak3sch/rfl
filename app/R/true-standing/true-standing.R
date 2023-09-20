@@ -6,8 +6,8 @@ true_standing <- read.csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/
   )
 
 current_standing <- readr::read_csv(
-  paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-", var.season, ".csv"),
-  col_types = "ciiccnnnnnnn"
+    paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-", var.season, ".csv"),
+    col_types = "ciiccnnnnnnn"
   ) %>%
   dplyr::filter(season == max(season)) %>%
   dplyr::mutate(
@@ -25,12 +25,12 @@ current_standing <- readr::read_csv(
     .groups = "drop"
   ) %>%
   dplyr::left_join(
-    true_standing %>% 
+    true_standing %>%
       dplyr::group_by(franchise_id) %>%
-      dplyr::arrange(week) %>%
       dplyr::summarise(
         pp_dist = list(unique(pp / 2) / week),
-        dplyr::across(c(win, pf, pp, dplyr::ends_with("rank")), ~ dplyr::last(.x))
+        win = sum(win, na.rm = TRUE),
+        dplyr::across(c(pf, pp, dplyr::ends_with("rank")), ~ dplyr::last(.x))
       ),
     by = "franchise_id"
   ) %>%
@@ -75,4 +75,4 @@ current_standing <- readr::read_csv(
   ) %>%
   dplyr::ungroup() %>%
   dplyr::group_by(conference_name) %>%
-  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, subline, seed, bowl)
+  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, subline, seed, bowl, conference_name)

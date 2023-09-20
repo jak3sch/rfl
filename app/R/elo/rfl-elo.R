@@ -46,7 +46,7 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
   dplyr::select(-spread, -isHome, -result) %>%
   tidyr::unnest_wider(2) %>%
   dplyr::rename(opponent_id = id) %>%
-  dplyr::select(franchise_id, opponent_id) %>% 
+  dplyr::select(franchise_id, opponent_id) %>%
   dplyr::left_join(
     elo %>%
       dplyr::filter(season == max(season)) %>%
@@ -54,7 +54,7 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
       dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(franchise_elo = franchise_elo_pregame),
     by = "franchise_id",
     multiple = "all",
-  ) %>% 
+  ) %>%
   dplyr::left_join(
     elo %>%
       dplyr::filter(season == max(season)) %>%
