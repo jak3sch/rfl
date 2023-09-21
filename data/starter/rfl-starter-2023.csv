@@ -126,7 +126,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0019,nonstarter,13632,"Lazard, Allen",WR,NYJ,6.60,1
 2023,1,0019,nonstarter,15366,"Holland, Jevon",S,MIA,24.00,1
 2023,1,0019,nonstarter,11225,"Patterson, Cordarrelle",RB,ATL,NA,0
-2023,1,0019,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,1,0019,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,1,0019,nonstarter,15822,"Lloyd, Devin",LB,JAC,7.00,1
 2023,1,0019,nonstarter,12831,"Roberts, Elandon",LB,PIT,14.00,1
 2023,1,0019,nonstarter,13172,"Brown, Noah",WR,HOU,4.90,0
@@ -147,7 +147,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0019,nonstarter,16287,"Tucker, Tre",WR,LVR,NA,0
 2023,1,0019,nonstarter,16281,"Brown, Ji'Ayir",S,SFO,0.00,0
 2023,1,0022,starter,13116,"Mahomes, Patrick",QB,KCC,20.54,1
-2023,1,0022,starter,14799,"Akers, Cam",RB,LAR,8.90,0
+2023,1,0022,starter,14799,"Akers, Cam",RB,MIN,8.90,0
 2023,1,0022,starter,13131,"Mixon, Joe",RB,CIN,10.30,1
 2023,1,0022,starter,14071,"Montgomery, David",RB,DET,13.40,1
 2023,1,0022,starter,12186,"Diggs, Stefon",WR,BUF,26.20,1
@@ -222,7 +222,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0034,nonstarter,15288,"Moore, Elijah",WR,CLE,9.20,0
 2023,1,0034,nonstarter,12720,"Kearse, Jayron",S,DAL,9.00,0
 2023,1,0034,nonstarter,14889,"Murray, Kenneth",LB,LAC,5.00,0
-2023,1,0034,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,1,0034,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,1,0034,nonstarter,11647,"Thomas, Logan",TE,WAS,8.30,1
 2023,1,0034,nonstarter,15345,"Paye, Kwity",DE,IND,11.00,0
 2023,1,0034,nonstarter,15381,"Grant, Richie",S,ATL,12.00,0
@@ -756,7 +756,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0003,nonstarter,15833,"Gardner, Ahmad",CB,NYJ,5.00,0
 2023,1,0003,nonstarter,15826,"Clark, Damone",LB,DAL,7.00,0
 2023,1,0003,nonstarter,14807,"Kelley, Joshua",RB,LAC,15.10,1
-2023,1,0003,nonstarter,15727,"Knight, Zonovan",RB,FA,NA,0
+2023,1,0003,nonstarter,15727,"Knight, Zonovan",RB,DET,NA,0
 2023,1,0003,nonstarter,14186,"Rapp, Taylor",S,BUF,6.00,0
 2023,1,0003,nonstarter,13608,"Penny, Rashaad",RB,PHI,NA,0
 2023,1,0003,nonstarter,14974,"Mooney, Darnell",WR,CHI,15.30,1
@@ -1015,7 +1015,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0026,nonstarter,16287,"Tucker, Tre",WR,LVR,NA,0
 2023,1,0026,nonstarter,16269,"Strange, Brenton",TE,JAC,0.00,0
 2023,1,0006,starter,13116,"Mahomes, Patrick",QB,KCC,20.54,1
-2023,1,0006,starter,14799,"Akers, Cam",RB,LAR,8.90,1
+2023,1,0006,starter,14799,"Akers, Cam",RB,MIN,8.90,1
 2023,1,0006,starter,15271,"Herbert, Khalil",RB,CHI,11.40,1
 2023,1,0006,starter,12175,"Cooper, Amari",WR,CLE,6.70,0
 2023,1,0006,starter,15751,"London, Drake",WR,ATL,0.00,0
@@ -1081,7 +1081,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0016,starter,14956,"Sneed, L'Jarius",CB,KCC,9.00,1
 2023,1,0016,starter,11313,"Mathieu, Tyrann",S,NOS,8.00,1
 2023,1,0016,starter,14518,"Thompson, Jalen",S,ARI,8.00,1
-2023,1,0016,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,1,0016,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,1,0016,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,2.95,0
 2023,1,0016,nonstarter,15308,"Marshall, Terrace",WR,CAR,4.30,0
 2023,1,0016,nonstarter,14782,"Love, Jordan",QB,GBP,23.00,1
@@ -1403,7 +1403,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0025,nonstarter,15681,"Elliss, Christian",LB,PHI,7.00,0
 2023,1,0025,nonstarter,16423,"Brownlee, Jason",WR,NYJ,NA,0
 2023,1,0017,starter,15238,"Fields, Justin",QB,CHI,16.54,0
-2023,1,0017,starter,14799,"Akers, Cam",RB,LAR,8.90,1
+2023,1,0017,starter,14799,"Akers, Cam",RB,MIN,8.90,1
 2023,1,0017,starter,15965,"Chestnut, Julius",RB,TEN,0.00,1
 2023,1,0017,starter,15293,"Bateman, Rashod",WR,BAL,6.50,0
 2023,1,0017,starter,14104,"Brown, A.J.",WR,PHI,14.90,1
@@ -1578,7 +1578,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0029,nonstarter,12225,"Williams, Leonard",DT,NYG,3.00,0
 2023,1,0029,nonstarter,15839,"Cross, Nick",S,IND,0.00,0
 2023,1,0029,nonstarter,15109,"Westbrook-Ikhine, Nick",WR,TEN,9.80,0
-2023,1,0029,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,1,0029,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,1,0029,nonstarter,15756,"Williams, Jameson",WR,DET,NA,0
 2023,1,0029,nonstarter,15777,"Austin III, Calvin",WR,PIT,9.80,0
 2023,1,0029,nonstarter,15759,"Metchie, John",WR,HOU,NA,0
@@ -1913,7 +1913,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0019,nonstarter,13632,"Lazard, Allen",WR,NYJ,6.60,1
 2023,1,0019,nonstarter,15366,"Holland, Jevon",S,MIA,24.00,1
 2023,1,0019,nonstarter,11225,"Patterson, Cordarrelle",RB,ATL,NA,0
-2023,1,0019,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,1,0019,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,1,0019,nonstarter,15822,"Lloyd, Devin",LB,JAC,7.00,1
 2023,1,0019,nonstarter,12831,"Roberts, Elandon",LB,PIT,14.00,1
 2023,1,0019,nonstarter,13172,"Brown, Noah",WR,HOU,4.90,0
@@ -1983,7 +1983,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0018,nonstarter,15428,"Sherwood, Jamien",LB,NYJ,4.00,0
 2023,1,0018,nonstarter,16342,"Douglas, Demario",WR,NEP,8.00,0
 2023,1,0022,starter,13116,"Mahomes, Patrick",QB,KCC,20.54,1
-2023,1,0022,starter,14799,"Akers, Cam",RB,LAR,8.90,0
+2023,1,0022,starter,14799,"Akers, Cam",RB,MIN,8.90,0
 2023,1,0022,starter,13131,"Mixon, Joe",RB,CIN,10.30,1
 2023,1,0022,starter,14071,"Montgomery, David",RB,DET,13.40,1
 2023,1,0022,starter,12186,"Diggs, Stefon",WR,BUF,26.20,1
@@ -2101,7 +2101,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0034,nonstarter,15288,"Moore, Elijah",WR,CLE,9.20,0
 2023,1,0034,nonstarter,12720,"Kearse, Jayron",S,DAL,9.00,0
 2023,1,0034,nonstarter,14889,"Murray, Kenneth",LB,LAC,5.00,0
-2023,1,0034,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,1,0034,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,1,0034,nonstarter,11647,"Thomas, Logan",TE,WAS,8.30,1
 2023,1,0034,nonstarter,15345,"Paye, Kwity",DE,IND,11.00,0
 2023,1,0034,nonstarter,15381,"Grant, Richie",S,ATL,12.00,0
@@ -2353,7 +2353,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0003,nonstarter,15833,"Gardner, Ahmad",CB,NYJ,5.00,0
 2023,1,0003,nonstarter,15826,"Clark, Damone",LB,DAL,7.00,0
 2023,1,0003,nonstarter,14807,"Kelley, Joshua",RB,LAC,15.10,1
-2023,1,0003,nonstarter,15727,"Knight, Zonovan",RB,FA,NA,0
+2023,1,0003,nonstarter,15727,"Knight, Zonovan",RB,DET,NA,0
 2023,1,0003,nonstarter,14186,"Rapp, Taylor",S,BUF,6.00,0
 2023,1,0003,nonstarter,13608,"Penny, Rashaad",RB,PHI,NA,0
 2023,1,0003,nonstarter,14974,"Mooney, Darnell",WR,CHI,15.30,1
@@ -2806,7 +2806,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0025,nonstarter,15681,"Elliss, Christian",LB,PHI,7.00,0
 2023,1,0025,nonstarter,16423,"Brownlee, Jason",WR,NYJ,NA,0
 2023,1,0006,starter,13116,"Mahomes, Patrick",QB,KCC,20.54,1
-2023,1,0006,starter,14799,"Akers, Cam",RB,LAR,8.90,1
+2023,1,0006,starter,14799,"Akers, Cam",RB,MIN,8.90,1
 2023,1,0006,starter,15271,"Herbert, Khalil",RB,CHI,11.40,1
 2023,1,0006,starter,12175,"Cooper, Amari",WR,CLE,6.70,0
 2023,1,0006,starter,15751,"London, Drake",WR,ATL,0.00,0
@@ -2855,7 +2855,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0006,nonstarter,16237,"Pappoe, Owen",LB,ARI,NA,0
 2023,1,0006,nonstarter,16192,"Washington, Parker",WR,JAC,NA,0
 2023,1,0017,starter,15238,"Fields, Justin",QB,CHI,16.54,0
-2023,1,0017,starter,14799,"Akers, Cam",RB,LAR,8.90,1
+2023,1,0017,starter,14799,"Akers, Cam",RB,MIN,8.90,1
 2023,1,0017,starter,15965,"Chestnut, Julius",RB,TEN,0.00,1
 2023,1,0017,starter,15293,"Bateman, Rashod",WR,BAL,6.50,0
 2023,1,0017,starter,14104,"Brown, A.J.",WR,PHI,14.90,1
@@ -2921,7 +2921,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0016,starter,14956,"Sneed, L'Jarius",CB,KCC,9.00,1
 2023,1,0016,starter,11313,"Mathieu, Tyrann",S,NOS,8.00,1
 2023,1,0016,starter,14518,"Thompson, Jalen",S,ARI,8.00,1
-2023,1,0016,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,1,0016,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,1,0016,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,2.95,0
 2023,1,0016,nonstarter,15308,"Marshall, Terrace",WR,CAR,4.30,0
 2023,1,0016,nonstarter,14782,"Love, Jordan",QB,GBP,23.00,1
@@ -3176,7 +3176,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,1,0029,nonstarter,12225,"Williams, Leonard",DT,NYG,3.00,0
 2023,1,0029,nonstarter,15839,"Cross, Nick",S,IND,0.00,0
 2023,1,0029,nonstarter,15109,"Westbrook-Ikhine, Nick",WR,TEN,9.80,0
-2023,1,0029,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,1,0029,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,1,0029,nonstarter,15756,"Williams, Jameson",WR,DET,NA,0
 2023,1,0029,nonstarter,15777,"Austin III, Calvin",WR,PIT,9.80,0
 2023,1,0029,nonstarter,15759,"Metchie, John",WR,HOU,NA,0
@@ -3411,7 +3411,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0024,nonstarter,13378,"Breida, Matt",RB,NYG,0.50,0
 2023,2,0024,nonstarter,13299,"Kittle, George",TE,SFO,6.00,0
 2023,2,0024,nonstarter,14079,"Sanders, Miles",RB,CAR,7.70,0
-2023,2,0024,nonstarter,11721,"Mack, Khalil",DE,LAC,10.00,0
+2023,2,0024,nonstarter,11721,"Mack, Khalil",DE,LAC,11.00,0
 2023,2,0024,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,1.70,0
 2023,2,0024,nonstarter,15808,"Karlaftis, George",DE,KCC,11.00,0
 2023,2,0024,nonstarter,14977,"Osborn, K.J.",WR,MIN,12.40,1
@@ -3454,22 +3454,22 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0019,starter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0019,nonstarter,12611,"Goff, Jared",QB,DET,23.92,0
 2023,2,0019,nonstarter,11938,"Thielen, Adam",WR,CAR,20.40,1
-2023,2,0019,nonstarter,11721,"Mack, Khalil",DE,LAC,10.00,1
+2023,2,0019,nonstarter,11721,"Mack, Khalil",DE,LAC,11.00,1
 2023,2,0019,nonstarter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0019,nonstarter,12676,"Henry, Hunter",TE,NEP,17.20,1
 2023,2,0019,nonstarter,13672,"Gesicki, Mike",TE,NEP,8.30,0
 2023,2,0019,nonstarter,13632,"Lazard, Allen",WR,NYJ,4.30,0
 2023,2,0019,nonstarter,11225,"Patterson, Cordarrelle",RB,ATL,NA,0
-2023,2,0019,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0019,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0019,nonstarter,13704,"Nwosu, Uchenna",DE,SEA,7.00,0
 2023,2,0019,nonstarter,13134,"Foreman, D'Onta",RB,CHI,NA,0
 2023,2,0019,nonstarter,14858,"Jefferson, Van",WR,LAR,1.90,0
-2023,2,0019,nonstarter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0019,nonstarter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0019,nonstarter,12948,"Okwara, Romeo",DE,DET,1.00,0
 2023,2,0019,nonstarter,14067,"Minshew, Gardner",QB,IND,11.14,0
 2023,2,0019,nonstarter,13726,"Edmonds, Chase",RB,TBB,1.20,0
 2023,2,0019,nonstarter,13700,"Landry, Harold",DE,TEN,8.00,0
-2023,2,0019,nonstarter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0019,nonstarter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0019,nonstarter,15720,"Haskins, Hassan",RB,TEN,NA,0
 2023,2,0019,nonstarter,15758,"Bell, David",WR,CLE,5.70,0
 2023,2,0019,nonstarter,16187,"Downs, Josh",WR,IND,7.70,0
@@ -3501,13 +3501,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0023,starter,14179,"Love, Julian",S,SEA,26.00,1
 2023,2,0023,nonstarter,10816,"Davis, Demario",LB,NOS,15.00,1
 2023,2,0023,nonstarter,14113,"Hardman, Mecole",WR,NYJ,1.60,0
-2023,2,0023,nonstarter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0023,nonstarter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0023,nonstarter,13717,"Reid, Justin",S,KCC,11.00,0
 2023,2,0023,nonstarter,12302,"Wilson, Damien",LB,FA,NA,0
 2023,2,0023,nonstarter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0023,nonstarter,13675,"Conklin, Tyler",TE,NYJ,10.00,0
 2023,2,0023,nonstarter,13133,"Perine, Samaje",RB,DEN,5.40,0
-2023,2,0023,nonstarter,13470,"Moore, Kenny",CB,IND,12.00,0
+2023,2,0023,nonstarter,13470,"Moore, Kenny",CB,IND,11.00,0
 2023,2,0023,nonstarter,13157,"Samuel, Curtis",WR,WAS,6.20,0
 2023,2,0023,nonstarter,14833,"Jeudy, Jerry",WR,DEN,5.50,0
 2023,2,0023,nonstarter,13688,"Davenport, Marcus",DE,MIN,0.00,0
@@ -3549,13 +3549,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0034,starter,13737,"Bates, Jessie",S,ATL,6.00,0
 2023,2,0034,starter,13252,"Maye, Marcus",S,NOS,17.00,1
 2023,2,0034,nonstarter,13113,"Watson, Deshaun",QB,CLE,14.60,0
-2023,2,0034,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0034,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0034,nonstarter,13672,"Gesicki, Mike",TE,NEP,8.30,0
 2023,2,0034,nonstarter,11761,"McKinnon, Jerick",RB,KCC,5.20,0
 2023,2,0034,nonstarter,15288,"Moore, Elijah",WR,CLE,7.10,0
 2023,2,0034,nonstarter,12720,"Kearse, Jayron",S,DAL,10.00,0
 2023,2,0034,nonstarter,14889,"Murray, Kenneth",LB,LAC,19.00,1
-2023,2,0034,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0034,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0034,nonstarter,11647,"Thomas, Logan",TE,WAS,10.20,1
 2023,2,0034,nonstarter,15381,"Grant, Richie",S,ATL,7.00,0
 2023,2,0034,nonstarter,12301,"Smith, Za'Darius",DE,CLE,2.00,0
@@ -3563,7 +3563,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0034,nonstarter,14157,"Williams, Quinnen",DT,NYJ,11.00,0
 2023,2,0034,nonstarter,14108,"Dortch, Greg",WR,ARI,0.57,0
 2023,2,0034,nonstarter,15734,"Ingram, Keaontay",RB,ARI,0.60,0
-2023,2,0034,nonstarter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0034,nonstarter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0034,nonstarter,15789,"Watson, Christian",WR,GBP,NA,0
 2023,2,0034,nonstarter,15713,"Ford, Jerome",RB,CLE,24.10,1
 2023,2,0034,nonstarter,12948,"Okwara, Romeo",DE,DET,1.00,0
@@ -3580,7 +3580,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0034,nonstarter,13726,"Edmonds, Chase",RB,TBB,1.20,0
 2023,2,0034,nonstarter,15239,"Wilson, Zach",QB,NYJ,11.40,0
 2023,2,0022,starter,13116,"Mahomes, Patrick",QB,KCC,22.20,1
-2023,2,0022,starter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0022,starter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0022,starter,13131,"Mixon, Joe",RB,CIN,13.50,1
 2023,2,0022,starter,14071,"Montgomery, David",RB,DET,13.40,1
 2023,2,0022,starter,15301,"Atwell, Tutu",WR,LAR,15.20,1
@@ -3589,12 +3589,12 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0022,starter,12263,"Waller, Darren",TE,NYG,13.60,1
 2023,2,0022,starter,14983,"Bass, Tyler",PK,BUF,7.90,1
 2023,2,0022,starter,13208,"Allen, Jonathan",DT,WAS,4.00,0
-2023,2,0022,starter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0022,starter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0022,starter,15350,"Parsons, Micah",DE,DAL,24.00,1
 2023,2,0022,starter,13706,"Baker, Jerome",LB,MIA,9.00,1
 2023,2,0022,starter,14260,"Holcomb, Cole",LB,PIT,14.00,1
 2023,2,0022,starter,13952,"Luvu, Frankie",LB,CAR,21.00,1
-2023,2,0022,starter,13696,"Smith, Roquan",LB,BAL,8.00,0
+2023,2,0022,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
 2023,2,0022,starter,13252,"Maye, Marcus",S,NOS,17.00,1
 2023,2,0022,starter,14908,"McKinney, Xavier",S,NYG,15.00,1
 2023,2,0022,nonstarter,13245,"Reddick, Haason",DE,PHI,0.00,0
@@ -3737,14 +3737,14 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0002,starter,10976,"Tucker, Justin",PK,BAL,11.15,1
 2023,2,0002,starter,15352,"Collins, Zaven",DE,ARI,7.00,0
 2023,2,0002,starter,14225,"Crosby, Maxx",DE,LVR,13.00,1
-2023,2,0002,starter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0002,starter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0002,starter,14590,"Al-Shaair, Azeez",LB,TEN,13.00,1
 2023,2,0002,starter,15858,"Andersen, Troy",LB,ATL,NA,0
 2023,2,0002,starter,14217,"Barton, Cody",LB,WAS,17.00,1
 2023,2,0002,starter,13952,"Luvu, Frankie",LB,CAR,21.00,1
 2023,2,0002,starter,15001,"Curl, Kamren",S,WAS,13.00,1
 2023,2,0002,starter,12349,"Diggs, Quandre",S,SEA,8.00,1
-2023,2,0002,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0002,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0002,nonstarter,13325,"Woods, Xavier",S,CAR,16.00,1
 2023,2,0002,nonstarter,12088,"Phillips, Adrian",S,NEP,3.00,0
 2023,2,0002,nonstarter,13284,"Hendrickson, Trey",DE,CIN,3.00,0
@@ -3881,13 +3881,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0027,starter,15329,"Pitts, Kyle",TE,ATL,3.50,0
 2023,2,0027,starter,12437,"Myers, Jason",PK,SEA,5.75,1
 2023,2,0027,starter,15817,"Davis, Jordan",DT,PHI,7.00,0
-2023,2,0027,starter,11721,"Mack, Khalil",DE,LAC,10.00,1
+2023,2,0027,starter,11721,"Mack, Khalil",DE,LAC,11.00,1
 2023,2,0027,starter,14148,"Sweat, Montez",DE,WAS,12.00,1
 2023,2,0027,starter,12779,"Campbell, De'Vondre",LB,GBP,21.00,1
 2023,2,0027,starter,15821,"Dean, Nakobe",LB,PHI,NA,1
 2023,2,0027,starter,15835,"Brisker, Jaquan",S,CHI,8.00,1
 2023,2,0027,starter,13713,"Fitzpatrick, Minkah",S,PIT,15.00,1
-2023,2,0027,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0027,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0027,starter,13325,"Woods, Xavier",S,CAR,16.00,1
 2023,2,0027,nonstarter,13716,"Edmunds, Terrell",S,PHI,14.00,1
 2023,2,0027,nonstarter,13814,"Scott, Boston",RB,PHI,4.00,0
@@ -3928,7 +3928,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0018,starter,14171,"Burns, Brian",DE,CAR,2.00,0
 2023,2,0018,starter,14225,"Crosby, Maxx",DE,LVR,13.00,1
 2023,2,0018,starter,15806,"Thibodeaux, Kayvon",DE,NYG,0.00,0
-2023,2,0018,starter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0018,starter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0018,starter,13307,"Milano, Matt",LB,BUF,13.00,1
 2023,2,0018,starter,14218,"Okereke, Bobby",LB,NYG,13.00,1
 2023,2,0018,starter,13762,"White, Kyzir",LB,ARI,16.00,1
@@ -4021,7 +4021,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0012,starter,10768,"David, Lavonte",LB,TBB,3.00,0
 2023,2,0012,starter,13837,"Franklin, Zaire",LB,IND,21.00,1
 2023,2,0012,starter,15846,"Walker, Quay",LB,GBP,27.00,1
-2023,2,0012,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0012,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0012,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
 2023,2,0012,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0012,starter,13714,"James, Derwin",S,LAC,18.00,1
@@ -4071,7 +4071,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0007,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
 2023,2,0007,starter,13702,"Jewell, Josey",LB,DEN,18.00,1
 2023,2,0007,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
-2023,2,0007,starter,13696,"Smith, Roquan",LB,BAL,8.00,0
+2023,2,0007,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
 2023,2,0007,starter,14179,"Love, Julian",S,SEA,26.00,1
 2023,2,0007,starter,11317,"Poyer, Jordan",S,BUF,5.00,1
 2023,2,0007,nonstarter,13128,"Cook, Dalvin",RB,NYJ,1.20,0
@@ -4121,7 +4121,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0009,starter,12231,"Thompson, Shaq",LB,CAR,5.00,0
 2023,2,0009,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
 2023,2,0009,starter,14982,"Gilman, Alohi",S,LAC,9.00,1
-2023,2,0009,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0009,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0009,starter,13714,"James, Derwin",S,LAC,18.00,1
 2023,2,0009,nonstarter,13793,"Valdes-Scantling, Marquez",WR,KCC,3.30,0
 2023,2,0009,nonstarter,13699,"Evans, Rashaan",LB,FA,NA,0
@@ -4162,13 +4162,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0003,starter,12263,"Waller, Darren",TE,NYG,13.60,1
 2023,2,0003,starter,15368,"McPherson, Evan",PK,CIN,5.70,1
 2023,2,0003,starter,14163,"Simmons, Jeffery",DT,TEN,11.00,1
-2023,2,0003,starter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0003,starter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0003,starter,13775,"Bentley, Ja'Whaun",LB,NEP,9.00,1
 2023,2,0003,starter,15869,"Bernard, Terrel",LB,BUF,15.00,1
 2023,2,0003,starter,12231,"Thompson, Shaq",LB,CAR,5.00,1
 2023,2,0003,starter,14168,"White, Devin",LB,TBB,4.00,0
 2023,2,0003,starter,15380,"Campbell, Tyson",CB,JAC,11.00,1
-2023,2,0003,starter,13470,"Moore, Kenny",CB,IND,12.00,1
+2023,2,0003,starter,13470,"Moore, Kenny",CB,IND,11.00,1
 2023,2,0003,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0003,nonstarter,13236,"Everett, Gerald",TE,LAC,7.70,0
 2023,2,0003,nonstarter,14208,"Johnson, Diontae",WR,PIT,NA,0
@@ -4185,7 +4185,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0003,nonstarter,15758,"Bell, David",WR,CLE,5.70,0
 2023,2,0003,nonstarter,15437,"Forrest, Darrick",S,WAS,5.00,1
 2023,2,0003,nonstarter,15826,"Clark, Damone",LB,DAL,1.00,0
-2023,2,0003,nonstarter,15727,"Knight, Zonovan",RB,FA,NA,0
+2023,2,0003,nonstarter,15727,"Knight, Zonovan",RB,DET,NA,0
 2023,2,0003,nonstarter,14159,"Lawrence, Dexter",DT,NYG,7.00,1
 2023,2,0003,nonstarter,13608,"Penny, Rashaad",RB,PHI,2.40,0
 2023,2,0003,nonstarter,14141,"Smith Jr., Irv",TE,CIN,3.00,0
@@ -4213,9 +4213,9 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0008,starter,15352,"Collins, Zaven",DE,ARI,7.00,0
 2023,2,0008,starter,13684,"Hubbard, Sam",DE,CIN,6.00,0
 2023,2,0008,starter,14268,"Long, David",LB,MIA,15.00,1
-2023,2,0008,starter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0008,starter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0008,starter,15846,"Walker, Quay",LB,GBP,27.00,1
-2023,2,0008,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0008,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0008,starter,13229,"Jackson, Eddie",S,CHI,0.00,0
 2023,2,0008,starter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0008,starter,13760,"Whitehead, Jordan",S,NYJ,16.00,1
@@ -4278,7 +4278,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0015,nonstarter,15385,"Ojulari, Azeez",DE,NYG,NA,0
 2023,2,0015,nonstarter,15368,"McPherson, Evan",PK,CIN,5.70,0
 2023,2,0015,nonstarter,13764,"Johnson, Taron",CB,BUF,6.00,0
-2023,2,0015,nonstarter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0015,nonstarter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0015,nonstarter,13688,"Davenport, Marcus",DE,MIN,0.00,0
 2023,2,0015,nonstarter,13850,"Edwards, Gus",RB,BAL,12.20,0
 2023,2,0015,nonstarter,11228,"Woods, Robert",WR,HOU,13.75,1
@@ -4404,14 +4404,14 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0016,starter,13909,"Maher, Brett",PK,LAR,14.90,1
 2023,2,0016,starter,14147,"Bosa, Nick",DE,SFO,3.00,1
 2023,2,0016,starter,13198,"Garrett, Myles",DE,CLE,2.00,0
-2023,2,0016,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
-2023,2,0016,starter,13696,"Smith, Roquan",LB,BAL,8.00,1
-2023,2,0016,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0016,starter,13733,"Leonard, Shaquille",LB,IND,7.00,1
+2023,2,0016,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
+2023,2,0016,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0016,starter,13281,"Douglas, Rasul",CB,GBP,16.00,1
 2023,2,0016,starter,13774,"Reed, D.J.",CB,NYJ,8.00,1
 2023,2,0016,starter,14956,"Sneed, L'Jarius",CB,KCC,20.00,1
 2023,2,0016,starter,14518,"Thompson, Jalen",S,ARI,18.00,1
-2023,2,0016,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,2,0016,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,2,0016,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,1.70,0
 2023,2,0016,nonstarter,15308,"Marshall, Terrace",WR,CAR,0.00,0
 2023,2,0016,nonstarter,14782,"Love, Jordan",QB,GBP,20.34,0
@@ -4474,12 +4474,12 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0006,nonstarter,14921,"Dugger, Kyle",S,NEP,7.00,0
 2023,2,0006,nonstarter,15452,"Hufanga, Talanoa",S,SFO,7.00,0
 2023,2,0006,nonstarter,14889,"Murray, Kenneth",LB,LAC,19.00,1
-2023,2,0006,nonstarter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0006,nonstarter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0006,nonstarter,15428,"Sherwood, Jamien",LB,NYJ,10.00,0
 2023,2,0006,nonstarter,14925,"Uche, Josh",DE,NEP,0.00,0
 2023,2,0006,nonstarter,15808,"Karlaftis, George",DE,KCC,11.00,1
 2023,2,0006,nonstarter,15829,"Asamoah, Brian",LB,MIN,3.00,0
-2023,2,0006,nonstarter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0006,nonstarter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0006,nonstarter,13253,"Williams, Marcus",S,BAL,NA,0
 2023,2,0006,nonstarter,11678,"Robinson, Allen",WR,PIT,3.20,0
 2023,2,0006,nonstarter,14893,"Baun, Zack",LB,NOS,0.00,0
@@ -4503,10 +4503,10 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0031,starter,15345,"Paye, Kwity",DE,IND,15.00,1
 2023,2,0031,starter,15346,"Rousseau, Gregory",DE,BUF,7.00,0
 2023,2,0031,starter,13214,"Watt, T.J.",DE,PIT,21.00,1
-2023,2,0031,starter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0031,starter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0031,starter,13743,"Warner, Fred",LB,SFO,26.00,1
 2023,2,0031,starter,14224,"Gardner-Johnson, Chauncey",CB,DET,15.00,1
-2023,2,0031,starter,13470,"Moore, Kenny",CB,IND,12.00,1
+2023,2,0031,starter,13470,"Moore, Kenny",CB,IND,11.00,1
 2023,2,0031,starter,16244,"Branch, Brian",S,DET,7.00,0
 2023,2,0031,nonstarter,13132,"Kamara, Alvin",RB,NOS,NA,0
 2023,2,0031,nonstarter,12181,"Agholor, Nelson",WR,BAL,17.30,1
@@ -4552,7 +4552,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0021,starter,10292,"Jordan, Cameron",DE,NOS,5.00,0
 2023,2,0021,starter,15355,"Bolton, Nick",LB,KCC,13.00,1
 2023,2,0021,starter,12287,"Hicks, Jordan",LB,MIN,19.00,1
-2023,2,0021,starter,12238,"Perryman, Denzel",LB,HOU,13.00,0
+2023,2,0021,starter,12238,"Perryman, Denzel",LB,HOU,12.00,0
 2023,2,0021,starter,14412,"Singleton, Alex",LB,DEN,6.00,0
 2023,2,0021,starter,10775,"Wagner, Bobby",LB,SEA,17.00,1
 2023,2,0021,starter,14908,"McKinney, Xavier",S,NYG,15.00,1
@@ -4565,7 +4565,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0021,nonstarter,12176,"Parker, DeVante",WR,NEP,11.70,0
 2023,2,0021,nonstarter,12678,"Higbee, Tyler",TE,LAR,4.20,0
 2023,2,0021,nonstarter,13134,"Foreman, D'Onta",RB,CHI,NA,0
-2023,2,0021,nonstarter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0021,nonstarter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0021,nonstarter,13668,"Chark, D.J.",WR,CAR,2.50,0
 2023,2,0021,nonstarter,15890,"McFadden, Micah",LB,NYG,8.00,0
 2023,2,0021,nonstarter,14123,"Renfrow, Hunter",WR,LVR,3.30,0
@@ -4601,7 +4601,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0028,starter,12795,"Judon, Matt",DE,NEP,12.00,1
 2023,2,0028,starter,13268,"Anzalone, Alex",LB,DET,16.00,1
 2023,2,0028,starter,15404,"Jones, Ernest",LB,LAR,15.00,1
-2023,2,0028,starter,12238,"Perryman, Denzel",LB,HOU,13.00,0
+2023,2,0028,starter,12238,"Perryman, Denzel",LB,HOU,12.00,0
 2023,2,0028,starter,14224,"Gardner-Johnson, Chauncey",CB,DET,15.00,1
 2023,2,0028,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0028,starter,13806,"Elliott, DeShon",S,MIA,12.00,0
@@ -4649,7 +4649,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0004,starter,14147,"Bosa, Nick",DE,SFO,3.00,0
 2023,2,0004,starter,15805,"Hutchinson, Aidan",DE,DET,6.00,1
 2023,2,0004,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
-2023,2,0004,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
+2023,2,0004,starter,13733,"Leonard, Shaquille",LB,IND,7.00,0
 2023,2,0004,starter,11728,"Mosley, C.J.",LB,NYJ,16.00,1
 2023,2,0004,starter,13813,"Oluokun, Foyesade",LB,JAC,19.00,1
 2023,2,0004,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
@@ -4699,7 +4699,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0032,starter,16223,"Anderson, Will",DE,HOU,5.00,0
 2023,2,0032,starter,13214,"Watt, T.J.",DE,PIT,21.00,1
 2023,2,0032,starter,13268,"Anzalone, Alex",LB,DET,16.00,1
-2023,2,0032,starter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0032,starter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0032,starter,13727,"Vander Esch, Leighton",LB,DAL,6.00,0
 2023,2,0032,starter,14903,"Diggs, Trevon",CB,DAL,10.00,0
 2023,2,0032,starter,15832,"Stingley Jr., Derek",CB,HOU,11.00,0
@@ -4708,7 +4708,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0032,nonstarter,13723,"Payne, Da'Ron",DT,WAS,16.00,1
 2023,2,0032,nonstarter,12741,"Jones, Chris",DT,KCC,11.00,0
 2023,2,0032,nonstarter,14207,"Thornhill, Juan",S,CLE,7.00,0
-2023,2,0032,nonstarter,14899,"Kinlaw, Javon",DT,SFO,4.00,0
+2023,2,0032,nonstarter,14899,"Kinlaw, Javon",DT,SFO,3.00,0
 2023,2,0032,nonstarter,12930,"Anderson, Chosen",WR,FA,NA,0
 2023,2,0032,nonstarter,14777,"Burrow, Joe",QB,CIN,16.38,0
 2023,2,0032,nonstarter,14197,"Savage, Darnell",S,GBP,14.00,1
@@ -4747,7 +4747,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0013,starter,14148,"Sweat, Montez",DE,WAS,12.00,1
 2023,2,0013,starter,14260,"Holcomb, Cole",LB,PIT,14.00,1
 2023,2,0013,starter,15404,"Jones, Ernest",LB,LAR,15.00,1
-2023,2,0013,starter,12238,"Perryman, Denzel",LB,HOU,13.00,1
+2023,2,0013,starter,12238,"Perryman, Denzel",LB,HOU,12.00,1
 2023,2,0013,starter,14903,"Diggs, Trevon",CB,DAL,10.00,0
 2023,2,0013,starter,15835,"Brisker, Jaquan",S,CHI,8.00,0
 2023,2,0013,starter,15366,"Holland, Jevon",S,MIA,19.00,1
@@ -4795,7 +4795,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0025,starter,14925,"Uche, Josh",DE,NEP,0.00,0
 2023,2,0025,starter,15869,"Bernard, Terrel",LB,BUF,15.00,1
 2023,2,0025,starter,15396,"Deablo, Divine",LB,LVR,20.00,1
-2023,2,0025,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0025,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0025,starter,15823,"Harris, Christian",LB,HOU,1.00,0
 2023,2,0025,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
 2023,2,0025,starter,15835,"Brisker, Jaquan",S,CHI,8.00,0
@@ -4809,7 +4809,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0025,nonstarter,14414,"Owens, Jonathan",S,GBP,0.00,0
 2023,2,0025,nonstarter,15734,"Ingram, Keaontay",RB,ARI,0.60,0
 2023,2,0025,nonstarter,15802,"Otton, Cade",TE,TBB,10.10,1
-2023,2,0025,nonstarter,14028,"Neal, Ryan",S,TBB,13.00,1
+2023,2,0025,nonstarter,14028,"Neal, Ryan",S,TBB,12.00,1
 2023,2,0025,nonstarter,15975,"Sanborn, Jack",LB,CHI,6.00,0
 2023,2,0025,nonstarter,14590,"Al-Shaair, Azeez",LB,TEN,13.00,1
 2023,2,0025,nonstarter,14877,"Young, Chase",DE,WAS,11.00,1
@@ -4832,7 +4832,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0025,nonstarter,14870,"Trautman, Adam",TE,DEN,0.00,0
 2023,2,0017,starter,15238,"Fields, Justin",QB,CHI,16.74,0
 2023,2,0017,starter,16167,"Achane, Devon",RB,MIA,1.90,1
-2023,2,0017,starter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0017,starter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0017,starter,14104,"Brown, A.J.",WR,PHI,6.90,0
 2023,2,0017,starter,15290,"Collins, Nico",WR,HOU,27.60,1
 2023,2,0017,starter,12801,"Hill, Tyreek",WR,MIA,15.00,1
@@ -4842,7 +4842,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0017,starter,14171,"Burns, Brian",DE,CAR,2.00,0
 2023,2,0017,starter,13684,"Hubbard, Sam",DE,CIN,6.00,1
 2023,2,0017,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
-2023,2,0017,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
+2023,2,0017,starter,13733,"Leonard, Shaquille",LB,IND,7.00,0
 2023,2,0017,starter,13307,"Milano, Matt",LB,BUF,13.00,0
 2023,2,0017,starter,11728,"Mosley, C.J.",LB,NYJ,16.00,1
 2023,2,0017,starter,13743,"Warner, Fred",LB,SFO,26.00,1
@@ -4894,7 +4894,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0014,starter,12831,"Roberts, Elandon",LB,PIT,4.00,0
 2023,2,0014,starter,14257,"Speed, E.J.",LB,IND,16.00,1
 2023,2,0014,starter,14168,"White, Devin",LB,TBB,4.00,0
-2023,2,0014,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0014,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0014,starter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0014,starter,14907,"Delpit, Grant",S,CLE,19.00,1
 2023,2,0014,nonstarter,11674,"Cooks, Brandin",WR,DAL,NA,0
@@ -4989,7 +4989,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0020,starter,13704,"Nwosu, Uchenna",DE,SEA,7.00,0
 2023,2,0020,starter,14217,"Barton, Cody",LB,WAS,17.00,1
 2023,2,0020,starter,15826,"Clark, Damone",LB,DAL,1.00,0
-2023,2,0020,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0020,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0020,starter,15387,"Werner, Pete",LB,NOS,10.00,1
 2023,2,0020,starter,14927,"Chinn, Jeremy",S,CAR,6.00,0
 2023,2,0020,starter,14921,"Dugger, Kyle",S,NEP,7.00,0
@@ -5036,10 +5036,10 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0029,starter,15369,"Patterson, Riley",PK,DET,7.80,1
 2023,2,0029,starter,14940,"Highsmith, Alex",DE,PIT,31.00,1
 2023,2,0029,starter,13682,"Key, Arden",DE,TEN,0.00,0
-2023,2,0029,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0029,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0029,starter,15823,"Harris, Christian",LB,HOU,1.00,0
 2023,2,0029,starter,15822,"Lloyd, Devin",LB,JAC,20.00,1
-2023,2,0029,starter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0029,starter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0029,starter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0029,starter,15001,"Curl, Kamren",S,WAS,13.00,0
 2023,2,0029,starter,13252,"Maye, Marcus",S,NOS,17.00,1
@@ -5090,7 +5090,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0035,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
 2023,2,0035,starter,14991,"Fuller, Jordan",S,LAR,13.00,1
 2023,2,0035,starter,15452,"Hufanga, Talanoa",S,SFO,7.00,0
-2023,2,0035,starter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0035,starter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0035,starter,15448,"Pinnock, Jason",S,NYG,23.00,1
 2023,2,0035,nonstarter,15255,"Gainwell, Kenneth",RB,PHI,NA,0
 2023,2,0035,nonstarter,14268,"Long, David",LB,MIA,15.00,1
@@ -5119,7 +5119,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0035,nonstarter,16432,"Wilson, Emanuel",RB,GBP,0.50,0
 2023,2,0035,nonstarter,16390,"McLaughlin, Jaleel",RB,DEN,6.50,1
 2023,2,0035,nonstarter,16192,"Washington, Parker",WR,JAC,NA,0
-2023,2,0035,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0035,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0035,nonstarter,14182,"Hooker, Amani",S,TEN,NA,0
 2023,2,0035,nonstarter,15985,"Bell, Markquese",S,DAL,7.00,0
 2023,2,0035,nonstarter,15257,"Sermon, Trey",RB,FA,NA,0
@@ -5149,7 +5149,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0024,nonstarter,13378,"Breida, Matt",RB,NYG,0.50,0
 2023,2,0024,nonstarter,13299,"Kittle, George",TE,SFO,6.00,0
 2023,2,0024,nonstarter,14079,"Sanders, Miles",RB,CAR,7.70,0
-2023,2,0024,nonstarter,11721,"Mack, Khalil",DE,LAC,10.00,0
+2023,2,0024,nonstarter,11721,"Mack, Khalil",DE,LAC,11.00,0
 2023,2,0024,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,1.70,0
 2023,2,0024,nonstarter,15808,"Karlaftis, George",DE,KCC,11.00,0
 2023,2,0024,nonstarter,14977,"Osborn, K.J.",WR,MIN,12.40,1
@@ -5241,13 +5241,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0023,starter,14179,"Love, Julian",S,SEA,26.00,1
 2023,2,0023,nonstarter,10816,"Davis, Demario",LB,NOS,15.00,1
 2023,2,0023,nonstarter,14113,"Hardman, Mecole",WR,NYJ,1.60,0
-2023,2,0023,nonstarter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0023,nonstarter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0023,nonstarter,13717,"Reid, Justin",S,KCC,11.00,0
 2023,2,0023,nonstarter,12302,"Wilson, Damien",LB,FA,NA,0
 2023,2,0023,nonstarter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0023,nonstarter,13675,"Conklin, Tyler",TE,NYJ,10.00,0
 2023,2,0023,nonstarter,13133,"Perine, Samaje",RB,DEN,5.40,0
-2023,2,0023,nonstarter,13470,"Moore, Kenny",CB,IND,12.00,0
+2023,2,0023,nonstarter,13470,"Moore, Kenny",CB,IND,11.00,0
 2023,2,0023,nonstarter,13157,"Samuel, Curtis",WR,WAS,6.20,0
 2023,2,0023,nonstarter,14833,"Jeudy, Jerry",WR,DEN,5.50,0
 2023,2,0023,nonstarter,13688,"Davenport, Marcus",DE,MIN,0.00,0
@@ -5282,7 +5282,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0018,starter,14171,"Burns, Brian",DE,CAR,2.00,0
 2023,2,0018,starter,14225,"Crosby, Maxx",DE,LVR,13.00,1
 2023,2,0018,starter,15806,"Thibodeaux, Kayvon",DE,NYG,0.00,0
-2023,2,0018,starter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0018,starter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0018,starter,13307,"Milano, Matt",LB,BUF,13.00,1
 2023,2,0018,starter,14218,"Okereke, Bobby",LB,NYG,13.00,1
 2023,2,0018,starter,13762,"White, Kyzir",LB,ARI,16.00,1
@@ -5339,22 +5339,22 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0019,starter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0019,nonstarter,12611,"Goff, Jared",QB,DET,23.92,0
 2023,2,0019,nonstarter,11938,"Thielen, Adam",WR,CAR,20.40,1
-2023,2,0019,nonstarter,11721,"Mack, Khalil",DE,LAC,10.00,1
+2023,2,0019,nonstarter,11721,"Mack, Khalil",DE,LAC,11.00,1
 2023,2,0019,nonstarter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0019,nonstarter,12676,"Henry, Hunter",TE,NEP,17.20,1
 2023,2,0019,nonstarter,13672,"Gesicki, Mike",TE,NEP,8.30,0
 2023,2,0019,nonstarter,13632,"Lazard, Allen",WR,NYJ,4.30,0
 2023,2,0019,nonstarter,11225,"Patterson, Cordarrelle",RB,ATL,NA,0
-2023,2,0019,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0019,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0019,nonstarter,13704,"Nwosu, Uchenna",DE,SEA,7.00,0
 2023,2,0019,nonstarter,13134,"Foreman, D'Onta",RB,CHI,NA,0
 2023,2,0019,nonstarter,14858,"Jefferson, Van",WR,LAR,1.90,0
-2023,2,0019,nonstarter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0019,nonstarter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0019,nonstarter,12948,"Okwara, Romeo",DE,DET,1.00,0
 2023,2,0019,nonstarter,14067,"Minshew, Gardner",QB,IND,11.14,0
 2023,2,0019,nonstarter,13726,"Edmonds, Chase",RB,TBB,1.20,0
 2023,2,0019,nonstarter,13700,"Landry, Harold",DE,TEN,8.00,0
-2023,2,0019,nonstarter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0019,nonstarter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0019,nonstarter,15720,"Haskins, Hassan",RB,TEN,NA,0
 2023,2,0019,nonstarter,15758,"Bell, David",WR,CLE,5.70,0
 2023,2,0019,nonstarter,16187,"Downs, Josh",WR,IND,7.70,0
@@ -5376,13 +5376,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0027,starter,15329,"Pitts, Kyle",TE,ATL,3.50,0
 2023,2,0027,starter,12437,"Myers, Jason",PK,SEA,5.75,1
 2023,2,0027,starter,15817,"Davis, Jordan",DT,PHI,7.00,0
-2023,2,0027,starter,11721,"Mack, Khalil",DE,LAC,10.00,1
+2023,2,0027,starter,11721,"Mack, Khalil",DE,LAC,11.00,1
 2023,2,0027,starter,14148,"Sweat, Montez",DE,WAS,12.00,1
 2023,2,0027,starter,12779,"Campbell, De'Vondre",LB,GBP,21.00,1
 2023,2,0027,starter,15821,"Dean, Nakobe",LB,PHI,NA,1
 2023,2,0027,starter,15835,"Brisker, Jaquan",S,CHI,8.00,1
 2023,2,0027,starter,13713,"Fitzpatrick, Minkah",S,PIT,15.00,1
-2023,2,0027,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0027,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0027,starter,13325,"Woods, Xavier",S,CAR,16.00,1
 2023,2,0027,nonstarter,13716,"Edmunds, Terrell",S,PHI,14.00,1
 2023,2,0027,nonstarter,13814,"Scott, Boston",RB,PHI,4.00,0
@@ -5412,7 +5412,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0027,nonstarter,15965,"Chestnut, Julius",RB,TEN,0.00,0
 2023,2,0027,nonstarter,15469,"Hamlin, Damar",S,BUF,NA,0
 2023,2,0022,starter,13116,"Mahomes, Patrick",QB,KCC,22.20,1
-2023,2,0022,starter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0022,starter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0022,starter,13131,"Mixon, Joe",RB,CIN,13.50,1
 2023,2,0022,starter,14071,"Montgomery, David",RB,DET,13.40,1
 2023,2,0022,starter,15301,"Atwell, Tutu",WR,LAR,15.20,1
@@ -5421,12 +5421,12 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0022,starter,12263,"Waller, Darren",TE,NYG,13.60,1
 2023,2,0022,starter,14983,"Bass, Tyler",PK,BUF,7.90,1
 2023,2,0022,starter,13208,"Allen, Jonathan",DT,WAS,4.00,0
-2023,2,0022,starter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0022,starter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0022,starter,15350,"Parsons, Micah",DE,DAL,24.00,1
 2023,2,0022,starter,13706,"Baker, Jerome",LB,MIA,9.00,1
 2023,2,0022,starter,14260,"Holcomb, Cole",LB,PIT,14.00,1
 2023,2,0022,starter,13952,"Luvu, Frankie",LB,CAR,21.00,1
-2023,2,0022,starter,13696,"Smith, Roquan",LB,BAL,8.00,0
+2023,2,0022,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
 2023,2,0022,starter,13252,"Maye, Marcus",S,NOS,17.00,1
 2023,2,0022,starter,14908,"McKinney, Xavier",S,NYG,15.00,1
 2023,2,0022,nonstarter,13245,"Reddick, Haason",DE,PHI,0.00,0
@@ -5474,7 +5474,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0007,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
 2023,2,0007,starter,13702,"Jewell, Josey",LB,DEN,18.00,1
 2023,2,0007,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
-2023,2,0007,starter,13696,"Smith, Roquan",LB,BAL,8.00,0
+2023,2,0007,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
 2023,2,0007,starter,14179,"Love, Julian",S,SEA,26.00,1
 2023,2,0007,starter,11317,"Poyer, Jordan",S,BUF,5.00,1
 2023,2,0007,nonstarter,13128,"Cook, Dalvin",RB,NYJ,1.20,0
@@ -5527,13 +5527,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0034,starter,13737,"Bates, Jessie",S,ATL,6.00,0
 2023,2,0034,starter,13252,"Maye, Marcus",S,NOS,17.00,1
 2023,2,0034,nonstarter,13113,"Watson, Deshaun",QB,CLE,14.60,0
-2023,2,0034,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0034,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0034,nonstarter,13672,"Gesicki, Mike",TE,NEP,8.30,0
 2023,2,0034,nonstarter,11761,"McKinnon, Jerick",RB,KCC,5.20,0
 2023,2,0034,nonstarter,15288,"Moore, Elijah",WR,CLE,7.10,0
 2023,2,0034,nonstarter,12720,"Kearse, Jayron",S,DAL,10.00,0
 2023,2,0034,nonstarter,14889,"Murray, Kenneth",LB,LAC,19.00,1
-2023,2,0034,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0034,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0034,nonstarter,11647,"Thomas, Logan",TE,WAS,10.20,1
 2023,2,0034,nonstarter,15381,"Grant, Richie",S,ATL,7.00,0
 2023,2,0034,nonstarter,12301,"Smith, Za'Darius",DE,CLE,2.00,0
@@ -5541,7 +5541,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0034,nonstarter,14157,"Williams, Quinnen",DT,NYJ,11.00,0
 2023,2,0034,nonstarter,14108,"Dortch, Greg",WR,ARI,0.57,0
 2023,2,0034,nonstarter,15734,"Ingram, Keaontay",RB,ARI,0.60,0
-2023,2,0034,nonstarter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0034,nonstarter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0034,nonstarter,15789,"Watson, Christian",WR,GBP,NA,0
 2023,2,0034,nonstarter,15713,"Ford, Jerome",RB,CLE,24.10,1
 2023,2,0034,nonstarter,12948,"Okwara, Romeo",DE,DET,1.00,0
@@ -5571,7 +5571,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0012,starter,10768,"David, Lavonte",LB,TBB,3.00,0
 2023,2,0012,starter,13837,"Franklin, Zaire",LB,IND,21.00,1
 2023,2,0012,starter,15846,"Walker, Quay",LB,GBP,27.00,1
-2023,2,0012,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0012,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0012,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
 2023,2,0012,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0012,starter,13714,"James, Derwin",S,LAC,18.00,1
@@ -5763,7 +5763,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0009,starter,12231,"Thompson, Shaq",LB,CAR,5.00,0
 2023,2,0009,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
 2023,2,0009,starter,14982,"Gilman, Alohi",S,LAC,9.00,1
-2023,2,0009,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0009,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0009,starter,13714,"James, Derwin",S,LAC,18.00,1
 2023,2,0009,nonstarter,13793,"Valdes-Scantling, Marquez",WR,KCC,3.30,0
 2023,2,0009,nonstarter,13699,"Evans, Rashaan",LB,FA,NA,0
@@ -5855,9 +5855,9 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0008,starter,15352,"Collins, Zaven",DE,ARI,7.00,0
 2023,2,0008,starter,13684,"Hubbard, Sam",DE,CIN,6.00,0
 2023,2,0008,starter,14268,"Long, David",LB,MIA,15.00,1
-2023,2,0008,starter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0008,starter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0008,starter,15846,"Walker, Quay",LB,GBP,27.00,1
-2023,2,0008,starter,15836,"Hill, Daxton",S,CIN,22.00,1
+2023,2,0008,starter,15836,"Hill, Daxton",S,CIN,23.00,1
 2023,2,0008,starter,13229,"Jackson, Eddie",S,CHI,0.00,0
 2023,2,0008,starter,13288,"Jenkins, Rayshawn",S,JAC,18.00,1
 2023,2,0008,starter,13760,"Whitehead, Jordan",S,NYJ,16.00,1
@@ -5900,14 +5900,14 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0002,starter,10976,"Tucker, Justin",PK,BAL,11.15,1
 2023,2,0002,starter,15352,"Collins, Zaven",DE,ARI,7.00,0
 2023,2,0002,starter,14225,"Crosby, Maxx",DE,LVR,13.00,1
-2023,2,0002,starter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0002,starter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0002,starter,14590,"Al-Shaair, Azeez",LB,TEN,13.00,1
 2023,2,0002,starter,15858,"Andersen, Troy",LB,ATL,NA,0
 2023,2,0002,starter,14217,"Barton, Cody",LB,WAS,17.00,1
 2023,2,0002,starter,13952,"Luvu, Frankie",LB,CAR,21.00,1
 2023,2,0002,starter,15001,"Curl, Kamren",S,WAS,13.00,1
 2023,2,0002,starter,12349,"Diggs, Quandre",S,SEA,8.00,1
-2023,2,0002,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0002,nonstarter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0002,nonstarter,13325,"Woods, Xavier",S,CAR,16.00,1
 2023,2,0002,nonstarter,12088,"Phillips, Adrian",S,NEP,3.00,0
 2023,2,0002,nonstarter,13284,"Hendrickson, Trey",DE,CIN,3.00,0
@@ -5946,13 +5946,13 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0003,starter,12263,"Waller, Darren",TE,NYG,13.60,1
 2023,2,0003,starter,15368,"McPherson, Evan",PK,CIN,5.70,1
 2023,2,0003,starter,14163,"Simmons, Jeffery",DT,TEN,11.00,1
-2023,2,0003,starter,12756,"Ngakoue, Yannick",DE,CHI,4.00,0
+2023,2,0003,starter,12756,"Ngakoue, Yannick",DE,CHI,3.00,0
 2023,2,0003,starter,13775,"Bentley, Ja'Whaun",LB,NEP,9.00,1
 2023,2,0003,starter,15869,"Bernard, Terrel",LB,BUF,15.00,1
 2023,2,0003,starter,12231,"Thompson, Shaq",LB,CAR,5.00,1
 2023,2,0003,starter,14168,"White, Devin",LB,TBB,4.00,0
 2023,2,0003,starter,15380,"Campbell, Tyson",CB,JAC,11.00,1
-2023,2,0003,starter,13470,"Moore, Kenny",CB,IND,12.00,1
+2023,2,0003,starter,13470,"Moore, Kenny",CB,IND,11.00,1
 2023,2,0003,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0003,nonstarter,13236,"Everett, Gerald",TE,LAC,7.70,0
 2023,2,0003,nonstarter,14208,"Johnson, Diontae",WR,PIT,NA,0
@@ -5969,7 +5969,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0003,nonstarter,15758,"Bell, David",WR,CLE,5.70,0
 2023,2,0003,nonstarter,15437,"Forrest, Darrick",S,WAS,5.00,1
 2023,2,0003,nonstarter,15826,"Clark, Damone",LB,DAL,1.00,0
-2023,2,0003,nonstarter,15727,"Knight, Zonovan",RB,FA,NA,0
+2023,2,0003,nonstarter,15727,"Knight, Zonovan",RB,DET,NA,0
 2023,2,0003,nonstarter,14159,"Lawrence, Dexter",DT,NYG,7.00,1
 2023,2,0003,nonstarter,13608,"Penny, Rashaad",RB,PHI,2.40,0
 2023,2,0003,nonstarter,14141,"Smith Jr., Irv",TE,CIN,3.00,0
@@ -6016,7 +6016,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0015,nonstarter,15385,"Ojulari, Azeez",DE,NYG,NA,0
 2023,2,0015,nonstarter,15368,"McPherson, Evan",PK,CIN,5.70,0
 2023,2,0015,nonstarter,13764,"Johnson, Taron",CB,BUF,6.00,0
-2023,2,0015,nonstarter,13306,"Walker, Anthony",LB,CLE,6.00,0
+2023,2,0015,nonstarter,13306,"Walker, Anthony",LB,CLE,7.00,0
 2023,2,0015,nonstarter,13688,"Davenport, Marcus",DE,MIN,0.00,0
 2023,2,0015,nonstarter,13850,"Edwards, Gus",RB,BAL,12.20,0
 2023,2,0015,nonstarter,11228,"Woods, Robert",WR,HOU,13.75,1
@@ -6047,7 +6047,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0032,starter,16223,"Anderson, Will",DE,HOU,5.00,0
 2023,2,0032,starter,13214,"Watt, T.J.",DE,PIT,21.00,1
 2023,2,0032,starter,13268,"Anzalone, Alex",LB,DET,16.00,1
-2023,2,0032,starter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0032,starter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0032,starter,13727,"Vander Esch, Leighton",LB,DAL,6.00,0
 2023,2,0032,starter,14903,"Diggs, Trevon",CB,DAL,10.00,0
 2023,2,0032,starter,15832,"Stingley Jr., Derek",CB,HOU,11.00,0
@@ -6056,7 +6056,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0032,nonstarter,13723,"Payne, Da'Ron",DT,WAS,16.00,1
 2023,2,0032,nonstarter,12741,"Jones, Chris",DT,KCC,11.00,0
 2023,2,0032,nonstarter,14207,"Thornhill, Juan",S,CLE,7.00,0
-2023,2,0032,nonstarter,14899,"Kinlaw, Javon",DT,SFO,4.00,0
+2023,2,0032,nonstarter,14899,"Kinlaw, Javon",DT,SFO,3.00,0
 2023,2,0032,nonstarter,12930,"Anderson, Chosen",WR,FA,NA,0
 2023,2,0032,nonstarter,14777,"Burrow, Joe",QB,CIN,16.38,0
 2023,2,0032,nonstarter,14197,"Savage, Darnell",S,GBP,14.00,1
@@ -6143,7 +6143,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0025,starter,14925,"Uche, Josh",DE,NEP,0.00,0
 2023,2,0025,starter,15869,"Bernard, Terrel",LB,BUF,15.00,1
 2023,2,0025,starter,15396,"Deablo, Divine",LB,LVR,20.00,1
-2023,2,0025,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0025,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0025,starter,15823,"Harris, Christian",LB,HOU,1.00,0
 2023,2,0025,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
 2023,2,0025,starter,15835,"Brisker, Jaquan",S,CHI,8.00,0
@@ -6157,7 +6157,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0025,nonstarter,14414,"Owens, Jonathan",S,GBP,0.00,0
 2023,2,0025,nonstarter,15734,"Ingram, Keaontay",RB,ARI,0.60,0
 2023,2,0025,nonstarter,15802,"Otton, Cade",TE,TBB,10.10,1
-2023,2,0025,nonstarter,14028,"Neal, Ryan",S,TBB,13.00,1
+2023,2,0025,nonstarter,14028,"Neal, Ryan",S,TBB,12.00,1
 2023,2,0025,nonstarter,15975,"Sanborn, Jack",LB,CHI,6.00,0
 2023,2,0025,nonstarter,14590,"Al-Shaair, Azeez",LB,TEN,13.00,1
 2023,2,0025,nonstarter,14877,"Young, Chase",DE,WAS,11.00,1
@@ -6240,7 +6240,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0013,starter,14148,"Sweat, Montez",DE,WAS,12.00,1
 2023,2,0013,starter,14260,"Holcomb, Cole",LB,PIT,14.00,1
 2023,2,0013,starter,15404,"Jones, Ernest",LB,LAR,15.00,1
-2023,2,0013,starter,12238,"Perryman, Denzel",LB,HOU,13.00,1
+2023,2,0013,starter,12238,"Perryman, Denzel",LB,HOU,12.00,1
 2023,2,0013,starter,14903,"Diggs, Trevon",CB,DAL,10.00,0
 2023,2,0013,starter,15835,"Brisker, Jaquan",S,CHI,8.00,0
 2023,2,0013,starter,15366,"Holland, Jevon",S,MIA,19.00,1
@@ -6308,12 +6308,12 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0006,nonstarter,14921,"Dugger, Kyle",S,NEP,7.00,0
 2023,2,0006,nonstarter,15452,"Hufanga, Talanoa",S,SFO,7.00,0
 2023,2,0006,nonstarter,14889,"Murray, Kenneth",LB,LAC,19.00,1
-2023,2,0006,nonstarter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0006,nonstarter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0006,nonstarter,15428,"Sherwood, Jamien",LB,NYJ,10.00,0
 2023,2,0006,nonstarter,14925,"Uche, Josh",DE,NEP,0.00,0
 2023,2,0006,nonstarter,15808,"Karlaftis, George",DE,KCC,11.00,1
 2023,2,0006,nonstarter,15829,"Asamoah, Brian",LB,MIN,3.00,0
-2023,2,0006,nonstarter,15811,"Jackson, Drake",DE,SFO,4.00,0
+2023,2,0006,nonstarter,15811,"Jackson, Drake",DE,SFO,5.00,0
 2023,2,0006,nonstarter,13253,"Williams, Marcus",S,BAL,NA,0
 2023,2,0006,nonstarter,11678,"Robinson, Allen",WR,PIT,3.20,0
 2023,2,0006,nonstarter,14893,"Baun, Zack",LB,NOS,0.00,0
@@ -6383,14 +6383,14 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0016,starter,13909,"Maher, Brett",PK,LAR,14.90,1
 2023,2,0016,starter,14147,"Bosa, Nick",DE,SFO,3.00,1
 2023,2,0016,starter,13198,"Garrett, Myles",DE,CLE,2.00,0
-2023,2,0016,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
-2023,2,0016,starter,13696,"Smith, Roquan",LB,BAL,8.00,1
-2023,2,0016,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0016,starter,13733,"Leonard, Shaquille",LB,IND,7.00,1
+2023,2,0016,starter,13696,"Smith, Roquan",LB,BAL,7.00,0
+2023,2,0016,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0016,starter,13281,"Douglas, Rasul",CB,GBP,16.00,1
 2023,2,0016,starter,13774,"Reed, D.J.",CB,NYJ,8.00,1
 2023,2,0016,starter,14956,"Sneed, L'Jarius",CB,KCC,20.00,1
 2023,2,0016,starter,14518,"Thompson, Jalen",S,ARI,18.00,1
-2023,2,0016,nonstarter,12745,"Jones, Deion",LB,FA,NA,0
+2023,2,0016,nonstarter,12745,"Jones, Deion",LB,CAR,NA,0
 2023,2,0016,nonstarter,14857,"Peoples-Jones, Donovan",WR,CLE,1.70,0
 2023,2,0016,nonstarter,15308,"Marshall, Terrace",WR,CAR,0.00,0
 2023,2,0016,nonstarter,14782,"Love, Jordan",QB,GBP,20.34,0
@@ -6435,7 +6435,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0014,starter,12831,"Roberts, Elandon",LB,PIT,4.00,0
 2023,2,0014,starter,14257,"Speed, E.J.",LB,IND,16.00,1
 2023,2,0014,starter,14168,"White, Devin",LB,TBB,4.00,0
-2023,2,0014,starter,14221,"Williams, Quincy",LB,NYJ,14.00,1
+2023,2,0014,starter,14221,"Williams, Quincy",LB,NYJ,16.00,1
 2023,2,0014,starter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0014,starter,14907,"Delpit, Grant",S,CLE,19.00,1
 2023,2,0014,nonstarter,11674,"Cooks, Brandin",WR,DAL,NA,0
@@ -6482,10 +6482,10 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0031,starter,15345,"Paye, Kwity",DE,IND,15.00,1
 2023,2,0031,starter,15346,"Rousseau, Gregory",DE,BUF,7.00,0
 2023,2,0031,starter,13214,"Watt, T.J.",DE,PIT,21.00,1
-2023,2,0031,starter,14247,"Greenlaw, Dre",LB,SFO,21.00,1
+2023,2,0031,starter,14247,"Greenlaw, Dre",LB,SFO,20.00,1
 2023,2,0031,starter,13743,"Warner, Fred",LB,SFO,26.00,1
 2023,2,0031,starter,14224,"Gardner-Johnson, Chauncey",CB,DET,15.00,1
-2023,2,0031,starter,13470,"Moore, Kenny",CB,IND,12.00,1
+2023,2,0031,starter,13470,"Moore, Kenny",CB,IND,11.00,1
 2023,2,0031,starter,16244,"Branch, Brian",S,DET,7.00,0
 2023,2,0031,nonstarter,13132,"Kamara, Alvin",RB,NOS,NA,0
 2023,2,0031,nonstarter,12181,"Agholor, Nelson",WR,BAL,17.30,1
@@ -6520,7 +6520,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0031,nonstarter,16199,"Palmer, Trey",WR,TBB,3.00,0
 2023,2,0017,starter,15238,"Fields, Justin",QB,CHI,16.74,0
 2023,2,0017,starter,16167,"Achane, Devon",RB,MIA,1.90,1
-2023,2,0017,starter,14799,"Akers, Cam",RB,LAR,NA,0
+2023,2,0017,starter,14799,"Akers, Cam",RB,MIN,NA,0
 2023,2,0017,starter,14104,"Brown, A.J.",WR,PHI,6.90,0
 2023,2,0017,starter,15290,"Collins, Nico",WR,HOU,27.60,1
 2023,2,0017,starter,12801,"Hill, Tyreek",WR,MIA,15.00,1
@@ -6530,7 +6530,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0017,starter,14171,"Burns, Brian",DE,CAR,2.00,0
 2023,2,0017,starter,13684,"Hubbard, Sam",DE,CIN,6.00,1
 2023,2,0017,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
-2023,2,0017,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
+2023,2,0017,starter,13733,"Leonard, Shaquille",LB,IND,7.00,0
 2023,2,0017,starter,13307,"Milano, Matt",LB,BUF,13.00,0
 2023,2,0017,starter,11728,"Mosley, C.J.",LB,NYJ,16.00,1
 2023,2,0017,starter,13743,"Warner, Fred",LB,SFO,26.00,1
@@ -6580,7 +6580,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0021,starter,10292,"Jordan, Cameron",DE,NOS,5.00,0
 2023,2,0021,starter,15355,"Bolton, Nick",LB,KCC,13.00,1
 2023,2,0021,starter,12287,"Hicks, Jordan",LB,MIN,19.00,1
-2023,2,0021,starter,12238,"Perryman, Denzel",LB,HOU,13.00,0
+2023,2,0021,starter,12238,"Perryman, Denzel",LB,HOU,12.00,0
 2023,2,0021,starter,14412,"Singleton, Alex",LB,DEN,6.00,0
 2023,2,0021,starter,10775,"Wagner, Bobby",LB,SEA,17.00,1
 2023,2,0021,starter,14908,"McKinney, Xavier",S,NYG,15.00,1
@@ -6593,7 +6593,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0021,nonstarter,12176,"Parker, DeVante",WR,NEP,11.70,0
 2023,2,0021,nonstarter,12678,"Higbee, Tyler",TE,LAR,4.20,0
 2023,2,0021,nonstarter,13134,"Foreman, D'Onta",RB,CHI,NA,0
-2023,2,0021,nonstarter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0021,nonstarter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0021,nonstarter,13668,"Chark, D.J.",WR,CAR,2.50,0
 2023,2,0021,nonstarter,15890,"McFadden, Micah",LB,NYG,8.00,0
 2023,2,0021,nonstarter,14123,"Renfrow, Hunter",WR,LVR,3.30,0
@@ -6629,7 +6629,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0020,starter,13704,"Nwosu, Uchenna",DE,SEA,7.00,0
 2023,2,0020,starter,14217,"Barton, Cody",LB,WAS,17.00,1
 2023,2,0020,starter,15826,"Clark, Damone",LB,DAL,1.00,0
-2023,2,0020,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0020,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0020,starter,15387,"Werner, Pete",LB,NOS,10.00,1
 2023,2,0020,starter,14927,"Chinn, Jeremy",S,CAR,6.00,0
 2023,2,0020,starter,14921,"Dugger, Kyle",S,NEP,7.00,0
@@ -6677,7 +6677,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0004,starter,14147,"Bosa, Nick",DE,SFO,3.00,0
 2023,2,0004,starter,15805,"Hutchinson, Aidan",DE,DET,6.00,1
 2023,2,0004,starter,14303,"Elliss, Kaden",LB,ATL,16.00,1
-2023,2,0004,starter,13733,"Leonard, Shaquille",LB,IND,6.00,0
+2023,2,0004,starter,13733,"Leonard, Shaquille",LB,IND,7.00,0
 2023,2,0004,starter,11728,"Mosley, C.J.",LB,NYJ,16.00,1
 2023,2,0004,starter,13813,"Oluokun, Foyesade",LB,JAC,19.00,1
 2023,2,0004,starter,14928,"Wilson, Logan",LB,CIN,17.00,1
@@ -6730,7 +6730,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0035,starter,16383,"Pace, Ivan",LB,MIN,15.00,1
 2023,2,0035,starter,14991,"Fuller, Jordan",S,LAR,13.00,1
 2023,2,0035,starter,15452,"Hufanga, Talanoa",S,SFO,7.00,0
-2023,2,0035,starter,15871,"Joseph, Kerby",S,DET,15.00,1
+2023,2,0035,starter,15871,"Joseph, Kerby",S,DET,16.00,1
 2023,2,0035,starter,15448,"Pinnock, Jason",S,NYG,23.00,1
 2023,2,0035,nonstarter,15255,"Gainwell, Kenneth",RB,PHI,NA,0
 2023,2,0035,nonstarter,14268,"Long, David",LB,MIA,15.00,1
@@ -6759,7 +6759,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0035,nonstarter,16432,"Wilson, Emanuel",RB,GBP,0.50,0
 2023,2,0035,nonstarter,16390,"McLaughlin, Jaleel",RB,DEN,6.50,1
 2023,2,0035,nonstarter,16192,"Washington, Parker",WR,JAC,NA,0
-2023,2,0035,nonstarter,13138,"Hunt, Kareem",RB,FA*,NA,0
+2023,2,0035,nonstarter,13138,"Hunt, Kareem",RB,CLE,NA,0
 2023,2,0035,nonstarter,14182,"Hooker, Amani",S,TEN,NA,0
 2023,2,0035,nonstarter,15985,"Bell, Markquese",S,DAL,7.00,0
 2023,2,0035,nonstarter,15257,"Sermon, Trey",RB,FA,NA,0
@@ -6776,7 +6776,7 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0028,starter,12795,"Judon, Matt",DE,NEP,12.00,1
 2023,2,0028,starter,13268,"Anzalone, Alex",LB,DET,16.00,1
 2023,2,0028,starter,15404,"Jones, Ernest",LB,LAR,15.00,1
-2023,2,0028,starter,12238,"Perryman, Denzel",LB,HOU,13.00,0
+2023,2,0028,starter,12238,"Perryman, Denzel",LB,HOU,12.00,0
 2023,2,0028,starter,14224,"Gardner-Johnson, Chauncey",CB,DET,15.00,1
 2023,2,0028,starter,15418,"Bynum, Camryn",S,MIN,21.00,1
 2023,2,0028,starter,13806,"Elliott, DeShon",S,MIA,12.00,0
@@ -6823,10 +6823,10 @@ season,week,franchise_id,starter_status,player_id,player_name,pos,team,player_sc
 2023,2,0029,starter,15369,"Patterson, Riley",PK,DET,7.80,1
 2023,2,0029,starter,14940,"Highsmith, Alex",DE,PIT,31.00,1
 2023,2,0029,starter,13682,"Key, Arden",DE,TEN,0.00,0
-2023,2,0029,starter,13697,"Edmunds, Tremaine",LB,CHI,24.00,1
+2023,2,0029,starter,13697,"Edmunds, Tremaine",LB,CHI,23.00,1
 2023,2,0029,starter,15823,"Harris, Christian",LB,HOU,1.00,0
 2023,2,0029,starter,15822,"Lloyd, Devin",LB,JAC,20.00,1
-2023,2,0029,starter,13987,"Spillane, Robert",LB,LVR,27.00,1
+2023,2,0029,starter,13987,"Spillane, Robert",LB,LVR,26.00,1
 2023,2,0029,starter,12752,"Byard, Kevin",S,TEN,19.00,1
 2023,2,0029,starter,15001,"Curl, Kamren",S,WAS,13.00,0
 2023,2,0029,starter,13252,"Maye, Marcus",S,NOS,17.00,1
