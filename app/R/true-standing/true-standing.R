@@ -5,15 +5,14 @@ true_standing <- read.csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/
     by = "franchise_id"
   )
 
-current_standing <- readr::read_csv(
-    paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-", var.season, ".csv"),
-    col_types = "ciiccnnnnnnn"
-  ) %>%
+current_standing <- elo %>%
   dplyr::filter(season == max(season)) %>%
   dplyr::mutate(
     winloss = ifelse(score_differential > 0, 1, 0)
   ) %>%
-  dplyr::group_by(franchise_id) %>%
+  dplyr::group_by(franchise_id, week) %>%
+  dplyr::mutate(elo_shift = sum(elo_shift)) %>%
+  dplyr::group_by(franchise_id, franchise_name, division_name) %>%
   dplyr::arrange(week) %>%
   dplyr::summarise(
     season = dplyr::first(season),
@@ -45,7 +44,7 @@ current_standing <- readr::read_csv(
   ) %>%
   dplyr::left_join(
     franchises %>%
-      dplyr::select(franchise_id, franchise_name, division_name, conference_name),
+      dplyr::select(franchise_id, conference_name),
     by = "franchise_id"
   ) %>%
   dplyr::mutate(
@@ -75,4 +74,4 @@ current_standing <- readr::read_csv(
   ) %>%
   dplyr::ungroup() %>%
   dplyr::group_by(conference_name) %>%
-  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, 12:17, 5:6, elo_shift, subline, seed, bowl, conference_name)
+  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, pf:true_rank, elo_shift, franchise_elo_postgame, subline, seed, bowl, conference_name)

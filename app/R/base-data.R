@@ -65,3 +65,12 @@ war <- purrr::map_df(2016:var.season, function(x) {
   ) %>%
     dplyr::mutate(season = x)
 })
+
+elo <- purrr::map_df(2016:var.season, function(x) {
+  readr::read_csv(
+    glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/elo/rfl-elo-{x}.csv"),
+    col_types = "ciiccnnnnnnn"
+  )
+}) %>%
+  dplyr::left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>%
+  dplyr::left_join(franchises %>% select(franchise_id, franchise_name) %>% rename(opponent_name = franchise_name), by = c("opponent_id" = "franchise_id"))
