@@ -26,6 +26,7 @@ current_standing <- elo %>%
   dplyr::left_join(
     true_standing %>%
       dplyr::group_by(franchise_id) %>%
+      dplyr::arrange(week) %>%
       dplyr::summarise(
         pp_dist = list(unique(pp / 2) / week),
         win = sum(win, na.rm = TRUE),
@@ -37,9 +38,9 @@ current_standing <- elo %>%
   dplyr::mutate(
     place = row_number(),
     loss = (2 * week) - win,
-    pf = pf / 2,
-    pp = pp / 2,
-    across(pf_rank:coach_rank, ~ 37 - .x),
+    pf = pf,
+    pp = pp,
+    dplyr::across(pf_rank:coach_rank, ~ 37 - .x),
     elo_shift_norm = elo_shift - min(elo_shift)
   ) %>%
   dplyr::left_join(
@@ -74,4 +75,7 @@ current_standing <- elo %>%
   ) %>%
   dplyr::ungroup() %>%
   dplyr::group_by(conference_name) %>%
-  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, pf:true_rank, elo_shift, franchise_elo_postgame, subline, seed, bowl, conference_name)
+  dplyr::select(season, week, franchise_name, win, loss, winloss, pf_sparkline, pp_dist, pf_rank:true_rank, elo_shift, franchise_elo_postgame, subline, seed, bowl, conference_name)
+
+
+
