@@ -1,12 +1,12 @@
 running_elo <- elo %>%
-  group_by(franchise_id) %>%
-  mutate(game = paste0(season, week)) %>%
-  arrange(game) %>%
-  select(game, franchise_id, franchise_elo_postgame) %>%
-  distinct() %>%
-  mutate(game = row_number()) %>%
-  left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>%
-  ungroup()
+  dplyr::group_by(franchise_id) %>%
+  dplyr::mutate(game = paste0(season, week)) %>%
+  dplyr::arrange(game) %>%
+  dplyr::select(game, franchise_id, franchise_elo_postgame) %>%
+  dplyr::distinct() %>%
+  dplyr::mutate(game = dplyr::row_number()) %>%
+  dplyr::left_join(franchises %>% dplyr::select(franchise_id, franchise_name, division_name), by = "franchise_id") %>%
+  dplyr::ungroup()
 
 elo_matchups_prev <- elo %>%
   mutate(
@@ -42,15 +42,17 @@ elo_matchups_next <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=sc
     elo %>%
       dplyr::filter(season == max(season)) %>%
       dplyr::filter(week == max(week)) %>%
-      dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(franchise_elo = franchise_elo_pregame),
+      dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(franchise_elo = franchise_elo_pregame) %>%
+      dplyr::distinct(),
     by = "franchise_id",
-    multiple = "all",
+    multiple = "all"
   ) %>%
   dplyr::left_join(
     elo %>%
       dplyr::filter(season == max(season)) %>%
       dplyr::filter(week == max(week)) %>%
-      dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(opponent_elo = franchise_elo_pregame),
+      dplyr::select(franchise_id, franchise_elo_pregame) %>% rename(opponent_elo = franchise_elo_pregame) %>%
+      dplyr::distinct(),
     by = c("opponent_id" = "franchise_id"),
     multiple = "all",
   ) %>%

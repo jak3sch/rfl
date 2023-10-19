@@ -125,7 +125,7 @@ selectizeInput(
 )
 ```
 
-> Das Power Ranking setzt sich aus den Kategorien Points For, Potential Points, Effizienz und All Play Record zusammen. Das beste Team in jeder Kategorie erhält 36 Punkte, das schlechteste einen. Für das Ranking werden alle Punkte zusammengerechnet.
+> Das Power Ranking setzt sich aus den Kategorien Points For, Potential Points, Effizienz und All Play Record zusammen.
 
 ## Row
 ### Aktuelles Standing
@@ -267,16 +267,16 @@ gt::render_gt({
 ### Power Ranking
 ```{r power-ranking, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 renderPlot({
-  true_standing %>%
+  power_ranking %>%
     ggplot2::ggplot(aes(x = week, y = true_rank, group = franchise_id, color = franchise_id)) +
       plotDefaults +
       ggplot2::geom_point(size = 3, color = var.colorAccent, alpha = 0.5) +
       ggbump::geom_bump(color = var.colorAccent, size = 1) +
-      ggplot2::geom_text(data = subset(true_standing, week == 1), aes(label = franchise_name), x = 0.97, hjust = 1, vjust = 0.35, color = var.colorAccent) +
-      ggplot2::geom_text(data = subset(true_standing, week == max(week)), aes(label = franchise_name, x = max(week) + 0.03), hjust = 0, vjust = 0.35, color = var.colorAccent) +
+      ggplot2::geom_text(data = subset(power_ranking, week == 1), aes(label = franchise_name), x = 0.97, hjust = 1, vjust = 0.35, color = var.colorAccent) +
+      ggplot2::geom_text(data = subset(power_ranking, week == max(week)), aes(label = franchise_name, x = max(week) + 0.03), hjust = 0, vjust = 0.35, color = var.colorAccent) +
     
-      geom_bump(data = subset(true_standing, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 1.8) +
-      geom_point(data = subset(true_standing, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 5) +
+      geom_bump(data = subset(power_ranking, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 1.8) +
+      geom_point(data = subset(power_ranking, division_name == input$powerRankSelectDivision | franchise_name %in% input$powerRankSelectTeam), size = 5) +
     
       ggplot2::scale_y_reverse() +
       paletteer::scale_color_paletteer_d("awtools::ppalette") +
@@ -364,24 +364,24 @@ renderPlot({
 ```{r elo-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
 DT::renderDataTable({
   table_data <- running_elo %>%
-    group_by(franchise_name) %>% 
-    filter(
+    dplyr::group_by(franchise_name) %>% 
+    dplyr::filter(
       game == max(game),
       #division_name == input$eloSelectDivision | franchise_name %in% input$eloSelectTeam
     ) %>% 
-    ungroup() %>% 
-    left_join(
+    dplyr::ungroup() %>% 
+    dplyr::left_join(
       running_elo %>% 
-        group_by(franchise_name) %>% 
-        filter(game == max(game) - 1) %>%
-        group_by(franchise_id) %>% 
-        summarise(elo_prev_week = mean(franchise_elo_postgame), .groups = "drop") %>% 
-        ungroup(),
+        dplyr::group_by(franchise_name) %>% 
+        dplyr::filter(game == max(game) - 1) %>%
+        dplyr::group_by(franchise_id) %>% 
+        dplyr::summarise(elo_prev_week = mean(franchise_elo_postgame), .groups = "drop") %>% 
+        dplyr::ungroup(),
       by = "franchise_id"
     ) %>% 
-    mutate(elo_diff = franchise_elo_postgame - elo_prev_week) %>% 
-    select(franchise_name, franchise_elo_postgame, elo_diff) %>%
-    rename(Franchise = franchise_name, ELO= franchise_elo_postgame, "+/-" = elo_diff)
+    dplyr::mutate(elo_diff = franchise_elo_postgame - elo_prev_week) %>% 
+    dplyr::select(franchise_name, franchise_elo_postgame, elo_diff) %>%
+    dplyr::rename(Franchise = franchise_name, ELO= franchise_elo_postgame, "+/-" = elo_diff)
   
   formattable::formattable(
     table_data,
@@ -391,7 +391,6 @@ DT::renderDataTable({
     )
   ) %>% 
   formattable::as.datatable(escape = FALSE, rownames = F, options = list(pageLength = 12, order = list(1, 'asc')))
-    
 })
 ```
 
