@@ -469,6 +469,122 @@ DT::renderDataTable({
 # ToDo: Scaling und sortierung der color bars haut nicht hin
 ```
 
+# Lineup Hit Rates {data-navmenu="Teams"}
+
+## Sidebar {.sidebar}
+
+```{r inputs-lineup-hit-rates, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+sliderInput("lineupHitRatesSelectSeason", "Saison:", min = 2016, max = var.season, value = c(var.season, var.season), sep = "")
+
+selectizeInput(
+  "lineupHitRatesSelectPlayer",
+  "Filter nach Spieler",
+  choices = players$player_name,
+  multiple = FALSE,
+  selected = "McCaffrey, Christian",
+  options = list(
+    placeholder = "Spieler wählen"
+  )
+)
+
+selectizeInput(
+  "lineupHitRatesSelectTeam",
+  "Filter nach Teams",
+  choices = franchises$franchise_name,
+  multiple = FALSE,
+  options = list(
+    placeholder = "Team wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+```
+
+## Row
+
+### Lineup Hit Rates
+
+```{r eval=FALSE, include=FALSE}
+renderText(input$lineupHitRatesSelectTeam)
+renderText(input$lineupHitRatesSelectPlayer)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+DT::renderDataTable({
+  lineup_hit_rates %>%
+    dplyr::filter(
+      season >= input$selectSeason[1] & season <= input$selectSeason[2]
+    )
+})
+```
+
+
+```{r lineup-hit-rates, eval=FALSE, message=TRUE, warning=TRUE, include=FALSE}
+source("R/lineup-hit-rates/rfl-lineup-hit-rates.R")
+
+gt::render_gt({
+  lineup_hit_rates %>%
+    dplyr::filter(
+      season >= input$selectSeason[1] & season <= input$selectSeason[2],
+      player_name == input$lineupHitRatesSelectPlayer,
+      franchise_name == input$lineupHitRatesSelectTeam
+    ) %>%
+    gt::gt() %>%
+    gt::cols_hide(columns = c(player_id)) %>%
+    gt::tab_header(
+      title = paste("Lineup Hit Rates")
+    ) %>%
+    gtExtras::gt_merge_stack(
+      player_name,
+      subline,
+      small_cap = F,
+      palette = c("#222f3e", "#8395a7"),
+      font_size = c("14px", "10px"),
+      font_weight = c("normal", "normal")
+    ) %>%
+    gt::tab_spanner(
+      label = "Starts",
+      columns = c(starts, started)
+    ) %>%
+    gt::tab_spanner(
+      label = "Hit Rate",
+      columns = c(hit, hit_rate)
+    ) %>%
+    gtExtras::gt_plt_winloss(
+      started,
+      max_wins = 10,
+      palette = c("#10ac84", "#ee5253", "gray"),
+      type = "pill"
+    ) %>%
+    gtExtras::gt_plt_winloss(
+      hit,
+      max_wins = 10,
+      palette = c("#10ac84", "#ee5253", "gray"),
+      type = "pill"
+    ) %>%
+    gtExtras::gt_plt_bar_pct(
+      hit_rate,
+      scaled = FALSE,
+      fill = "#222f3e",
+      background = "#c8d6e5"
+    ) %>%
+    gt::cols_label(
+      player_name = "Player",
+      starts = "Started",
+      started = "Last 10 G",
+      hit = "Last 10 G",
+      hit_rate = "Hit Rate"
+    ) %>%
+    gt::cols_align(
+      align = "center",
+      columns = c(starts)
+    ) %>%
+  
+    gtDefaults()
+})
+```
+
+
 # Strength of Schedule {data-navmenu="Teams"}
 
 ```{r global-sos, message=TRUE, warning=TRUE, include=FALSE}

@@ -35,7 +35,7 @@ franchises <- league %>%
   )
 
 ## starter data ----
-starter <- purrr::map_df(2016:2022, function(x) {
+starter <- purrr::map_df(2016:var.season, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"),
     col_types = "iiccdcccni"

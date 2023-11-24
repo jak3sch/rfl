@@ -1,4 +1,7 @@
 running_elo <- elo %>%
+  dplyr::mutate(
+    week = stringr::str_pad(week, 2, pad = "0")
+  ) %>%
   dplyr::group_by(franchise_id) %>%
   dplyr::mutate(game = paste0(season, week)) %>%
   dplyr::arrange(game) %>%
