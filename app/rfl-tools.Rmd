@@ -395,8 +395,41 @@ DT::renderDataTable({
 ```
 
 ## Row
-### Aktuelle Matchups {data-width=350}
-> ELO Vortail aus Sicht des Home Teams, berechent anhand der derzeitigen ELO
+### ELO Ranking Veränderung zum Saisonstart {data-width=500}
+```{r elo-ranking-season, echo=FALSE, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  table_data <- elo %>%
+    dplyr::filter(season == var.season) %>% 
+    dplyr::filter(
+      week == 1 | week == max(week)
+    ) %>% 
+    dplyr::select(week, franchise_id, franchise_elo_pregame, franchise_elo_postgame:franchise_name) %>% 
+    dplyr::distinct() %>% 
+    dplyr::group_by(franchise_name) %>% 
+    dplyr::arrange(week) %>% 
+    dplyr::mutate(
+      franchise_elo_pregame = dplyr::lag(franchise_elo_pregame),
+      elo_diff = franchise_elo_postgame - franchise_elo_pregame
+    ) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::filter(week == max(week)) %>% 
+    dplyr::select(franchise_name, franchise_elo_pregame, franchise_elo_postgame, elo_diff) %>%
+    dplyr::rename(Franchise = franchise_name, "ELO Start" = franchise_elo_pregame, ELO = franchise_elo_postgame, "+/-" = elo_diff) 
+  
+  formattable::formattable(
+    table_data,
+    list(
+      "ELO Start" = formattable::color_tile("#EA2027", "#009432"),
+      ELO = formattable::color_tile("#EA2027", "#009432"),
+      "+/-" = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = F, options = list(pageLength = 12, order = list(3, 'asc')))
+})
+```
+
+### Aktuelle Matchups {data-width=500}
+> ELO Vorteil aus Sicht des Home Teams, berechent anhand der derzeitigen ELO
 
 ```{r elo-matchups-next, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 DT::renderDataTable(
@@ -407,6 +440,7 @@ DT::renderDataTable(
 )
 ```
 
+## Row
 ### Alle Spiele
 > ELO shift = ELO Veränderung nach dem Spiel aus Home Team Sicht
 
