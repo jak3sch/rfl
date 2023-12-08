@@ -1,14 +1,14 @@
 library(tidyverse)
 
 var.season <- 2023
-var.week <- 1
+var.week <- 13
 
-scores <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=playerScores&L=63018&APIKEY=&W=", var.week, "&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")) %>%
+scores <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", var.season, "/export?TYPE=playerScores&L=63018&APIKEY=&W=", var.week, "&YEAR=&PLAYERS=&POSITION=&STATUS=&RULES=&COUNT=&JSON=1")) %>%
   purrr::pluck("playerScores", "playerScore") %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
   dplyr::left_join(
-    jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.season, "/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")) %>%
+    jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", var.season, "/export?TYPE=players&L=63018&APIKEY=&DETAILS=&SINCE=&PLAYERS=&JSON=1")) %>%
       purrr::pluck("players", "player") %>%
       dplyr::tibble() %>%
       tidyr::unnest_wider(1),
