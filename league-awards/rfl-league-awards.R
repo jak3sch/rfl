@@ -1,7 +1,7 @@
 library(tidyverse)
 library(nflfastR)
 
-var.lastSeason = 2022
+var.lastSeason = 2023
 
 # base data ----
 ## fantasy ----
@@ -12,7 +12,7 @@ fantasyPoints <- readRDS(url(paste0("https://github.com/jak3sch/rfl/blob/main/da
   )
 
 ## WAR ----
-franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), col_types = "icccdd") %>% 
+franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), col_types = "icccdd") %>%
   dplyr::left_join(
     readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason - 1, ".csv"), col_types = "icccdd") %>%
       dplyr::select(player_id, war) %>%
@@ -20,7 +20,7 @@ franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.c
     by = "player_id"
   )
 
-franchiseWARPlayer <- jsonlite::read_json(paste0("https://www55.myfantasyleague.com/", var.lastSeason, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1"))$rosters$franchise %>%
+franchiseWARPlayer <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", var.lastSeason, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1"))$rosters$franchise %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
   dplyr::rename(franchise_id = id) %>%
