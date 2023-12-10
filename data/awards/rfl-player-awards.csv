@@ -41,6 +41,9 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2017,13215,00-0033887,Reuben Foster,Foster,LB,70,0.14,1,DROY,Defensive Rookie of the Year
 2017,13221,00-0033539,Jarrad Davis,Davis,LB,108,0.1,2,DROY,2. Platz
 2017,13214,00-0033886,T.J. Watt,Watt,LB,100,-0.08,3,DROY,3. Platz
+2017,12205,00-0032055,Devin Funchess,Funchess,WR,144.3,0.38,1,CPOY,Comeback Player of the Year
+2017,11222,00-0030279,Keenan Allen,Allen,WR,184.6,0.98,2,CPOY,2. Platz
+2017,9902,00-0027656,Rob Gronkowski,Gronkowski,TE,158.2,0.68,3,CPOY,3. Platz
 2018,12150,00-0032241,Todd Gurley,Gurley,RB,298.4,2.8,1,MVP,Most Valuable Player
 2018,13604,00-0034844,Saquon Barkley,Barkley,RB,286,2.62,2,MVP,2. Platz
 2018,13132,00-0033906,Alvin Kamara,Kamara,RB,276.75,2.5,3,MVP,3. Platz
@@ -62,6 +65,9 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2018,13733,00-0034846,Shaquille Leonard,Leonard,LB,243,1.48,1,DROY,Defensive Rookie of the Year
 2018,13727,00-0034674,Leighton Vander Esch,Vander Esch,LB,183,1,2,DROY,2. Platz
 2018,13743,00-0034815,Fred Warner,Warner,LB,164,0.72,3,DROY,3. Platz
+2018,13146,00-0033553,James Conner,Conner,RB,247.2,2.08,1,CPOY,Comeback Player of the Year
+2018,8448,00-0024421,Antoine Bethea,Bethea,DB,172,0.52,2,CPOY,2. Platz
+2018,12171,00-0032187,David Johnson,Johnson,RB,181.7,1.14,3,CPOY,3. Platz
 2019,13130,00-0033280,Christian McCaffrey,McCaffrey,RB,336.9,3.38,1,MVP,Most Valuable Player
 2019,13128,00-0033893,Dalvin Cook,Cook,RB,257.2,2.32,2,MVP,2. Platz
 2019,12652,00-0032765,Michael Thomas,Thomas,WR,263.3,1.84,3,MVP,3. Platz
@@ -83,6 +89,9 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2019,14170,00-0035525,Devin Bush,Bush,LB,169,0.74,1,DROY,Defensive Rookie of the Year
 2019,14168,00-0035707,Devin White,White,LB,119,0.26,2,DROY,2. Platz
 2019,14260,00-0035286,Cole Holcomb,Holcomb,LB,132,0.22,3,DROY,3. Platz
+2019,13319,00-0033293,Aaron Jones,Jones,RB,216.1,1.76,1,CPOY,Comeback Player of the Year
+2019,11316,00-0030411,Logan Ryan,Ryan,DB,164,0.48,2,CPOY,2. Platz
+2019,10738,00-0029293,Marvin Jones,Jones,WR,174.1,0.58,3,CPOY,3. Platz
 2020,14168,00-0035707,Devin White,White,LB,209,2.6,1,MVP,Most Valuable Player
 2020,13132,00-0033906,Alvin Kamara,Kamara,RB,264.42,2.42,2,MVP,2. Platz
 2020,10768,00-0029562,Lavonte David,David,LB,186,1.96,3,MVP,3. Platz
@@ -104,11 +113,14 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2020,14896,00-0036323,Patrick Queen,Queen,LB,157,0.78,1,DROY,Defensive Rookie of the Year
 2020,14889,00-0036441,Kenneth Murray,Murray,LB,111,0.12,2,DROY,2. Platz
 2020,15029,00-0036167,Tae Crowder,Crowder,LB,38,0.1,3,DROY,3. Platz
+2020,13696,00-0034874,Roquan Smith,Smith,LB,192,1.3,1,CPOY,Comeback Player of the Year
+2020,14138,00-0035229,T.J. Hockenson,Hockenson,TE,130,0.28,2,CPOY,2. Platz
+2020,14087,00-0035664,Darrell Henderson,Henderson,RB,106.9,0.12,3,CPOY,3. Platz
 2021,14802,00-0036223,Jonathan Taylor,Taylor,RB,310.4,5.22,1,MVP,Most Valuable Player
 2021,13164,00-0033908,Cooper Kupp,Kupp,WR,305.1,2.46,2,MVP,2. Platz
-2021,13404,00-0033699,Austin Ekeler,Ekeler,RB,263.09999999999997,2.28,3,MVP,3. Platz
+2021,13404,00-0033699,Austin Ekeler,Ekeler,RB,263.1,2.28,3,MVP,3. Platz
 2021,13164,00-0033908,Cooper Kupp,Kupp,WR,305.1,2.46,1,OPOY,Offensive Player of the Year
-2021,13404,00-0033699,Austin Ekeler,Ekeler,RB,263.09999999999997,2.28,2,OPOY,2. Platz
+2021,13404,00-0033699,Austin Ekeler,Ekeler,RB,263.1,2.28,2,OPOY,2. Platz
 2021,13131,00-0033897,Joe Mixon,Mixon,RB,226,1.74,3,OPOY,3. Platz
 2021,13733,00-0034846,Shaquille Leonard,Leonard,LB,198,1.64,1,DPOY,Defensive Player of the Year
 2021,10775,00-0029255,Bobby Wagner,Wagner,LB,233,1.56,2,DPOY,2. Platz
@@ -127,7 +139,7 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2021,15351,00-0036915,Jeremiah Owusu-Koramoah,Owusu-Koramoah,LB,95,0,3,DROY,3. Platz
 2021,13131,00-0033897,Joe Mixon,Mixon,RB,226,1.74,1,CPOY,Comeback Player of the Year
 2021,14167,00-0035642,Josh Allen,Allen,DL,131,0.62,2,CPOY,2. Platz
-2021,14926,00-0036362,Willie Gay,Gay,LB,66,-0.14,3,CPOY,3. Platz
+2021,14147,00-0035717,Nick Bosa,Bosa,DL,130,0.62,3,CPOY,3. Platz
 2022,13699,00-0034743,Rashaan Evans,Evans,LB,227,3.04,1,MVP,Most Valuable Player
 2022,13319,00-0033293,Aaron Jones,Jones,RB,202.5,2.7,2,MVP,2. Platz
 2022,13404,00-0033699,Austin Ekeler,Ekeler,RB,270.3,2.56,3,MVP,3. Platz
@@ -150,8 +162,8 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2022,15822,00-0037244,Devin Lloyd,Lloyd,LB,149,0.64,2,DROY,2. Platz
 2022,15914,00-0037289,Malcolm Rodriguez,Rodriguez,LB,124,0.28,3,DROY,3. Platz
 2022,13130,00-0033280,Christian McCaffrey,McCaffrey,RB,239.26,2.12,1,CPOY,Comeback Player of the Year
-2022,14212,00-0035646,Sione Takitaki,Takitaki,LB,76,0.24,2,CPOY,2. Platz
-2022,14341,00-0035329,Donald Parham,Parham,TE,8.3,-0.14,3,CPOY,3. Platz
+2022,15238,00-0036945,Justin Fields,Fields,QB,257.34,0.72,2,CPOY,2. Platz
+2022,14212,00-0035646,Sione Takitaki,Takitaki,LB,76,0.24,3,CPOY,3. Platz
 2023,13130,00-0033280,Christian McCaffrey,McCaffrey,RB,297.1,2.84,1,MVP,Most Valuable Player
 2023,12801,00-0033040,Tyreek Hill,Hill,WR,313.6,2.52,2,MVP,2. Platz
 2023,13813,00-0034413,Foyesade Oluokun,Oluokun,LB,255,2.14,3,MVP,3. Platz
@@ -173,3 +185,6 @@ season,mfl_id,gsis_id,display_name,last_name,pos,points,war,rank,award,label
 2023,16236,00-0038599,Henry To'oTo'o,To'oTo'o,LB,94,0.06,1,DROY,Defensive Rookie of the Year
 2023,16383,00-0038807,Ivan Pace,Pace,LB,100,-0.04,2,DROY,2. Platz
 2023,16239,00-0039018,Jack Campbell,Campbell,LB,93,-0.14,3,DROY,3. Platz
+2023,15290,00-0036554,Nico Collins,Collins,WR,194.1,0.74,1,CPOY,Comeback Player of the Year
+2023,13470,00-0033393,Kenny Moore,Moore,DB,177,0.34,2,CPOY,2. Platz
+2023,15373,00-0036614,Jamin Davis,Davis,LB,169,1.46,3,CPOY,3. Platz
