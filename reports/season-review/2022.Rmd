@@ -42,19 +42,14 @@ library(gt)
 #library(rflfastR)
 ```
 
-```{r}
-var_season_first <- 2016
-var_season_last <- nflreadr::most_recent_season()
-var_mfl_league_id <- 63018
-var_mfl_api_base <- paste0("https://www55.myfantasyleague.com/", var_season_last, "/")
-```
-
-```{r}
-source("R/data/league.R", local = knitr::knit_global())
-source("R/data/franchises.R", local = knitr::knit_global())
-source("R/data/starter.R", local = knitr::knit_global())
-source("R/data/war.R", local = knitr::knit_global())
-source("R/plots/default.R", local = knitr::knit_global())
+```{r base, message=FALSE, warning=FALSE, include=FALSE}
+source("R/data/variables.R")
+source("R/data/league.R")
+source("R/data/franchises.R")
+source("R/data/players.R")
+source("R/data/starter.R")
+source("R/data/war.R")
+source("R/plots/default.R")
 ```
 
 ```{r}
@@ -65,8 +60,8 @@ output <- template
 # Liga
 ## Auszeichnungen
 ### Spieler Awards
-```{r}
-
+```{r awards, message=FALSE, warning=FALSE, include=FALSE}
+source("R/league/player-awards.R")
 ```
 
 
@@ -79,7 +74,8 @@ source("R/league/postseason-participation.R", local = knitr::knit_global())
 # Team Berichte
 ```{r}
 
-print(output, paste0("output/rfl-season-reports-", var_season_last, ".pptx"))
+print(output, paste0("output/rfl-season-reports-", v_season_last, ".pptx"))
+rm(output)
 
 source("R/plots/personnel.R", local = knitr::knit_global())
 
