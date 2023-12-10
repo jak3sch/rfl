@@ -433,10 +433,12 @@ DT::renderDataTable({
 
 ```{r elo-matchups-next, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
 DT::renderDataTable(
-  DT::datatable(
-    elo_matchups_next,
-    rownames = F, options = list(dom = "Ppft", pageLength = 12, order = list(2, "desc"))
-  )
+  if (nflreadr::get_current_week() <= 13) {
+    DT::datatable(
+      elo_matchups_next,
+      rownames = F, options = list(dom = "Ppft", pageLength = 12, order = list(2, "desc"))
+    )
+  }
 )
 ```
 
