@@ -11,9 +11,9 @@ library(gtExtras)
 library(webshot2)
 
 # data ----
-data <- readr::read_csv("data.csv") %>% 
-  dplyr::group_by(unit) %>% 
-  dplyr::group_modify(~ dplyr::add_row(.x, .before = 0)) %>% 
+data <- readr::read_csv("data.csv") %>%
+  dplyr::group_by(unit) %>%
+  dplyr::group_modify(~ dplyr::add_row(.x, .before = 0)) %>%
   dplyr::mutate(season = ifelse(dplyr::row_number() == 1, 2015, season))
 annotations <- readr::read_csv("annotations.csv")
 
@@ -69,10 +69,10 @@ plot <- function(data) {
     ggplot2::facet_wrap(~season, ncol = 4) +
     treemapify::geom_treemap() +
     treemapify::geom_treemap_subgroup2_border(color = color_bg, size = 3) +
-    
+
     ggplot2::geom_text(data = subset(data, season != 2015), aes(label = season), x = 0.05, y = 0.05, vjust = 0, hjust = 0, family = "base", fontface = "bold", color = color_bg, size = 4.5) +
     ggplot2::geom_text(data = subset(data, xmax - xmin > 0.1), aes(label = ifelse(count_above_league_avg > 0, paste0("+", count_above_league_avg), count_above_league_avg), x = xmax - 0.05, y = ymax - 0.05), hjust = 1, vjust = 1, family = "base", fontface = "bold", color = color_bg, size = 4.5) +
-    
+
     ggplot2::scale_x_continuous(limits = c(0, 1), expand = c(0, 0)) +
     ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
     ggplot2::scale_fill_manual(values = colors) +
@@ -80,12 +80,12 @@ plot <- function(data) {
     ggplot2::scale_shape_manual(values = c(17, 15, 19, 17)) +
     ggplot2::guides(fill = "none", color = "none", shape = guide_legend()) +
     ggplot2::coord_fixed() +
-    
+
     ggplot2::labs(
       x = NULL,
       y = NULL
     ) +
-    
+
     ggplot2::theme_void() +
     plot_reset +
     ggplot2::theme (
@@ -115,7 +115,7 @@ points <- function(data, pos) {
 offense <- plot(data = subset(data, unit == "offense"))
 defense <- plot(data = subset(data, unit == "defense"))
 
-example_data <- data %>% 
+example_data <- data %>%
   dplyr::filter(
     unit == "defense" & season == 2016
   )
@@ -132,13 +132,13 @@ for(pos in as.vector(unique(annotations$position))) {
       data = subset(annotations, unit == "offense"),
       pos = pos
     )
-  
+
   defense <- defense +
     points(
       data = subset(annotations, unit == "defense"),
       pos = pos
     )
-  
+
   example <- example +
     points(
       data = subset(annotations, unit == "defense" & season == 2016),
@@ -151,7 +151,7 @@ for(pos in as.vector(unique(annotations$position))) {
 ### tables ----
 gt_default <- function(df) {
   df %>%
-    gt::gt(rowname_col = "personnel") %>% 
+    gt::gt(rowname_col = "personnel") %>%
     gt::cols_hide(grouping) %>%
     gt::tab_options(
       table.background.color = color_bg,
@@ -161,7 +161,7 @@ gt_default <- function(df) {
       table.border.bottom.style = "hidden",
       table.border.left.style = "hidden",
       column_labels.hidden = TRUE
-    ) %>% 
+    ) %>%
     gt::data_color(
       method = "numeric",
       palette = c(color_bg, color_accent)
@@ -169,22 +169,22 @@ gt_default <- function(df) {
 }
 
 gt_to_png <- function(filter) {
-  gt <- table_data %>% 
-    dplyr::filter(grouping %in% {{filter}}) %>% 
+  gt <- table_data %>%
+    dplyr::filter(grouping %in% {{filter}}) %>%
     gt_default()
-  
+
   tmp <- tempfile(fileext = '.png') #generate path to temp .png file
   gt::gtsave(gt, tmp, expand = 0, vwidth = 550) #save gt table as png
   table_png <- png::readPNG(tmp, native = TRUE) # read tmp png file
-  
+
   return(table_png)
 }
 
-table_data <- data %>% 
-  dplyr::group_by(unit, grouping, personnel) %>% 
-  dplyr::summarise(count = sum(count), .groups = "drop") %>% 
-  dplyr::group_by(unit, grouping) %>% 
-  dplyr::arrange(dplyr::desc(count)) %>% 
+table_data <- data %>%
+  dplyr::group_by(unit, grouping, personnel) %>%
+  dplyr::summarise(count = sum(count), .groups = "drop") %>%
+  dplyr::group_by(unit, grouping) %>%
+  dplyr::arrange(dplyr::desc(count)) %>%
   dplyr::mutate(
     unit = stringr::str_to_title(unit),
     grouping_clean = dplyr::case_when(
@@ -194,7 +194,7 @@ table_data <- data %>%
       grouping == "234" ~ "2DL, 3LB, 4 DB",
       grouping == "225" ~ "2DL, 2LB, 5 DB",
     )
-  ) %>% 
+  ) %>%
   dplyr::group_by(unit, grouping_clean)
 
 
@@ -254,12 +254,12 @@ example_annotation <- function(xstart, xend, ystart, yend, curve = -0.5, shape =
     hjust = 0
     labelx <- xend + 0.07
   }
-  
+
   list(
     ggplot2::geom_point(aes(x = xstart, y = ystart), shape = shape, size = size, color = color, stroke = stroke),
     ggplot2::geom_curve(aes(x = xstart, xend = xend, y = ystart, yend = yend), curvature = curve, color = color_light, linewidth = 0.3),
     ggplot2::geom_text(aes(x = labelx, y = yend), label = label, color = color_light, size = 6, lineheight = 0.45, family = "base", vjust = 0.5, hjust = hjust, ...)
-    
+
   )
 }
 
@@ -272,7 +272,7 @@ guides <- ggplot2::ggplot() +
     yend = 0.85,
     label = "Colors stand for the grouping.\nFor offense that means number of started WR,\nfor the defense it is a 3 digit code consisting\nof the number of started DL, LB and DB (eg. 252)"
   ) +
-  
+
   # tiles annotation
   example_annotation(
     xstart = 2.39,
@@ -283,7 +283,7 @@ guides <- ggplot2::ggplot() +
     curve = -0.2,
     label = "Tiles stand for started personnel."
   ) +
-  
+
   # symbols annotation
   example_annotation(
     xstart = 2.05,
@@ -293,7 +293,7 @@ guides <- ggplot2::ggplot() +
     curve = 0.3,
     label = "Symbols on the largest areas illustrate the personnel.\nFrom top to bottom:\nOffense: WR, TE, RB\nDefense: S, CB, LB, DE, DT\nThe number of symbols in one row stands for the\nnumber of started players of that position."
   ) +
-  
+
   # season annotation
   example_annotation(
     xstart = 2.07,
@@ -303,7 +303,7 @@ guides <- ggplot2::ggplot() +
     curve = 0.4,
     label = "Number stands\nfor the played\nseason."
   ) +
-  
+
   # abv. league avg annotation
   example_annotation(
     xstart = 2.4,
@@ -313,14 +313,14 @@ guides <- ggplot2::ggplot() +
     curve = 0.4,
     label = "Number stands for the started\npersonnel above league average."
   ) +
-  
+
   ggplot2::scale_x_continuous(limits = c(0, 4), expand = c(0, 0)) +
   ggplot2::scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) +
-  
+
   ggplot2::labs(
     caption = caption
   ) +
-  
+
   ggplot2::theme_void() +
   ggplot2::theme(
     plot.caption = ggtext::element_markdown(
@@ -351,7 +351,7 @@ left <- patchwork::wrap_elements(
       subtitle = subtitle
     ) +
     ggplot2::theme_void() +
-    
+
     ggplot2::theme(
       plot.margin = ggplot2::margin(0),
       plot.title = ggplot2::element_text(
@@ -371,7 +371,7 @@ left <- patchwork::wrap_elements(
         color = color_light
       )
     ) +
-    
+
     guides +
     patchwork::plot_layout(ncol = 1, heights = c(1, 1)) &
     plot_reset
