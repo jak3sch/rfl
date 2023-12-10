@@ -1,10 +1,10 @@
 # plot ----
 plot_defaults_mvp_bar <- list(
-  geom_text(mapping = ggplot2::aes(label = war), vjust = 1.7, size = 10, color = color_bg, family = "accent"),
-  geom_text(aes(label = sapply(display_name, function(x) paste(strwrap(x, width = 5), collapse = "\n"))), vjust = -0.5, hjust = 0.5, size = 7, family = "base", color = color_light, lineheight = 0.3),
-  geom_hline(yintercept = 0, color = color_light, linewidth = 0.3),
+  ggplot2::geom_text(mapping = ggplot2::aes(label = war), vjust = 1.7, size = 10, color = c_background, family = "accent"),
+  ggplot2::geom_text(ggplot2::aes(label = sapply(display_name, function(x) paste(strwrap(x, width = 5), collapse = "\n"))), vjust = -0.5, hjust = 0.5, size = 7, family = "base", color = color_light, lineheight = 0.3),
+  ggplot2::geom_hline(yintercept = 0, color = c_light, linewidth = 0.3),
   nflplotR::geom_nfl_headshots(aes(player_gsis = gsis_id), y = 0, height = 0.25, vjust = 0),
-  ggplot2::scale_fill_manual(values = colors_position, guide = "none")
+  ggplot2::scale_fill_manual(values = v_colors, guide = "none")
 )
 
 # data ----
@@ -30,9 +30,9 @@ league_awards <- league_awards_data %>%
   tidyr::gather(category, pctl, dplyr::ends_with("pctl")) %>%
   dplyr::mutate(
     group = dplyr::case_when(
-      grepl("season", category) ~ paste0("Alle Award Anwärter der Saison ", var_season_last),
-      grepl("award", category) ~ paste0("Alle Spieler des gleichen Awards ", var_season_first, "-", var_season_last),
-      TRUE ~ paste0("Alle Award Anwärter ", var_season_first, "-", var_season_last)
+      grepl("season", category) ~ paste0("Alle Award Anwärter der Saison ", v_season_last),
+      grepl("award", category) ~ paste0("Alle Spieler des gleichen Awards ", v_season_first, "-", v_season_last),
+      TRUE ~ paste0("Alle Award Anwärter ", v_season_first, "-", v_season_last)
     ),
     category_f= factor(
       category,
@@ -52,7 +52,7 @@ league_awards <- league_awards_data %>%
   )
 
 league_awards_last_season <- league_awards %>%
-  dplyr::filter(season == var_season_last & rank == 1)
+  dplyr::filter(season == v_season_last & rank == 1)
 
 # plots ----
 ## helper ----
@@ -66,19 +66,19 @@ player_annotaions <- function() {
     ggplot2::geom_text(
       data = player_data,
       mapping = ggplot2::aes(label = award),
-      x = 3.5, y = 1.28, hjust = 0.5, color = color_accent, family = "accent", size = 8
+      x = 3.5, y = 1.28, hjust = 0.5, color = c_accent, family = "accent", size = 8
     ),
     # player name
     ggplot2::geom_text(
       data = player_data,
       mapping = ggplot2::aes(label = display_name),
-      x = 3.5, y = -3.5, hjust = 0.5, color = color_light, family = "accent", size = 10
+      x = 3.5, y = -3.5, hjust = 0.5, color = c_light, family = "accent", size = 10
     ),
     # award description
     ggplot2::geom_text(
       data = player_data,
       mapping = ggplot2::aes(label = subline),
-      x = 3.5, y = -4.05, vjust = 1, hjust = 0.5, color = color_muted, family = "base", size = 8, lineheight = 0.35
+      x = 3.5, y = -4.05, vjust = 1, hjust = 0.5, color = c_muted, family = "base", size = 8, lineheight = 0.35
     )
   )
 
@@ -91,22 +91,25 @@ segments <- data.frame(
   x2 = c(rep(6.5, 3), 3, 6),
   y1 = c(0.25, 0.50, 0.75, 1.35, 1.35),
   y2 = c(0.25, 0.50, 0.75, 1.35, 1.35),
-  color = c(rep(color_bg, 3), rep(color_accent, 2))
+  color = c(rep(c_background, 3), rep(c_accent, 2))
 )
 
 league_awards_plot <- ggplot2::ggplot(league_awards_last_season, aes(x = category_f, y = pctl)) +
-  ggplot2::facet_wrap(~ award_f, ncol = 3) +
+  ggplot2::facet_wrap(~ award_f, ncol = 4) +
   ggplot2::coord_polar(start = -3.15, clip = "off") +
 
-  ggplot2::geom_col(mapping = ggplot2::aes(alpha = group), fill = color_light, width = 0.97, position = "dodge") +
+  ggplot2::geom_col(mapping = ggplot2::aes(alpha = group), fill = c_light, width = 0.97, position = "dodge") +
 
   # custom grid lines and annotations
-  ggplot2::geom_text(label = "FPts", x = 5.85, y = -4.4, color = color_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
-  ggplot2::geom_text(label = "WAR", x = 6.15, y = 1.4, color = color_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_text(label = "FPts", x = 5.85, y = -4.4, color = c_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
+  ggplot2::geom_text(label = "WAR", x = 6.15, y = 1.4, color = c_muted, size = 6, family = "base", vjust = 1, hjust = 0.5, lineheight = 0.35) +
   ggplot2::geom_segment(data = segments, mapping = aes(x = x1, xend = x2, y = y1, yend = y2, color = color), linewidth = 0.3) +
   ggplot2::scale_color_identity()
 
-for (player in unique(league_awards$gsis_id)) {
+
+league_awards_plot
+
+for (player in unique(league_awards_last_season$award)) {
   league_awards_plot <- league_awards_plot +
     player_annotaions()
 }
@@ -119,19 +122,19 @@ league_awards_plot <- league_awards_plot +
 
   # player
   ggimage::geom_image(
-    data = league_awards_last_season %>% dplyr::group_by(gsis_id) %>% dplyr::filter(dplyr::row_number() == 1),
+    data = league_awards_last_season %>% dplyr::group_by(award) %>% dplyr::filter(dplyr::row_number() == 1),
     mapping = ggplot2::aes(image = cropcircles::circle_crop(headshot)),
     y = -1.5,
     asp = 1, size = 0.39
   ) +
 
-  ggplot2::scale_color_manual(values = colors_position, guide = "none") +
+  ggplot2::scale_color_manual(values = v_colors, guide = "none") +
   ggplot2::scale_alpha_manual(values = c(0.3, 1, 0.6)) +
   ggplot2::scale_y_continuous(limits = c(-1.5, 1.35)) +
   ggplot2::scale_x_discrete(expand = ggplot2::expansion(add = 2.5)) +
 
   ggplot2::labs(
-    title = paste("Spieler Auszeichnungen", var_season_last),
+    title = paste("Spieler Auszeichnungen", v_season_last),
     subtitle = "Die Grafik zeigt die besten Spieler in ihrer Kategorie. Die Balken stehen für die Perzentile,\nin denen der Spieler zwischen den Top-3 (Award Anwärter) ihrer Kategorie gerankt ist.",
     alpha = ""
   ) +
@@ -143,6 +146,13 @@ league_awards_plot <- league_awards_plot +
     panel.spacing.x = ggplot2::unit(5, "mm"),
     panel.spacing.y = ggplot2::unit(0, "mm")
   )
+
+league_awards_plot
+
+output <- output %>% 
+  officer::add_slide(layout = "Bild") %>% 
+  officer::ph_with(value = league_awards_plot, location = officer::ph_location_label("img"))
+
 
 # recent mvps ----
 recent_mvps <- league_awards %>%

@@ -1,4 +1,4 @@
-starter <- purrr::map_df(2016:var_season_last, function(x) {
+starter <- purrr::map_df(2016:v_season_last, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/starter/rfl-starter-{x}.csv"), show_col_types = FALSE
   )

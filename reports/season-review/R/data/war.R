@@ -1,4 +1,4 @@
-war <- purrr::map_df(var_season_first:var_season_last, function(x) {
+war <- purrr::map_df(v_season_first:v_season_last, function(x) {
   readr::read_csv(
     glue::glue("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-{x}.csv"),
     col_types = "iiccdd"

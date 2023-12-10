@@ -1,4 +1,4 @@
-rfl_players <- jsonlite::read_json(paste0(var_mfl_api_base, "export?TYPE=players&L=", var_mfl_league_id, "&APIKEY=&DETAILS=&SINCE=2016&PLAYERS=&JSON=1"))$players$player %>%
+rfl_players <- jsonlite::read_json(paste0(v_mfl_api_base, "export?TYPE=players&L=", v_mfl_league_id, "&APIKEY=&DETAILS=&SINCE=2016&PLAYERS=&JSON=1"))$players$player %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
   dplyr::mutate(

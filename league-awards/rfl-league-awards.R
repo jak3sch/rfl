@@ -1,7 +1,7 @@
 library(tidyverse)
 library(nflfastR)
 
-var.lastSeason = 2023
+var.lastSeason = 2017
 
 # base data ----
 ## fantasy ----
@@ -12,7 +12,7 @@ fantasyPoints <- readRDS(url(paste0("https://github.com/jak3sch/rfl/blob/main/da
   )
 
 ## WAR ----
-franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), col_types = "icccdd") %>%
+franchiseWARPlayerRaw <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason, ".csv"), col_types = "icccdd") %>% 
   dplyr::left_join(
     readr::read_csv(paste0("https://raw.githubusercontent.com/jak3sch/rfl/main/data/war/rfl-war-", var.lastSeason - 1, ".csv"), col_types = "icccdd") %>%
       dplyr::select(player_id, war) %>%
@@ -57,7 +57,20 @@ league_awards <- franchiseWARPlayer %>%
   dplyr::filter(!is.na(war)) %>%
   dplyr::group_by(pos) %>%
   dplyr::arrange(desc(war)) %>%
-  dplyr::mutate(rank = dplyr::row_number()) %>%
+  dplyr::mutate(
+    rank = dplyr::row_number(),
+    # manual gsis_ids
+    #gsis_id = dplyr::case_when(
+  #    mfl_id == "15853" ~ "00-0038133",
+    #  mfl_id == "15832" ~ "00-0037237",
+     # mfl_id == "15849" ~ "00-0038125",
+    #  mfl_id == "15894" ~ "00-0037079",
+    #  mfl_id == "15833" ~ "00-0035253",
+    #  mfl_id == "15815" ~ "00-0037235",
+    #  mfl_id == "15812" ~ "00-0038127",
+    #  TRUE ~ gsis_id
+    #)
+  ) %>%
   dplyr::ungroup() %>%
   dplyr::left_join(
     nflreadr::load_players() %>% dplyr::select(display_name, last_name, gsis_id, rookie_year),
@@ -159,15 +172,16 @@ league_droy <- league_rookies %>%
   )
 
 ## Comeback
-league_comeback <- nflreadr::load_rosters(var.lastSeason - 1) %>%
-  dplyr::filter(status == "R/Injured") %>%
+league_comeback <- nflreadr::load_rosters(var.lastSeason - 1) %>% 
+  dplyr::filter(status == "RES") %>% 
   dplyr::select(gsis_id) %>%
   dplyr::left_join(
     league_awards,
     by = "gsis_id"
-  ) %>%
+  ) %>% 
+  dplyr::filter(war >= 0) %>% 
   dplyr::mutate(war_diff = war - war_last_season) %>%
-  dplyr::arrange(desc(war_diff)) %>%
+  dplyr::arrange(desc(war_diff)) %>% 
   orderCols() %>%
   dplyr::mutate(
     award = "CPOY",
@@ -181,7 +195,8 @@ combined_league_awards <- rbind(league_mvp, league_opoy, league_dpoy, league_air
     by = "mfl_id"
   ) %>%
   dplyr::mutate(season = var.lastSeason) %>%
-  dplyr::select(season, dplyr::ends_with("id"), dplyr::ends_with("name"), pos:label)
+  dplyr::select(season, dplyr::ends_with("id"), dplyr::ends_with("name"), pos:label) %>% 
+  dplyr::mutate(points = round(points, 2))
 
 read_data <- readr::read_csv("data/awards/rfl-player-awards.csv") %>%
   dplyr::filter(season < var.lastSeason)
