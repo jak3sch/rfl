@@ -69,9 +69,10 @@ players <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=players&L=63
     player_id = id
   )
 
-source("R/base-data.R", local = T)
+source("R/base-data.R")
 
 source("R/chunks/plotDefaults.R")
+source("R/true-standing/true-standing.R")
 
 gtDefaults <- function(df) {
   df %>% 
@@ -130,8 +131,6 @@ selectizeInput(
 ## Row
 ### Aktuelles Standing
 ```{r current-standing, echo=FALSE, fig.height=20, message=FALSE, warning=FALSE}
-source("R/true-standing/true-standing.R")
-
 gt::render_gt({
   current_standing %>% 
     dplyr::select(-season, -week) %>% 
@@ -158,7 +157,7 @@ gt::render_gt({
     gtExtras::gt_plt_winloss(
       winloss,
       max_wins = 26,
-      palette = c("#10ac84", "#ee5253", "gray"),
+      palette = c("#10ac84", "#ee5253", "#c8d6e5"),
       type = "pill"
     ) %>% 
     
@@ -790,6 +789,93 @@ DT::renderDataTable({
         WAR = war
       ),
     rownames = F, filter = "top", options = list(pageLength = 12, order = list(3, 'desc'))
+  )
+})
+```
+
+# Advance Rate {data-navmenu="Spieler"}
+
+## Inputs {.sidebar}
+
+```{r inputs-advance-rates, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/advance-rates/advance-rates.R", local = T)
+```
+
+## Main
+### Advance Rates
+
+```{r advance-rates, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  DT::datatable(
+    advanced_rosters %>% 
+      dplyr::rename(
+        "Spieler" = player_name,
+        "FPts/G" = score,
+        "Pos" = pos,
+        "Pos Rank" = rank,
+        "Advance Rate" = advance_rate
+      ),
+    rownames = FALSE, options = list(pageLength = 12, order = list(1, 'desc'))
+  )
+})
+```
+
+
+# Projections {data-navmenu="Matchups"}
+## Inputs {.sidebar}
+
+```{r inputs-matchup-projections, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/matchups/projections.R")
+
+selectizeInput(
+  "matchupProjectionsSelectMatchup",
+  "Filter nach Matchup",
+  choices = matchups$matchup,
+  selected = matchups$matchup[1],
+  multiple= FALSE,
+  options = list(
+    placeholder = "Matchup wählen"
+  )
+)
+```
+
+## Main
+### Home Team
+
+```{r matchup-projections-home, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+home_team <- reactive({
+  matchups %>% 
+    dplyr::filter(matchup == input$matchupProjectionsSelectMatchup) %>% 
+    dplyr::pull(home_name)
+})
+
+gt::render_gt({
+  matchup_projection_table_data %>% 
+  dplyr::filter(franchise_name == home_team()) %>% 
+  gtMatchupProjections() %>% 
+  gt::tab_header(
+    title = home_team(),
+    subtitle = paste("Week", nflreadr::get_current_week(), nflreadr::get_current_season())
+  )
+})
+```
+
+### Away Team
+
+```{r matchup-projections-away, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+away_team <- reactive({
+  matchups %>% 
+    dplyr::filter(matchup == input$matchupProjectionsSelectMatchup) %>% 
+    dplyr::pull(away_name)
+})
+
+gt::render_gt({
+  matchup_projection_table_data %>% 
+  dplyr::filter(franchise_name == away_team()) %>% 
+  gtMatchupProjections() %>% 
+  gt::tab_header(
+    title = away_team(),
+    subtitle = paste("Week", nflreadr::get_current_week(), nflreadr::get_current_season())
   )
 })
 ```

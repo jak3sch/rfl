@@ -74,3 +74,18 @@ elo <- purrr::map_df(2016:var.season, function(x) {
 }) %>%
   dplyr::left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>%
   dplyr::left_join(franchises %>% select(franchise_id, franchise_name) %>% rename(opponent_name = franchise_name), by = c("opponent_id" = "franchise_id"))
+
+player_ranks_avg <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=playerScores&L=63018&W=AVG&JSON=1"))$playerScores$playerScore %>% 
+  dplyr::tibble() %>% 
+  tidyr::unnest_wider(1) %>% 
+  dplyr::select(id, score) %>% 
+  dplyr::left_join(
+    players %>% 
+      dplyr::select(player_id, pos),
+    by = c("id" = "player_id")
+  ) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(dplyr::desc(as.numeric(score))) %>% 
+  dplyr::mutate(
+    rank = row_number()
+  )
