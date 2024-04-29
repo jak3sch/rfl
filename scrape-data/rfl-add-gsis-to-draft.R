@@ -14,7 +14,7 @@ merge <- rfl_drafts %>%
   dplyr::select(season:mfl_id, gsis_id, player_name:is_rookie)
 
 new_data <- rbind(rfl_drafts %>% 
-                    dplyr::filter(is.na(gsis_id)),
+                    dplyr::filter(!is.na(gsis_id)),
                   merge) %>% 
   dplyr::arrange(season, overall)
 
