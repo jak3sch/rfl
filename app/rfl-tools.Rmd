@@ -45,7 +45,8 @@ library(ggridges)
 
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
 var.mflLeagueID <- 63018
-var.season <- 2023
+var.season <- nflreadr::get_current_season()
+var.week <- nflreadr::get_current_week()
 var.mflApiBase <- paste0("https://www45.myfantasyleague.com/", var.season)
 
 var.colorBlue <- "#00183C"
@@ -824,8 +825,21 @@ DT::renderDataTable({
 # Projections {data-navmenu="Matchups"}
 ## Inputs {.sidebar}
 
-```{r inputs-matchup-projections, echo=FALSE, message=FALSE, warning=FALSE}
+```{r inputs-matchup-projections, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 source("R/matchups/projections.R")
+
+weeks <- c(1:var.week)
+
+selectizeInput(
+  "matchupProjectionsSelectWeek",
+  "Filter nach Woche",
+  choices = weeks,
+  selected = max(weeks),
+  multiple= FALSE,
+  options = list(
+    placeholder = "Woche wählen"
+  )
+)
 
 selectizeInput(
   "matchupProjectionsSelectMatchup",
@@ -1073,3 +1087,19 @@ renderPlot({
 }, height = 1000)
 ```
 
+### Nach NFL Draft Round
+
+```{r fig.height=12}
+renderPlot({
+  nfl_draft_rounds() %>% 
+    ggplot2::ggplot(ggplot2::aes(x = round_nfl, y = round, fill = count)) +
+    ggplot2::facet_wrap(~ position) +
+    ggplot2::geom_tile() +
+    ggplot2::geom_text(ggplot2::aes(label = count), color = "white", size = 3) +
+    ggplot2::labs(
+      x = "NFL Draft Round",
+      y = "RFL Draft Round"
+    ) +
+    plotDefaults
+}, height = 1000)
+```
