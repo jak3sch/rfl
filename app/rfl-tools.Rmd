@@ -472,11 +472,26 @@ DT::renderDataTable(
 ```
 
 # WAR nach Position {data-navmenu="Teams"}
+
+## Sidebar {.sidebar}
+
+```{r inputs-war-teams, echo=FALSE, message=FALSE, warning=FALSE}
+sliderInput("warTeamsMinStarts", "Minimum Starts eines Spielers in einem Team", min = 0, max = 13, value = 7, sep = "")
+```
+
 > Übersicht über die kummulierten WAR für die einzelnen Teams. Es fließen derzeit nur Spieler ein, die in dieser Saison mindestens einmal in der Liga gestartet wurden.
 
+## Row
+
 ```{r war-teams, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
-DT::renderDataTable({
-  roster %>% 
+war_teams_data <- roster %>% 
+    dplyr::mutate(
+      pos = dplyr::case_when(
+        pos %in% c("DT", "DE") ~ "DL",
+        pos %in% c("CB", "S") ~ "DB",
+        TRUE ~ pos
+      )
+    ) %>% 
     dplyr::left_join(
       war %>%
         dplyr::filter(season == var.season) %>% 
@@ -485,12 +500,29 @@ DT::renderDataTable({
       by = "player_id",
       multiple = "all"
     ) %>% 
+    dplyr::left_join(
+      starter %>% 
+        dplyr::filter(starter_status == "starter", season == var.season) %>% 
+        dplyr::mutate(player_id = as.character(player_id)) %>% 
+        dplyr::group_by(franchise_id, player_id) %>% 
+        dplyr::summarise(starts = n() / 2, .groups = "drop"),
+      by = c("player_id", "franchise_id")
+    ) %>%
+  dplyr::mutate(starts = ifelse(!is.na(starts), starts, 0))
+
+war_teams_data_filtered <- reactive({
+  req(input$warTeamsMinStarts[1])
+  
+  war_teams_data %>% 
+    dplyr::filter(
+      starts >= input$warTeamsMinStarts[1]
+    ) %>% 
     dplyr::group_by(franchise_id, pos) %>% 
     dplyr::summarise(
       war = round(sum(war, na.rm = T), 2),
       .groups = "drop") %>% 
     dplyr::group_by(franchise_id) %>% 
-    dplyr::mutate(total = sum(war, na.rm = T)) %>% 
+    dplyr::mutate(total = round(sum(war, na.rm = T), 2)) %>% 
     dplyr::ungroup() %>% 
     tidyr::spread(pos, war) %>% 
     dplyr::left_join(
@@ -498,7 +530,11 @@ DT::renderDataTable({
         dplyr::select(franchise_id, franchise_name),
       by = "franchise_id"
     ) %>%
-    dplyr::select(franchise_name, total, QB, RB, WR, TE, DT, DE, LB, CB, S, PK)
+    dplyr::select(franchise_name, total, QB, RB, WR, TE, DL, LB, DB, PK)
+})
+
+DT::renderDataTable({
+  war_teams_data_filtered()
 }, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'desc')))
 
 # ToDo: WAR wird nur für spieler berechnet, die diese saison gestartet wurden
