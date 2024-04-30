@@ -1,5 +1,5 @@
 # league data ----
-league <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=league&L=63018&APIKEY=&JSON=1")) %>%
+league <- jsonlite::read_json(paste0(var.mflApiBaseEarlyNewYear, "/export?TYPE=league&L=63018&APIKEY=&JSON=1")) %>%
   purrr::pluck("league")
 
 ## franchise data ----
@@ -43,7 +43,7 @@ starter <- purrr::map_df(2016:nflreadr::get_current_season(), function(x) {
 })
 
 ## roster data ----
-roster <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1")) %>%
+roster <- jsonlite::read_json(paste0(var.mflApiBaseEarlyNewYear, "/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1")) %>%
   purrr::pluck("rosters", "franchise") %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
@@ -75,17 +75,17 @@ elo <- purrr::map_df(2016:nflreadr::get_current_season(), function(x) {
   dplyr::left_join(franchises %>% select(franchise_id, franchise_name, division_name), by = "franchise_id") %>%
   dplyr::left_join(franchises %>% select(franchise_id, franchise_name) %>% rename(opponent_name = franchise_name), by = c("opponent_id" = "franchise_id"))
 
-player_ranks_avg <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=playerScores&L=63018&W=AVG&JSON=1"))$playerScores$playerScore %>% 
-  dplyr::tibble() %>% 
-  tidyr::unnest_wider(1) %>% 
-  dplyr::select(id, score) %>% 
+player_ranks_avg <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=playerScores&L=63018&W=AVG&JSON=1"))$playerScores$playerScore %>%
+  dplyr::tibble() %>%
+  tidyr::unnest_wider(1) %>%
+  dplyr::select(id, score) %>%
   dplyr::left_join(
-    players %>% 
+    players %>%
       dplyr::select(player_id, pos),
     by = c("id" = "player_id")
-  ) %>% 
-  dplyr::group_by(pos) %>% 
-  dplyr::arrange(dplyr::desc(as.numeric(score))) %>% 
+  ) %>%
+  dplyr::group_by(pos) %>%
+  dplyr::arrange(dplyr::desc(as.numeric(score))) %>%
   dplyr::mutate(
     rank = row_number()
   )

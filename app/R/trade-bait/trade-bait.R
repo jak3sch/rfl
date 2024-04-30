@@ -12,7 +12,7 @@ create_pos_rank <- function(df) {
     dplyr::select(player_id, war, pos_rank)
 }
 
-trade_baits <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=tradeBait&L=63018&APIKEY=aRNp3s%2BWvuWsx12mPlrBYDoeErox&INCLUDE_DRAFT_PICKS=0&JSON=1"))$tradeBaits$tradeBait %>%
+trade_baits <- jsonlite::read_json(paste0(var.mflApiBaseEarlyNewYear, "/export?TYPE=tradeBait&L=63018&APIKEY=aRNp3s%2BWvuWsx12mPlrBYDoeErox&INCLUDE_DRAFT_PICKS=0&JSON=1"))$tradeBaits$tradeBait %>%
   dplyr::tibble() %>%
   tidyr::unnest_wider(1) %>%
 

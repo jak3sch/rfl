@@ -46,8 +46,10 @@ library(ggridges)
 ```{r global, message=TRUE, warning=TRUE, include=FALSE}
 var.mflLeagueID <- 63018
 var.season <- nflreadr::get_current_season()
+var.seasonNewYear <- nflreadr::get_current_season(TRUE)
 var.week <- nflreadr::get_current_week()
 var.mflApiBase <- paste0("https://www45.myfantasyleague.com/", var.season)
+var.mflApiBaseEarlyNewYear <- paste0("https://www45.myfantasyleague.com/", var.seasonNewYear)
 
 var.colorBlue <- "#00183C"
 var.colorRed <- "#D03324"
@@ -1002,7 +1004,7 @@ gt::render_gt({
 
 # Trade Bait {data-navmenu="Trades"}
 ### Trade Bait
-```{r trade-bait, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r trade-bait, message=FALSE, warning=FALSE, include=FALSE}
 source("R/trade-bait/trade-bait.R", local = T)
 ```
 
@@ -1139,3 +1141,5 @@ renderPlot({
     plotDefaults
 }, height = 1000)
 ```
+
+> oben links: früh im NFL Draft, spät im RFL Draft (Steal?) - oben rechts: spät im NFL Draft, spät im RFL Draft - unten rechts: spät im NFL Draft, früh im RFL Draft (Reach?) - unten links: früh im NFL Draft, früh im RFL Draft
