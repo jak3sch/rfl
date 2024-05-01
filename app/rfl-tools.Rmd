@@ -22,6 +22,15 @@ output:
 runtime: shiny
 ---
 
+```{css}
+.datatables.html-widget.html-widget-static-bound { 
+  height: auto !important;
+}
+.dataTables_scrollBody {
+  height: unset !important;
+}
+```
+
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
@@ -485,7 +494,7 @@ sliderInput("warTeamsMinStarts", "Minimum Starts eines Spielers in einem Team", 
 
 ## Row
 
-```{r war-teams, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+```{r war-teams, echo=FALSE, message=FALSE, warning=FALSE}
 war_teams_data <- roster %>% 
     dplyr::mutate(
       pos = dplyr::case_when(
