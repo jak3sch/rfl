@@ -1,8 +1,20 @@
-# stats for calculating fantasy points
-offense_stats <- nflreadr::load_player_stats((var.season - 20):var.season, "offense") %>%
+rostered_players <- jsonlite::read_json("https://www45.myfantasyleague.com/2024/export?TYPE=rosters&L=63018&APIKEY=&FRANCHISE=&W=&JSON=1") %>%
+  purrr::pluck("rosters", "franchise") %>%
+  dplyr::tibble() %>%
+  tidyr::unnest_wider(1) %>%
+  tidyr::unnest(player) %>%
+  dplyr::rename(franchise_id = id) %>%
+  tidyr::unnest_wider(player) %>%
+  dplyr::rename(player_id = id) %>%
+  dplyr::select(player_id) %>%
+  dplyr::distinct()
+
+rfl_drafts_data <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/drafts/rfl-draft.csv", col_types = "iicccccccci")
+
+offense_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "offense") %>%
   dplyr::filter(
     position %in% c("QB", "RB", "WR", "TE"),
-    season_type == "REG"
+    week <= 16
   ) %>%
   dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>%
   dplyr::mutate(
@@ -10,7 +22,7 @@ offense_stats <- nflreadr::load_player_stats((var.season - 20):var.season, "offe
   ) %>%
   dplyr::select(season, week, player_id, position, fpts)
 
-defense_stats <- nflreadr::load_player_stats((var.season - 20):var.season, "defense") %>%
+defense_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "defense") %>%
   dplyr::mutate(
     position = dplyr::case_when(
       position %in% c("DT", "DE", "OLB", "NT", "DL") ~ "DL",
@@ -18,22 +30,21 @@ defense_stats <- nflreadr::load_player_stats((var.season - 20):var.season, "defe
       position %in% c("CB", "DB", "FS", "SS", "SAF", "S") ~ "DB"
     )
   ) %>%
-  dplyr::filter(position %in% c("DL", "LB", "DB"), season_type == "REG") %>%
+  dplyr::filter(position %in% c("DL", "LB", "DB"), week <= 16) %>%
   dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>%
   dplyr::mutate(
     fpts = (def_tackles_solo * 2) + def_tackle_assists + (def_fumbles_forced * 3) + (def_sacks * 4) + (def_interceptions * 4) + (def_pass_defended * 2) + (def_tds * 6) - def_fumbles + (def_fumble_recovery_opp * 3) + (def_safety * 2)
   ) %>%
   dplyr::select(season, week, player_id, position, fpts)
 
-kicking_stats <- nflreadr::load_player_stats((var.season - 20):var.season, "kicking") %>%
-  dplyr::filter(position == "K", season_type == "REG") %>%
+kicking_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "kicking") %>%
+  dplyr::filter(position == "K", week <= 16) %>%
   dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>%
   dplyr::mutate(
     fpts = (fg_made_distance) * 0.1 + ((fg_missed_0_19 + fg_missed_20_29) * -2) + (fg_missed_30_39 * -1) + (fg_missed_40_49 * -0.5) + ((fg_missed_50_59 + fg_missed_60_) * -0.25) + pat_made - pat_missed
   ) %>%
   dplyr::select(season, week, player_id, position, fpts)
 
-# combine fantasy points
 fpts <- rbind(offense_stats, defense_stats, kicking_stats) %>%
   dplyr::left_join(
     nflreadr::load_players() %>%
@@ -41,9 +52,7 @@ fpts <- rbind(offense_stats, defense_stats, kicking_stats) %>%
     by = c("player_id" = "gsis_id")
   ) %>%
   dplyr::filter(!is.na(entry_year))
-#week <= 16
 
-# calculating ppg
 ppg <- fpts %>%
   dplyr::left_join(
     nflreadr::load_draft_picks() %>%
@@ -97,39 +106,7 @@ aging_curves <- ppg %>%
   dplyr::ungroup() %>%
   dplyr::select(position, experience, round, multi_n5)
 
-# positional value
-positional_value <- starter %>%
-  dplyr::filter(starter_status == "starter") %>%
-  dplyr::mutate(
-    pos = dplyr::case_when(
-      pos %in% c("DT", "DE") ~ "DL",
-      pos %in% c("CB", "S") ~ "DB",
-      TRUE ~ pos
-    )
-  ) %>%
-  dplyr::group_by(season, week, franchise_id, player_id) %>%
-  dplyr::filter(dplyr::row_number() == 1) %>% # entferne doppelte spieler von double header matchups
-  dplyr::group_by(season, week, franchise_id) %>%
-  dplyr::mutate(franchise_points = sum(player_score, na.rm = TRUE)) %>%
-  dplyr::group_by(season, week, franchise_id, pos) %>%
-  dplyr::mutate(
-    position_count = n(),
-    position_score = sum(player_score, na.rm = TRUE),
-    position_value = position_score / franchise_points
-  ) %>%
-  dplyr::group_by(pos) %>%
-  dplyr::summarise(
-    dplyr::across(position_count:position_value, \(x) mean(x, na.rm = TRUE)),
-    .groups = "drop"
-  )
-
-player_values <- rbind(
-  roster %>%
-    dplyr::select(player_id),
-  rfl_drafts_data %>%
-    select(mfl_id) %>%
-    dplyr::rename(player_id = mfl_id)
-  ) %>%
+player_values <- rbind(rostered_players, rfl_drafts_data %>% select(mfl_id) %>% dplyr::rename(player_id = mfl_id)) %>%
   dplyr::distinct() %>%
   dplyr::left_join(
     nflreadr::load_ff_playerids() %>%
@@ -149,7 +126,7 @@ player_values <- rbind(
   ) %>%
   dplyr::mutate(
     round = ifelse(is.na(round), 8, round),
-    experience = var.season - entry_year + 1
+    experience = last_season - entry_year + 1
   ) %>%
   dplyr::left_join(
     ppg %>%
@@ -163,7 +140,7 @@ player_values <- rbind(
   ) %>%
   dplyr::left_join(
     ppg %>%
-      dplyr::filter(season == var.season) %>%
+      dplyr::filter(season == last_season) %>%
       dplyr::select(player_id, ppg) %>%
       dplyr::rename(ppg_last_season = ppg),
     by = c("gsis_id" = "player_id")
@@ -206,15 +183,3 @@ pick_values <- rfl_drafts_data %>%
   dplyr::arrange(dplyr::desc(pick_value)) %>%
   dplyr::mutate(pick = row_number()) %>%
   dplyr::select(-new_order)
-
-trade_values <- rbind(
-  player_values %>%
-    dplyr::mutate(
-      asset = paste0(display_name, " (", position, ")"),
-    ) %>%
-    dplyr::rename(value = proj_fpts) %>%
-    dplyr::select(asset, value),
-  pick_values %>%
-    dplyr::rename(asset = pick, value = pick_value) %>%
-    select(asset, value)
-)
