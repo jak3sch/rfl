@@ -302,28 +302,49 @@ position_depth <- player_war_values %>%
   ) %>% 
   dplyr::filter(pos_rank <= ceiling(position_count * 12)) %>% 
   dplyr::filter(pos_rank == max(pos_rank)) %>% 
-  dplyr::rename(last_starter_war_value = player_war_value) %>% 
-  dplyr::select(pos, last_starter_war_value) %>% 
+  dplyr::rename(last_starter_war_pct = player_war_value_pct, last_starter_above_0 = player_war_value) %>% 
+  dplyr::select(pos, last_starter_war_pct, last_starter_above_0) %>% 
   dplyr::ungroup()
 
 position_depth %>% 
-  dplyr::arrange(dplyr::desc(last_starter_war_value)) %>% 
+  dplyr::arrange(dplyr::desc(last_starter_war_pct)) %>% 
   gt::gt()
 
 ```
 
+### Aging Curves
 
+Spieler verlieren im Laufe ihrer Karriere an Wert. Wir nutzen Aging Curves um diesen Wertverfall in den Wert des Spielers einzuberechnen. Dazu schauen wir auf alle Spieler seit 2000, ermitteln ihren Karrieredurchschnitt an Fantasy Punkten und schauen, wie viel Punkte sie in jedem Jahr ihrer Karriere mehr oder weniger als ihren Durchschnitt erreicht haben.
+
+```{r}
+aging_curves <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/fantasy-data/main/fantasy/aging-curves.csv", col_types = "cinn")
+
+ggplot2::ggplot(aging_curves, aes(x = years_experience, y = multiplicator, fill = position)) +
+  ggplot2::geom_col() +
+  ggplot2::facet_wrap(vars(position)) +
+  ggplot2::labs(
+    title = "PPR/Game aging curve by experience",
+    subtitle = "All players with NFL debut in 2000 or later",
+    x = "Years of experience",
+    y = "Total season PPR over career average"
+  ) +
+  ggplot2::theme(
+    legend.position = "none"
+  ) +
+  ggplot2::scale_y_continuous(labels = scales::percent)
+```
+Für die Berechnung schauen wir, in welchem Jahr der betreffende Spieler ist und ermitteln den Durchschnitt der nächsten zwei Jahre aus der Aging Curve der Positionsgruppe. Dieser Wert dient als Multiplikator für den Spieler Wert.
 
 ## Player Value
 
 Führen wir die Daten zusammen:
 
  1. Wir haben den Wert des Spielers an sich (*player_war_value*), gemessen in WAR unter Berücksichtigung der letzten Jahre (siehe oben)
+ 2. Wir haben den Dynasty Wert des Spieler, gemessen in einem Prozentualem Anteil seiner prognostizierten Fantasy Punkte im Vergleich zu seinem Karriere Schnitt
  2. Wir haben den Wert der Positionsgruppe (*position_value*), gemessen in einem Prozentualem Anteil am Ergebnis des Teams
- 3. Wir haben den Wert der Positionsgruppe, gemessen in WAR des letzten Starters (*last_starter_war_value*)
+ 3. Wir haben den Wert der Positionsgruppe (*last_starter_war_value*), gemessen in einem Prozentualem Anteil der WAR des letzten Starters an den WAR des besten Spielers in seiner Positionsgruppe.
  
  Keinen Einfluss haben (derzeit):
-  - Alter des Spielers (aging curve einberechnen)
   - Umstände (zB Depth Chart Position, Spieler anderer Units, Coaching etc.)
   - Vertrag des Spielers
 
@@ -332,8 +353,40 @@ Aus allem ergibt sich die Formel:
 **player_value = (player_war_value + positional_war_value) * player_war_value_pct**
 
 ```{r echo=FALSE}
-player_values <- player_war_values %>% 
-  dplyr::select(season, player_id, player_name, pos, player_war_value) %>% 
+player_values <- player_war_values %>%
+  dplyr::left_join(
+    nflreadr::load_ff_playerids() %>% 
+      dplyr::mutate(mfl_id = as.double(mfl_id)) %>% 
+      dplyr::select(mfl_id, gsis_id),
+    by = c("player_id" = "mfl_id")
+  ) %>% 
+  dplyr::left_join(
+    nflreadr::load_players() %>% 
+      dplyr::select(gsis_id, entry_year),
+    by = "gsis_id"
+  ) %>% 
+  dplyr::mutate(
+    years_experience = ifelse(is.na(entry_year), 1, season - entry_year + 1)
+  ) %>% 
+  
+  # füge aging curve data an
+  dplyr::left_join(
+    aging_curves %>% 
+      dplyr::group_by(position) %>% 
+      dplyr::arrange(years_experience) %>% 
+      dplyr::mutate(
+        n_1 = dplyr::lead(multiplicator, 1),
+        n_2 = dplyr::lead(multiplicator, 2),
+        aging_curve_value = (n_1 + n_2) / 2
+      ) %>% 
+      dplyr::select(position, years_experience, aging_curve_value),
+    by = c("pos" = "position", "years_experience")
+  ) %>% 
+  dplyr::mutate(
+    aging_curve_value = ifelse(is.na(aging_curve_value), 1, aging_curve_value)
+  ) %>% 
+  
+  dplyr::select(season, player_id, player_name, pos, player_war_value, aging_curve_value) %>% 
   #dplyr::mutate(
   #  player_war_value_pct = (player_war_value_pct - min(player_war_value_pct)) / (max(player_war_value_pct) - min(player_war_value_pct)) # wert zwishcen 0 und 1 erzeugen
   #) %>% 
@@ -347,8 +400,9 @@ player_values <- player_war_values %>%
     by = "pos", multiple = "all"
   ) %>% 
   dplyr::mutate(
-    #position_value = 1 - position_value, 
-    player_value = round((player_war_value * position_value) - last_starter_war_value, 2)
+    #check = position_value - last_starter_war_pct, 
+    player_value = round((player_war_value * aging_curve_value) * (position_value - last_starter_war_pct), 2),
+    #player_value = player_value - min(player_value)
   )
 
 player_values %>% 
@@ -357,16 +411,13 @@ player_values %>%
   dplyr::mutate(rank = dplyr::row_number()) %>% 
   dplyr::ungroup() %>% 
   ggplot2::ggplot(aes(rank, player_value)) +
-  ggplot2::facet_wrap(~pos, ncol = 4) +
+  ggplot2::facet_wrap(~pos, ncol = 2) +
   ggplot2::geom_line(size = 1)
-  ggplot2::labs(
-    x = "Saison",
-    y = "Wert"
-  ) +
-  ggplot2::theme_minimal() +
-  ggplot2::theme(
-    legend.position = "top",
-  )
+```
+
+
+```{r}
+
 ```
 
 
@@ -389,19 +440,45 @@ pick_values <- league_drafts_raw %>%
       dplyr::select(player_id, war_3y_avg),
     by = c("mfl_id" = "player_id")
   ) %>% 
+  
+  dplyr::mutate(
+    position = dplyr::case_when(
+      position %in% c("DT", "DE") ~ "DL",
+      position %in% c("CB", "S") ~ "DB",
+      TRUE ~ position
+    )
+  ) %>% 
+  
+  # add positional value
+  dplyr::left_join(
+    positional_value %>% 
+      dplyr::select(pos, position_value),
+    by = c("position" = "pos"), multiple = "all"
+  ) %>% 
+  dplyr::left_join(
+    position_depth,
+    by = c("position" = "pos"), multiple = "all"
+  ) %>% 
   dplyr::filter(!is.na(war_3y_avg)) %>% 
   dplyr::select(-overall:-franchise) %>% 
+  dplyr::mutate(
+    pick_value = war_3y_avg * (position_value - last_starter_war_pct)
+    #pick_value = war_3y_avg
+  )
   dplyr::distinct() %>% 
   dplyr::group_by(season) %>% 
-  dplyr::arrange(dplyr::desc(war_3y_avg)) %>% 
+  dplyr::arrange(dplyr::desc(pick_value)) %>% 
   dplyr::mutate(overall_war = dplyr::row_number()) %>% 
   dplyr::group_by(overall_war) %>% 
-  dplyr::summarise(pick_value = mean(war_3y_avg)) %>% 
+  dplyr::summarise(
+    pick_value = mean(pick_value),
+    .groups = "drop"
+  ) %>% 
   dplyr::filter(!is.na(pick_value)) %>% 
   dplyr::arrange(dplyr::desc(pick_value)) %>% # dadurch, dass in manchen drafts nicht alle picks gemacht wurden, kommt es hier zu fehlern. deshalb wird neu sortiert
   dplyr::mutate(overall_war = dplyr::row_number()) %>% 
   dplyr::mutate(
-    pick_value_norm = round((-1 * min(pick_value)) + pick_value, 2),
+    pick_value_norm = round(((pick_value - min(pick_value)) / (max(pick_value) - min(pick_value))) * 100, 0), # wert zwischen 0 und 100 erzeugen
     pick_value_pct = pick_value / max(pick_value)
   )
 
@@ -441,7 +518,8 @@ pick_values_overall <- tibble(
       pick <= 12 ~ paste("Early", round),
       pick <= 24 ~ paste("Mid", round),
       pick <= 36 ~ paste("Late", round)
-    )
+    ),
+    multiplicator = pick_value_norm / pick_value
   ) %>% 
   dplyr::ungroup()
 
@@ -454,27 +532,41 @@ ggplot2::ggplot(pick_values_overall, ggplot2::aes(x = overall, y = pick_value)) 
 ```
 In dem Prozess gehen wir davon aus, dass die Spieler mit den selben WAR immer 3 mal hintereinander gedraftet werden. Das bedeutet, dass eine Pick-Gruppe von 3 aufeinander folgenden Picks den selben Value hat.
 
+Um es dem Nutzer möglichst einfach zu machen, definieren wir für den 1.01 Pick einen Wert von 100.
+
 ```{r}
+
+highest_pick_value <- pick_values_overall %>% 
+  dplyr::filter(overall == 1) %>% 
+  dplyr::select(pick_value) %>% 
+  dplyr::pull()
+
 trade_values <- player_values %>% 
-  dplyr::mutate(
-    asset = paste0(player_name, " (", pos, ")")
-  ) %>% 
   dplyr::rename(value = player_value) %>% 
+  dplyr::mutate(
+    asset = paste0(player_name, " (", pos, ")"),
+    test = highest_pick_value,
+    value = value,
+    check = max(value) / test,
+    value = round(((value - min(value)) / (max(value) - min(value))) * (100  * check), 0), # 
+  )
   dplyr::select(asset, value) %>% 
   dplyr::bind_rows(
     pick_values_overall %>% 
-      dplyr::select(pick_readable, pick_value) %>% 
-      dplyr::rename(asset = pick_readable, value = pick_value)
+      dplyr::select(pick_readable, pick_value_norm) %>% 
+      dplyr::rename(asset = pick_readable, value = pick_value_norm)
   ) %>% 
   dplyr::bind_rows(
     pick_values_overall %>% 
-      dplyr::select(time, pick_value) %>% 
+      dplyr::select(time, pick_value_norm) %>% 
       dplyr::group_by(time) %>% 
-      dplyr::summarise(value = mean(pick_value), .groups = "drop") %>% 
+      dplyr::summarise(value = mean(pick_value_norm), .groups = "drop") %>% 
       dplyr::rename(asset = time)
-  ) %>% 
-  dplyr::mutate(
-    value = round(value, 2)
+  )
+    
+  dplyr::rename(value = player_value) %>% 
+  dplyr::select(asset, value)
+  
   )
 
 readr::write_csv(trade_values, "../data/trade-calculator/trade-values.csv")
