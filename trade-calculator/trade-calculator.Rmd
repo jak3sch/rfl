@@ -20,19 +20,22 @@ library(gt)
 ```
 
 ```{r include=FALSE}
-last_season <- nflreadr::most_recent_season() - 1
+last_season <- nflreadr::most_recent_season()
 
-league_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", last_season, "/export?TYPE=league&L=63018&APIKEY=&JSON=1"))
+league_data <- jsonlite::read_json(paste0("https://www45.myfantasyleague.com/", last_season, "/export?TYPE=league&L=63018&JSON=1"))
 ```
 
 ## Ziel
 
 Ziel dieses Prozesses soll es sein, einen Trade Calculatot für die RFL zu haben, anhand dessen der Wert für Spieler und Draftpicks abgeschätzt werden kann.
 
-
 ### Spieler Values
 
-Basis der Kalkulationen sind WAR (Wins Above Replacement). WAR beschreiben den Einfluss eines einzelnen Spielers auf das Ergebnis des gesamten Fantasy Lineups. Je höher die WAR eines Spielers, desto wertvoller ist er.
+Ausgangslage für die Wertbestimmung eines Spielers sind seine durchschnittlichen Fantasy Points per Game (PPG).
+
+In die Berechnung einfließen tuen noch das Alter des Spielers (bzw. die Anzahl der Jahre, in denen er in der NFL spielt), die Anzahl bisher verpasster Spiele und der Positional Value.
+
+
 
 ### Pick Values
 
@@ -198,7 +201,7 @@ formulas %>%
 ```
 
 
-Betrachten wir die derzeit wertvollsten Spieler jeder Positionsgruppe:
+Betrachten wir die derzeit wertvollsten Spieler jeder Positionsgruppe nach der WAR Berechnung:
 
 ```{r echo=FALSE, fig.height=10, fig.width=20, message=FALSE, warning=FALSE}
 player_war_values <- player_war %>% 
@@ -239,7 +242,223 @@ player_war_values %>%
   )
 ```
 
-Wir sehen, dass die Values so nicht wirklich nutzbar sind - denn wenn Kicker nicht den geringsten Value haben, haben wir ein Problem. Da kommt Positional Value ins Spiel.
+## Aging Curves
+
+Das Alter von Spielern ist in Dynasty Ligen sehr relevant, wenn es um die Einschätzung seines Wertes geht. Aber wie lässt sich das statistisch belegen? Dazu schauen wir uns alle Spieler an, die in den letzten 20 Jahren in die NFL gekommen sind. Wir berechnen anhand der RFL Punkte Regeln ihre PPG und gruppieren diese Werte nach Draft Round.
+
+```{r echo=FALSE, fig.height=12, fig.width=20}
+offense_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "offense") %>% 
+  dplyr::filter(
+    position %in% c("QB", "RB", "WR", "TE"),
+    week <= 13
+  ) %>% 
+  dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>%
+  dplyr::mutate(
+    fpts = (passing_yards * 0.04) + (passing_tds * 4) - interceptions + (rushing_yards * 0.1) + (rushing_tds * 6) + (rushing_2pt_conversions * 2) + receptions + (receiving_yards * 0.1) + (receiving_tds * 6) + (receiving_2pt_conversions * 2) - (sack_fumbles_lost + rushing_fumbles_lost + receiving_fumbles_lost)
+  ) %>% 
+  dplyr::select(season, week, player_id, player_name, position, fpts)
+
+defense_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "defense") %>% 
+  dplyr::mutate(
+    position = dplyr::case_when(
+      position %in% c("DT", "DE", "OLB", "NT", "DL") ~ "DL",
+      position %in% c("ILB", "LB", "MLB") ~ "LB",
+      position %in% c("CB", "DB", "FS", "SS", "SAF", "S") ~ "DB"
+    )
+  ) %>% 
+  dplyr::filter(position %in% c("DL", "LB", "DB"), week <= 13) %>% 
+  dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>%
+  dplyr::mutate(
+    fpts = (def_tackles_solo * 2) + def_tackle_assists + (def_fumbles_forced * 3) + (def_sacks * 4) + (def_interceptions * 4) + (def_pass_defended * 2) + (def_tds * 6) - def_fumbles + (def_fumble_recovery_opp * 3) + (def_safety * 2)
+  ) %>% 
+  dplyr::select(season, week, player_id, player_name, position, fpts)
+
+kicking_stats <- nflreadr::load_player_stats((last_season - 20):last_season, "kicking") %>% 
+  dplyr::filter(position == "K", week <= 13) %>% 
+  dplyr::mutate_if(is.numeric , replace_na, replace = 0) %>% 
+  dplyr::mutate(
+    fpts = (fg_made_distance) * 0.1 + ((fg_missed_0_19 + fg_missed_20_29) * -2) + (fg_missed_30_39 * -1) + (fg_missed_40_49 * -0.5) + ((fg_missed_50_59 + fg_missed_60_) * -0.25) + pat_made - pat_missed
+  ) %>% 
+  dplyr::select(season, week, player_id, player_name, position, fpts)
+
+fpts <- rbind(offense_stats, defense_stats, kicking_stats)
+
+replacement_level <- fpts %>% 
+  dplyr::group_by(season, week, position) %>% 
+  dplyr::arrange(dplyr::desc(fpts)) %>% 
+  dplyr::filter(
+      # ToDo korrektes replacement level berechnen (flex statt feste werte)
+      position %in% c("QB", "TE", "PK") & row_number() == 12 |
+      position == "DL" & row_number() == 24 |
+      position == "RB" & row_number() == 30 |
+      position %in% c("WR", "DB") & row_number() == 36 |
+      position == "LB" & row_number() == 48
+  ) %>% 
+  dplyr::group_by(season, position) %>% 
+  dplyr::summarise(ppg_replacement = mean(fpts, na.rm = TRUE), .groups = "drop")
+
+ppg_value <- fpts %>% 
+  dplyr::left_join(
+    nflreadr::load_players() %>% 
+      dplyr::select(gsis_id, entry_year),
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  dplyr::filter(entry_year >= last_season - 20) %>% 
+  dplyr::left_join(
+    nflreadr::load_draft_picks() %>% 
+      dplyr::select(gsis_id, round),
+    by = c("player_id" = "gsis_id")
+  ) %>% 
+  dplyr::mutate(round = ifelse(is.na(round), 8, round)) %>% 
+  dplyr::group_by(season, player_id, player_name, position, entry_year, round) %>% 
+  dplyr::summarise(
+    games = n(),
+    fpts = sum(fpts, na.rm = TRUE),
+    ppg = sum(fpts, na.rm = TRUE) / games,
+    .groups = "drop"
+  ) %>% 
+  dplyr::left_join(
+    replacement_level,
+    by = c("season", "position")
+  ) %>% 
+  dplyr::mutate(
+    multi_games = games / 13,
+    ppg_over_replacement = ppg - ppg_replacement,
+    #ppg_value = ppg_over_replacement * multi_games,
+    year = season - entry_year + 1
+  ) %>% 
+  dplyr::select(-entry_year)
+
+aging_curves <- ppg_value %>% 
+  dplyr::group_by(position, year, round) %>% 
+  dplyr::summarise(ppg = mean(ppg), .groups = "drop")
+  
+ggplot2::ggplot(aging_curves, ggplot2::aes(x = year, y = ppg, color = as.factor(round))) +
+  ggplot2::facet_wrap(~position, ncol = 2) +
+  ggplot2::geom_line() +
+  ggplot2::theme(
+    legend.position = "top"
+  )
+
+```
+
+Wenn wir daraus prozentuale Werte berechnen, erhalten wir die folgende Tabelle (Beispiel anhand aller 1st Round Picks):
+
+```{r echo=FALSE}
+aging_curves_pct <- aging_curves %>% 
+  dplyr::group_by(position, round) %>% 
+  dplyr::mutate(
+    career_ppg = mean(ppg),
+    career_ppg_pct = ppg / career_ppg
+  ) %>% 
+  dplyr::ungroup()
+
+aging_curves_pct %>%
+  dplyr::mutate(
+    career_ppg_pct = round(career_ppg_pct, 2)
+  ) %>%
+  dplyr::select(-ppg, -career_ppg) %>% 
+  tidyr::spread(position, career_ppg_pct) %>% 
+  dplyr::arrange(round) %>% 
+  head(19) %>% 
+  gt::gt()
+```
+
+Hier sieht man zB ganz gut, dass 1st Round RBs im Schnitt in den ersten 4 Jahren ihrer Karriere die meisten Punkte machen und dann ein deutlicher Abwärtstrend beginnt.
+
+Da in Dynastyligen in mittelfristigen Zeiträumen gedacht wird, werden wir für die Berechnung immer die nächsten 5 Jahre einbeziehen.
+
+**Ein Beispiel**
+Spieler X ist ein in Runde 1 Gedrafteter WR und hat gerade sein sein 5. in der NFL gespielt. Im Durchschnitt hat er das 1.2-fache seines Karriere PPG Schnittes erzielt. Der Trade-Wert dieses Spielers ergibt sich aus der WAR Berechnung weiter oben und einem Multiplikator, der aus der Aging Curve Berechnet wird. Dafür nehmen wir den Durchschnitt der nächsten 5 Jahre (in diesem Beispiel die Jahre 6-10). Also (1.1 + 1.05 + 0.99 + 0.92 + 1.01) / 5 = 1.014.
+
+Das ist der Multiplikator, mit dem der WAR Wert des Spielers verrechnet wird.
+
+```{r echo=FALSE}
+aging_curves_multi <- aging_curves_pct %>% 
+  dplyr::group_by(position, round) %>% 
+  dplyr::arrange(year) %>% 
+  dplyr::mutate(
+    multi_n5 = (dplyr::lead(career_ppg_pct, 1, default = 0) + dplyr::lead(career_ppg_pct, 2, default = 0) + dplyr::lead(career_ppg_pct, 3, default = 0) + dplyr::lead(career_ppg_pct, 4, default = 0) + dplyr::lead(career_ppg_pct, 5, default = 0)) / 5,
+    multi_n5 = ifelse(multi_n5 == 0, lag(multi_n5, 1), multi_n5) # wenn maximum erreicht ist, nehme letzten wert anstatt 0
+  ) %>% 
+  dplyr::ungroup()
+
+aging_curves_multi %>%
+  dplyr::select(-ppg, -career_ppg, -career_ppg_pct) %>% 
+  tidyr::spread(position, multi_n5) %>% 
+  dplyr::arrange(round) %>% 
+  head(19) %>% 
+  gt::gt()
+```
+
+``` {r}
+player_values <- player_war_values %>% 
+  dplyr::select(season, player_id, player_name, pos, player_war_value) %>%
+  dplyr::mutate(player_id = as.character(player_id)) %>%
+  dplyr::left_join(
+    nflreadr::load_ff_playerids() %>% 
+      dplyr::select(mfl_id, gsis_id),
+    by = c("player_id" = "mfl_id")
+  ) %>% 
+  dplyr::left_join(
+    nflreadr::load_players() %>%
+      dplyr::select(gsis_id, entry_year),
+    by = "gsis_id"
+  ) %>% 
+  dplyr::left_join(
+    ppg_value %>% 
+      dplyr::group_by(player_id) %>% 
+      dplyr::summarise(
+        multi_games = mean(multi_games, na.rm = TRUE),
+        career_ppg = mean(ppg, na.rm = TRUE),
+        ppg_over_replacement = mean(ppg_over_replacement, na.rm = TRUE)
+      ),
+    by = c("gsis_id" = "player_id")
+  ) %>% 
+  dplyr::filter(!is.na(gsis_id)) %>% 
+  dplyr::left_join(
+    nflreadr::load_draft_picks() %>% 
+      dplyr::select(gsis_id, round),
+    by = "gsis_id"
+  ) %>% 
+  dplyr::mutate(
+    round = ifelse(is.na(round), 8, round),
+    year = season - entry_year + 1
+  ) %>% 
+  dplyr::select(-season, -entry_year, -gsis_id) %>% 
+  dplyr::left_join(
+    aging_curves_multi %>% 
+      dplyr::select(position, year, round, multi_n5),
+    by = c("pos" = "position", "year", "round")
+  ) %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::mutate(
+    proj_ppg = career_ppg * multi_n5 * multi_games,
+    proj_fpts = proj_ppg * 13 * 15,
+    #ppg_value = ifelse(is.na(ppg_value), 0, ppg_value),
+    #ppg_value = ppg_value + (min(ppg_value) * -1), # normalize auf 0
+    #ppg_value_pct = ppg_value / max(ppg_value)
+  )
+  dplyr::mutate(
+    player_value = player_war_value * multi_n5 * ppg_value_pct
+  )
+
+player_values %>% 
+  dplyr::group_by(pos) %>% 
+  dplyr::arrange(dplyr::desc(player_value)) %>% 
+  dplyr::filter(dplyr::row_number() == 1) %>%
+  ggplot2::ggplot(aes(x = reorder(player_name, dplyr::desc(player_value)), y = player_value, fill = pos)) +
+  ggplot2::geom_col(size = 5) +
+  ggplot2::labs(
+    x = "Saison",
+    y = "Wert"
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "top",
+  )
+
+```
 
 ## Positional Value
 ### Anteil an den Lineup Punkten
@@ -277,7 +496,7 @@ positional_value <- starter_data_raw %>%
   ) %>% 
   dplyr::group_by(pos) %>% 
   dplyr::summarise(
-    dplyr::across(position_count:position_value, mean, na.rm = TRUE),
+    dplyr::across(position_count:position_value, \(x) mean(x, na.rm = TRUE)),
     .groups = "drop"
   )
 

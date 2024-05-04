@@ -943,14 +943,33 @@ gt::render_gt({
 
 # Trade Calculator (Beta) {data-navmenu="Trades"}
 
-```{r inputs-trade-calculator, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+## Inputs {.sidebar}
+
+```{r inputs-trade-calculator, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/drafts/rfl-drafts.R")
 source("R/trades/trade-calculator.R")
+
+weeks <- c(1:18)
+
+sliderInput("tradeCalculatorInputGames", "Games/Season:", min = 1, max = 18, value = 13, sep = "")
+
+#selectizeInput(
+#  "tradeCalculatorInputGames",
+#  "Games/Season",
+#  choices = weeks,
+#  selected = 13,
+#  multiple= FALSE,
+#  options = list(
+#    placeholder = "Woche wählen"
+#  )
+#)
+
 ```
 
 ## Main
 ### Team 1
 
-```{r eval=FALSE, include=FALSE}
+```{r echo=FALSE}
 selectizeInput(
   "tradeCalculatorTeam1",
   "Wähle Assets",
@@ -981,7 +1000,7 @@ gt::render_gt({
 
 ### Team 2
 
-```{r eval=FALSE, include=FALSE}
+```{r echo=FALSE}
 selectizeInput(
   "tradeCalculatorTeam2",
   "Wähle Assets",
