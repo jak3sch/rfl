@@ -29,6 +29,7 @@ runtime: shiny
 .dataTables_scrollBody {
   height: unset !important;
 }
+.dataTable tbody td {white-space: pre-wrap;}
 ```
 
 ```{r setup, include=FALSE}
@@ -1119,11 +1120,103 @@ gt::render_gt({
 })
 ```
 
+# Trade History {data-navmenu="Trades"}
+
+## Inputs {.sidebar}
+
+```{r inputs-trade-history, echo=FALSE, message=FALSE, warning=FALSE}
+
+trades_data <- trades %>%
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    draft_round = dplyr::case_when(
+      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][4],
+      grepl("DP_", asset) ~ stringr::str_split(asset, "_")[[1]][2],
+      TRUE ~ name
+    ),
+    draft_year = dplyr::case_when(
+      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][3],
+      grepl("DP_", asset) ~ as.character(lubridate::year(date))
+    ),
+    team = dplyr::case_when(
+      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][2],
+      grepl("DP_", asset) ~ franchise_id,
+      TRUE ~ team
+    )
+  ) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::mutate(
+    draft_round = ifelse(grepl("DP_", asset), as.numeric(draft_round) + 1, draft_round),
+    name = dplyr::case_when(
+      draft_round == 1 ~ "1st Round Pick",
+      draft_round == 2 ~ "2nd Round Pick",
+      draft_round == 3 ~ "3rd Round Pick",
+      draft_round %in% c(4, 5, 6, 7) ~ paste0(draft_round, "th Round Pick"),
+      TRUE ~ paste0(name, ", ", position, " ", team)
+    ),
+    asset = ifelse(!is.na(draft_year), paste("DP", draft_round, sep = "_"), asset)
+  )
+
+selection <- trades_data %>% 
+  dplyr::select(asset, name) %>% 
+  dplyr::distinct() %>% 
+  dplyr::arrange(name)
+
+selectizeInput(
+  "tradeHistoryAssets",
+  "Filter nach Asset",
+  choices = setNames(selection$asset, selection$name),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Asset wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+# TODO: zeitraum durch input begrenzen
+
+```
+
+## Row
+### Trades mit gewähltem Asset {data-width=800}
+
+```{r trade-history, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  table_data <- trades_data %>% 
+    dplyr::mutate(
+      name = ifelse(grepl("DP_", asset), paste(draft_year, name), name)
+    ) %>% 
+    dplyr::group_by(trade_id) %>%
+    dplyr::mutate(
+      asset_ids = paste(asset, collapse = ",")
+    ) %>% 
+    dplyr::group_by(trade_id, franchise) %>%
+    dplyr::summarise(
+      date = dplyr::first(date),
+      asset_ids = dplyr::first(asset_ids),
+      asset_names = paste(name, collapse = "\n"),
+      .groups = "drop"
+    ) %>% 
+    #dplyr::filter(grepl("12655", as.character(asset_ids))) %>% 
+    dplyr::filter(grepl(input$tradeHistoryAssets, as.character(asset_ids))) %>% 
+    dplyr::select(trade_id, date, franchise, asset_names) %>% 
+    tidyr::spread(franchise, asset_names) %>% 
+    dplyr::arrange(dplyr::desc(trade_id)) %>% 
+    dplyr::select(-trade_id) %>% 
+    dplyr::rename(Datum = date, "Franchise 1" = franchise_1, "Franchise 2" = franchise_2)
+
+  DT::datatable(
+    table_data,
+    rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 12)
+  )
+})
+```
+
 # Trade Calculator (Beta) {data-navmenu="Trades"}
 
 ## Inputs {.sidebar}
 
-```{r inputs-trade-calculator, echo=FALSE, message=FALSE, warning=FALSE}
+```{r inputs-trade-calculator, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 source("R/drafts/rfl-drafts.R")
 source("R/trades/trade-calculator.R")
 
@@ -1147,7 +1240,7 @@ sliderInput("tradeCalculatorInputGames", "Games/Season:", min = 1, max = 18, val
 ## Main
 ### Team 1
 
-```{r echo=FALSE}
+```{r eval=FALSE, include=FALSE}
 selectizeInput(
   "tradeCalculatorTeam1",
   "Wähle Assets",
@@ -1178,7 +1271,7 @@ gt::render_gt({
 
 ### Team 2
 
-```{r echo=FALSE}
+```{r eval=FALSE, include=FALSE}
 selectizeInput(
   "tradeCalculatorTeam2",
   "Wähle Assets",
