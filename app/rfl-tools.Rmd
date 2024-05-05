@@ -79,6 +79,14 @@ players <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=players&L=63
     player_name = name,
     pos = position,
     player_id = id
+  ) %>% 
+  dplyr::filter(!grepl("TM", pos), !pos %in% c("Def", "ST", "Off", "Coach", "PN")) %>% 
+  dplyr::mutate(
+    grouped_pos = dplyr::case_when(
+      pos %in% c("DT", "DE") ~ "DL",
+      pos %in% c("CB", "S") ~ "DB",
+      TRUE ~ pos
+    )
   )
 
 source("R/base-data.R")
@@ -306,6 +314,7 @@ renderPlot({
 ```
 
 # ELO Rating {data-navmenu="Teams"}
+
 ## Sidebar {.sidebar}
 ```{r inputs-elo, echo=FALSE, message=FALSE, warning=FALSE}
 selectizeInput(
@@ -838,6 +847,175 @@ DT::renderDataTable({
       ),
     rownames = F, filter = "top", options = list(pageLength = 12, order = list(3, 'desc'))
   )
+})
+```
+
+# Elo Rating {data-navmenu="Spieler"}
+
+## Sidebar {.sidebar}
+```{r inputs-player-elo, echo=FALSE, message=FALSE, warning=FALSE}
+
+selectizeInput(
+  "eloPlayerSelectPlayer",
+  "Filter nach Spielern",
+  choices = setNames(players$player_id, players$player_name),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Spieler wählen",
+    onInitialize = I('function() { this.setValue("13116"); }')
+  )
+)
+
+selectizeInput(
+  "eloPlayerSelectPosition",
+  "Filter nach Position",
+  choices = players$grouped_pos,
+  multiple= TRUE,
+  options = list(
+    placeholder = "Position wählen",
+    onInitialize = I('function() { this.setValue("QB"); }')
+  )
+)
+
+sliderInput(
+  "eloPlayerStudThreshold",
+  "ELO Stud Threshold",
+  min = 1500,
+  max = 1750,
+  value = 1550,
+  step = 10
+)
+
+```
+
+> Das ELO Rating basiert auf einer Methode von [FiveThirtyEight](https://fivethirtyeight.com/methodology/how-our-nfl-predictions-work/). Mit Ligastart bekam jeder Spieler ein ELO Rating von 1500. Seit dem wird nach jedem Spiel die ELO eines jeden Spielers angepasst. Vor jeder 1. Woche einer neuen Saison wird die ELO der vergangenen Saison um 1/3 in Richtung 1500 verschobenen.
+
+## Row
+### Running ELO Rating {data-width=800}
+```{r player-elo, echo=FALSE, fig.height=7, message=FALSE, warning=FALSE}
+source("R/elo/rfl-elo-players.R")
+
+renderPlot({
+    ggplot(subset(running_player_elo, position %in% input$eloPlayerSelectPosition), aes(x = game, y = player_elo_post, color = display_name)) +
+      plotDefaults +
+      geom_hline(yintercept = 1500, color = var.colorRed, size = 0.5, alpha = 0.75) + # default elo
+      geom_hline(yintercept = input$eloPlayerStudThreshold, color = var.colorAccent, size = 0.5, alpha = 0.75) + # stud elo
+      
+      geom_point(color = var.colorAccent, alpha = 0.3) +
+      geom_line(data = subset(running_player_elo, mfl_id %in% input$eloPlayerSelectPlayer), size = 1) +
+  
+      paletteer::scale_color_paletteer_d("awtools::ppalette") +
+      labs(
+        title = paste("RFL ELO Rating"),
+        #subtitle = paste("Total Avg Opp Win % - maximale Total Avg Opp Win % der Liga.\nJe niedriger der Wert, desto leichter ist der SOS im Vergleich zum Rest der Liga."),
+        y = "ELO",
+        x = "Game",
+        color = ""
+      ) +
+      theme(
+        legend.position = "top",
+        legend.text = element_text(size = 12)
+      ) +
+      scale_x_discrete(limits = c(1, 76), breaks = pretty_breaks())
+})
+```
+
+### Derzeitiges ELO-Rating {data-width=500}
+```{r player-elo-ranking, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  table_data <- player_elo %>%
+    dplyr::filter(season == max(season)) %>% 
+    dplyr::group_by(mfl_id) %>% 
+    dplyr::filter(week == max(week)) %>% 
+    dplyr::ungroup() %>% 
+    dplyr::select(display_name, position, team, player_elo_post) %>%
+    dplyr::rename(Spieler = display_name, Pos = position, Team = team, ELO = player_elo_post)
+
+  formattable::formattable(
+    table_data,
+    list(
+      ELO = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 10, order = list(3, 'asc')))
+})
+```
+
+## Row
+### Elo Peak seit 2016 (Top 25) {data-width=500}
+
+```{r player-elo-peak, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  table_data <- player_elo %>%
+    dplyr::group_by(mfl_id) %>% 
+    dplyr::filter(player_elo_post == max(player_elo_post)) %>%
+    dplyr::ungroup() %>% 
+    dplyr::filter(position == input$eloPlayerSelectPosition) %>% 
+    dplyr::select(season, week, display_name, position, team, player_elo_post) %>%
+    dplyr::arrange(dplyr::desc(player_elo_post)) %>%
+    head(25) %>% 
+    dplyr::rename(Saison = season, Woche = week, Spieler = display_name, Pos = position, Team = team, ELO = player_elo_post)
+  
+  formattable::formattable(
+    table_data,
+    list(
+      "ELO" = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, options = list(pageLength = 12, order = list(4, 'asc')))
+})
+```
+
+### Wochen als Stud (über Trheshold) {data-width=300}
+
+```{r player-elo-above-1600, echo=FALSE, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+    table_data <- player_elo %>%
+      dplyr::filter(position == input$eloPlayerSelectPosition) %>% 
+      dplyr::mutate(above_threshold = ifelse(player_elo_post >= input$eloPlayerStudThreshold, 1, 0)) %>% 
+      dplyr::group_by(mfl_id, display_name) %>% 
+      dplyr::summarise(weeks = sum(above_threshold), .groups = "drop") %>% 
+      dplyr::filter(weeks > 0) %>% 
+      dplyr::select(display_name, weeks) %>%
+      dplyr::rename(Spieler = display_name, Wochen = weeks)
+      
+      formattable::formattable(
+        table_data,
+        list(
+          "Wochen" = formattable::color_tile("#EA2027", "#009432")
+        )
+      ) %>% 
+      formattable::as.datatable(escape = FALSE, rownames = FALSE, options = list(pageLength = 12, order = list(1, 'asc')))
+})
+```
+
+### Derzeitige NFL ELO {data-width=300}
+
+```{r current-nfl-elo, echo=FALSE, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+    table_data <- player_elo %>%
+      dplyr::filter(season == max(season), !grepl("NA_", opponent_id)) %>% 
+      dplyr::group_by(opponent_id) %>% 
+      dplyr::filter(week == max(week)) %>% 
+      dplyr::ungroup() %>% 
+      dplyr::rowwise() %>% 
+      dplyr::mutate(
+        team = stringr::str_split(opponent_id, "_")[[1]][1],
+        position = stringr::str_split(opponent_id, "_")[[1]][2]
+      ) %>% 
+      dplyr::select(position, team, opponent_elo_post) %>% 
+      dplyr::distinct() %>% 
+      dplyr::filter(position == input$eloPlayerSelectPosition) %>% 
+      dplyr::arrange(dplyr::desc(position), dplyr::desc(opponent_elo_post)) %>% 
+      dplyr::rename(Pos = position, Team = team, ELO = opponent_elo_post)
+      
+      formattable::formattable(
+        table_data,
+        list(
+          "ELO" = formattable::color_tile("#EA2027", "#009432")
+        )
+      ) %>% 
+      formattable::as.datatable(escape = FALSE, rownames = FALSE, options = list(pageLength = 12, order = list(2, 'asc')))
 })
 ```
 
