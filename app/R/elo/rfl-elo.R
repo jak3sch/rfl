@@ -14,7 +14,7 @@ running_elo <- elo %>%
 elo_matchups_prev <- elo %>%
   mutate(
     elo_diff = franchise_elo_pregame - opponent_elo_pregame,
-    upset = ifelse(elo_diff < 0 & score_differential > 0, 1, 0)
+    upset = ifelse(elo_diff < 0 & score_diff > 0, 1, 0)
   ) %>%
   dplyr::select(season, week, franchise_name, franchise_elo_pregame, franchise_score, elo_diff, opponent_score, opponent_elo_pregame, opponent_name, upset, elo_shift) %>%
   dplyr::rename(
