@@ -860,7 +860,7 @@ selectizeInput(
   "eloPlayerSelectPlayer",
   "Filter nach Spielern",
   choices = setNames(players$player_id, players$player_name),
-  multiple= TRUE,
+  multiple = TRUE,
   options = list(
     placeholder = "Spieler wählen",
     onInitialize = I('function() { this.setValue("13116"); }')
@@ -871,7 +871,7 @@ selectizeInput(
   "eloPlayerSelectPosition",
   "Filter nach Position",
   choices = players$grouped_pos,
-  multiple= TRUE,
+  multiple = TRUE,
   options = list(
     placeholder = "Position wählen",
     onInitialize = I('function() { this.setValue("QB"); }')
@@ -883,7 +883,7 @@ sliderInput(
   "ELO Stud Threshold",
   min = 1500,
   max = 1750,
-  value = 1550,
+  value = 1650,
   step = 10
 )
 
@@ -908,7 +908,6 @@ renderPlot({
       paletteer::scale_color_paletteer_d("awtools::ppalette") +
       labs(
         title = paste("RFL ELO Rating"),
-        #subtitle = paste("Total Avg Opp Win % - maximale Total Avg Opp Win % der Liga.\nJe niedriger der Wert, desto leichter ist der SOS im Vergleich zum Rest der Liga."),
         y = "ELO",
         x = "Game",
         color = ""
@@ -930,6 +929,7 @@ DT::renderDataTable({
     dplyr::filter(week == max(week)) %>% 
     dplyr::ungroup() %>% 
     dplyr::select(display_name, position, team, player_elo_post) %>%
+    dplyr::filter(pos != "K") %>% 
     dplyr::rename(Spieler = display_name, Pos = position, Team = team, ELO = player_elo_post)
 
   formattable::formattable(
@@ -943,7 +943,7 @@ DT::renderDataTable({
 ```
 
 ## Row
-### Elo Peak seit 2016 (Top 25) {data-width=500}
+### Elo Peak seit 2016 (Top 36) {data-width=500}
 
 ```{r player-elo-peak, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
 DT::renderDataTable({
@@ -954,7 +954,7 @@ DT::renderDataTable({
     dplyr::filter(position == input$eloPlayerSelectPosition) %>% 
     dplyr::select(season, week, display_name, position, team, player_elo_post) %>%
     dplyr::arrange(dplyr::desc(player_elo_post)) %>%
-    head(25) %>% 
+    head(36) %>% 
     dplyr::rename(Saison = season, Woche = week, Spieler = display_name, Pos = position, Team = team, ELO = player_elo_post)
   
   formattable::formattable(
@@ -963,7 +963,7 @@ DT::renderDataTable({
       "ELO" = formattable::color_tile("#EA2027", "#009432")
     )
   ) %>% 
-  formattable::as.datatable(escape = FALSE, rownames = FALSE, options = list(pageLength = 12, order = list(4, 'asc')))
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, options = list(pageLength = 12, order = list(5, 'asc')))
 })
 ```
 
@@ -1127,25 +1127,40 @@ gt::render_gt({
 ```{r inputs-trade-history, echo=FALSE, message=FALSE, warning=FALSE}
 selection <- trades %>% 
   dplyr::select(asset_id, asset_name) %>% 
+  dplyr::mutate(
+    asset_name = ifelse(grepl("DP_", asset_id), gsub("\\s*\\([^\\)]+\\)","", asset_name), asset_name),
+    asset_name = ifelse(grepl("DP_", asset_id), gsub("\\d+$","", asset_name), asset_name)
+  ) %>% 
   dplyr::distinct() %>% 
   dplyr::arrange(asset_name)
-
-#TODO clean up asset_names 
 
 selectizeInput(
   "tradeHistoryAssets",
   "Filter nach Asset",
-  choices = setNames(selection$asset, selection$name),
+  choices = setNames(selection$asset_id, selection$asset_name),
   multiple= TRUE,
   options = list(
-    placeholder = "Asset wählen",
-    onInitialize = I('function() { this.setValue(""); }')
+    placeholder = "Asset wählen..."
   )
 )
 
-# TODO: zeitraum durch input begrenzen
-
+dateRangeInput(
+  "tradeHistoryDate",
+  "Zeitraum beschränken",
+  start = "2016-06-18",
+  end = max(unique(trades$date)),
+  min = "2016-06-18",
+  max = max(unique(trades$date)),
+  format = "dd.mm.yyyy",
+  startview = "decade",
+  separator = " bis ",
+  weekstart = 1,
+  language = "de",
+  autoclose = TRUE
+)
 ```
+
+> wenn Error: [Object object] angezeigt wird, wähle einfach ein Asset aus und die getätigten Trades sollten erscheinen
 
 ## Row
 ### Trades mit gewähltem Asset {data-width=800}
@@ -1165,18 +1180,22 @@ DT::renderDataTable({
       .groups = "drop"
     ) %>% 
     #dplyr::filter(grepl("12655", as.character(asset_ids))) %>% 
-    dplyr::filter(grepl(input$tradeHistoryAssets, as.character(asset_ids))) %>% 
+    dplyr::filter(grepl(input$tradeHistoryAssets, as.character(asset_ids)) & date >= input$tradeHistoryDate[1] & date <= input$tradeHistoryDate[2]) %>% 
     dplyr::select(trade_id, date, trade_side, asset_names) %>% 
     tidyr::spread(trade_side, asset_names) %>% 
     dplyr::arrange(dplyr::desc(trade_id)) %>% 
     dplyr::select(-trade_id) %>% 
+    dplyr::mutate(
+      date = format(date, "%d.%m.%Y")
+    ) %>% 
     dplyr::rename(Datum = date, "Franchise 1" = franchise_1, "Franchise 2" = franchise_2)
-
+  
   DT::datatable(
     table_data,
     rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 12)
   )
 })
+
 ```
 
 # Trade Calculator (Beta) {data-navmenu="Trades"}
