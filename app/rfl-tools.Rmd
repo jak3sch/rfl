@@ -856,10 +856,16 @@ DT::renderDataTable({
 ## Sidebar {.sidebar}
 ```{r inputs-player-elo, echo=FALSE, message=FALSE, warning=FALSE}
 
+selection <- players %>% 
+  dplyr::mutate(
+    player_name = paste0(player_name, " (", pos, ", ", team, ")")
+  ) %>% 
+  dplyr::select(player_id, player_name)
+
 selectizeInput(
   "eloPlayerSelectPlayer",
   "Filter nach Spielern",
-  choices = setNames(players$player_id, players$player_name),
+  choices = setNames(selection$player_id, selection$player_name),
   multiple = TRUE,
   options = list(
     placeholder = "Spieler wählen",
@@ -928,8 +934,7 @@ DT::renderDataTable({
     dplyr::group_by(mfl_id) %>% 
     dplyr::filter(week == max(week)) %>% 
     dplyr::ungroup() %>% 
-    dplyr::select(display_name, position, team, player_elo_post) %>%
-    dplyr::filter(pos != "K") %>% 
+    dplyr::select(display_name, position, team, player_elo_post) %>% 
     dplyr::rename(Spieler = display_name, Pos = position, Team = team, ELO = player_elo_post)
 
   formattable::formattable(
@@ -967,7 +972,7 @@ DT::renderDataTable({
 })
 ```
 
-### Wochen als Stud (über Trheshold) {data-width=300}
+### Wochen als Stud (über Threshold) {data-width=300}
 
 ```{r player-elo-above-1600, echo=FALSE, message=FALSE, warning=FALSE}
 DT::renderDataTable({
@@ -991,6 +996,8 @@ DT::renderDataTable({
 ```
 
 ### Derzeitige NFL ELO {data-width=300}
+
+> Gegen diese Elo Werte spielen die Spieler am kommenden Spieltag
 
 ```{r current-nfl-elo, echo=FALSE, message=FALSE, warning=FALSE}
 DT::renderDataTable({
@@ -1160,7 +1167,7 @@ dateRangeInput(
 )
 ```
 
-> wenn Error: [Object object] angezeigt wird, wähle einfach ein Asset aus und die getätigten Trades sollten erscheinen
+> wenn ein Error angezeigt wird, wähle einfach ein Asset aus und die getätigten Trades sollten erscheinen
 
 ## Row
 ### Trades mit gewähltem Asset {data-width=800}
