@@ -9,7 +9,7 @@ true_standing <- readr::read_csv(paste0("https://raw.githubusercontent.com/jak3s
 current_standing <- elo %>%
   dplyr::filter(season == max(season)) %>%
   dplyr::mutate(
-    winloss = ifelse(score_differential > 0, 1, 0)
+    winloss = ifelse(score_diff > 0, 1, 0)
   ) %>%
   dplyr::group_by(franchise_id, week) %>%
   dplyr::mutate(elo_shift = sum(elo_shift)) %>%
