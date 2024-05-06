@@ -1,15 +1,15 @@
 [submodule "war"]
-	path = war
+	path = automatisation/war
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/war.git
 [submodule "starter"]
-	path = starter
+	path = automatisation/starter
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/starter.git
 [submodule "elo"]
-	path = elo
+	path = automatisation/elo
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/elo.git
 [submodule "rflfastR"]
 	path = rflfastR
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/rflfastr.git
 [submodule "true-standing"]
-	path = true-standing
+	path = automatisation/true-standing
 	url = https://gitlab.com/jakob-eschler/data-science/fantasy-football/rfl-group/true-standing.git
