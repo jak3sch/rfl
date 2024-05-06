@@ -1125,42 +1125,12 @@ gt::render_gt({
 ## Inputs {.sidebar}
 
 ```{r inputs-trade-history, echo=FALSE, message=FALSE, warning=FALSE}
-
-trades_data <- trades %>%
-  dplyr::rowwise() %>% 
-  dplyr::mutate(
-    draft_round = dplyr::case_when(
-      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][4],
-      grepl("DP_", asset) ~ stringr::str_split(asset, "_")[[1]][2],
-      TRUE ~ name
-    ),
-    draft_year = dplyr::case_when(
-      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][3],
-      grepl("DP_", asset) ~ as.character(lubridate::year(date))
-    ),
-    team = dplyr::case_when(
-      grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][2],
-      grepl("DP_", asset) ~ franchise_id,
-      TRUE ~ team
-    )
-  ) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::mutate(
-    draft_round = ifelse(grepl("DP_", asset), as.numeric(draft_round) + 1, draft_round),
-    name = dplyr::case_when(
-      draft_round == 1 ~ "1st Round Pick",
-      draft_round == 2 ~ "2nd Round Pick",
-      draft_round == 3 ~ "3rd Round Pick",
-      draft_round %in% c(4, 5, 6, 7) ~ paste0(draft_round, "th Round Pick"),
-      TRUE ~ paste0(name, ", ", position, " ", team)
-    ),
-    asset = ifelse(!is.na(draft_year), paste("DP", draft_round, sep = "_"), asset)
-  )
-
-selection <- trades_data %>% 
-  dplyr::select(asset, name) %>% 
+selection <- trades %>% 
+  dplyr::select(asset_id, asset_name) %>% 
   dplyr::distinct() %>% 
-  dplyr::arrange(name)
+  dplyr::arrange(asset_name)
+
+#TODO clean up asset_names 
 
 selectizeInput(
   "tradeHistoryAssets",
@@ -1182,25 +1152,22 @@ selectizeInput(
 
 ```{r trade-history, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
 DT::renderDataTable({
-  table_data <- trades_data %>% 
-    dplyr::mutate(
-      name = ifelse(grepl("DP_", asset), paste(draft_year, name), name)
-    ) %>% 
+  table_data <- trades %>% 
     dplyr::group_by(trade_id) %>%
     dplyr::mutate(
-      asset_ids = paste(asset, collapse = ",")
+      asset_ids = paste(asset_id, collapse = ",")
     ) %>% 
-    dplyr::group_by(trade_id, franchise) %>%
+    dplyr::group_by(trade_id, trade_side) %>%
     dplyr::summarise(
       date = dplyr::first(date),
       asset_ids = dplyr::first(asset_ids),
-      asset_names = paste(name, collapse = "\n"),
+      asset_names = paste(asset_name, collapse = "\n"),
       .groups = "drop"
     ) %>% 
     #dplyr::filter(grepl("12655", as.character(asset_ids))) %>% 
     dplyr::filter(grepl(input$tradeHistoryAssets, as.character(asset_ids))) %>% 
-    dplyr::select(trade_id, date, franchise, asset_names) %>% 
-    tidyr::spread(franchise, asset_names) %>% 
+    dplyr::select(trade_id, date, trade_side, asset_names) %>% 
+    tidyr::spread(trade_side, asset_names) %>% 
     dplyr::arrange(dplyr::desc(trade_id)) %>% 
     dplyr::select(-trade_id) %>% 
     dplyr::rename(Datum = date, "Franchise 1" = franchise_1, "Franchise 2" = franchise_2)

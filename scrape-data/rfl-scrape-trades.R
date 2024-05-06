@@ -8,19 +8,15 @@ find_week <- function(use_date) {
   week1_sep <- as.POSIXlt(paste0(lubridate::year(use_date), "-09-0", 1:7), tz = "GMT")
   monday1_sep <- week1_sep[week1_sep$wday == 1]
   first_game <- monday1_sep
-  first_game$mday <- first_game$mday + 3
+  first_game$mday <- first_game$mday + 1 # ab Dienstag neue Woche
   current_week <- as.numeric(as.Date(use_date) - as.Date(first_game))%/%7 + 1
-
-  # TODO: neue week beginnt am donnerstag - sollte aber dienstag sein
 
   if (current_week < 1 | current_week > 22)
     current_week <- 22
   return(current_week)
 }
 
-last_entry <- 2023090
-
-last_entry <- readr::read_csv("data/trades/rfl-trades.csv", col_types = "nncccccc") %>%
+last_entry <- readr::read_csv("data/trades/rfl-trades.csv", col_types = "ddTdcccc") %>%
   dplyr::select(trade_id) %>%
   dplyr::filter(trade_id == max(trade_id)) %>%
   dplyr::distinct() %>%
@@ -70,7 +66,43 @@ if (dim(trade_data_raw)[1] != 0) {
       date = lubridate::as_datetime(as.numeric(timestamp)),
       week = find_week(as.Date(date))
     ) %>%
-    dplyr::select(trade_id, timestamp, date, week, franchise_id, franchise, asset, name, position, team)
+
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      draft_pick = ifelse(grepl("DP_", asset), stringr::str_split(asset, "_")[[1]][3], NA),
+      draft_round = dplyr::case_when(
+        grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][4],
+        grepl("DP_", asset) ~ stringr::str_split(asset, "_")[[1]][2]
+      ),
+      draft_year = dplyr::case_when(
+        grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][3],
+        grepl("DP_", asset) ~ as.character(lubridate::year(date))
+      ),
+      team = dplyr::case_when(
+        grepl("FP_", asset) ~ stringr::str_split(asset, "_")[[1]][2],
+        grepl("DP_", asset) ~ franchise_id,
+        TRUE ~ team
+      )
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      draft_round = ifelse(grepl("DP_", asset), as.numeric(draft_round) + 1, draft_round),
+      name = dplyr::case_when(
+        draft_round == 1 ~ "1st Round Pick",
+        draft_round == 2 ~ "2nd Round Pick",
+        draft_round == 3 ~ "3rd Round Pick",
+        draft_round %in% c(4, 5, 6, 7) ~ paste0(draft_round, "th Round Pick"),
+        TRUE ~ paste0(name, " (", position, ", ", team, ")")
+      ),
+      asset_name = dplyr::case_when(
+        grepl("FP_", asset) ~ paste(name, draft_year),
+        grepl("DP_", asset) ~ paste0(name, " (", draft_round, ".", draft_pick, " ", draft_year, ")"),
+        TRUE ~ name
+      ),
+      asset_id = ifelse(!is.na(draft_year), paste("DP", draft_round, sep = "_"), asset)
+    ) %>%
+    dplyr::select(trade_id, timestamp, date, week, franchise_id, franchise, asset_id, asset_name) %>%
+    dplyr::rename(trade_side = franchise)
 
   readr::write_csv(trade_data, "data/trades/rfl-trades.csv", append = TRUE)
 }

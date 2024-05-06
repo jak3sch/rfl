@@ -98,4 +98,4 @@ player_ranks_avg <- jsonlite::read_json(paste0(var.mflApiBase, "/export?TYPE=pla
     rank = row_number()
   )
 
-trades <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/trades/rfl-trades.csv", col_types = "iiciccccc")
+trades <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/trades/rfl-trades.csv", col_types = "ddTdcccc")
