@@ -1153,6 +1153,16 @@ selectInput(
   selectize = TRUE
 )
 
+selectizeInput(
+  "tradeHistoryPositions",
+  "Filter nach Position",
+  choices = list("QB", "RB", "WR", "TE", "DT", "DE", "LB", "CB", "S"),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Position wählen"
+  )
+)
+
 dateRangeInput(
   "tradeHistoryDate",
   "Zeitraum beschränken",
@@ -1180,7 +1190,7 @@ selectizeInput(
 
 selectizeInput(
   "tradeHistoryTeams",
-  "Filter nach Teams",
+  "Filter nach RFL Franchise",
   choices = setNames(franchises$franchise_id, franchises$franchise_name),
   multiple= TRUE,
   options = list(
@@ -1205,7 +1215,6 @@ trade_history <- reactive({
     ) %>% 
     dplyr::group_by(trade_id) %>%
     dplyr::mutate(
-      asset_name = paste0(franchise_name, " sends\n", asset_name),
       asset_types = paste(asset_type, collapse = ","),
       asset_ids = paste(asset_id, collapse = ","),
       franchise_ids = paste(franchise_id, collapse = ",")
@@ -1217,37 +1226,51 @@ trade_history <- reactive({
       asset_types = dplyr::first(asset_types),
       franchise_ids = dplyr::first(franchise_ids),
       asset_names = paste(asset_name, collapse = "\n"),
+      franchise_name = dplyr::first(franchise_name),
       .groups = "drop"
     ) %>% 
+    dplyr::mutate(
+      asset_names = paste0(franchise_name, " sends\n", asset_names)
+    ) %>%
+    
     dplyr::filter(
       if(isTruthy(input$tradeHistoryAssets))
         grepl(input$tradeHistoryAssets, as.character(asset_ids))
       else
         TRUE
     ) %>%
-    dplyr::filter(
-      if(isTruthy(input$tradeHistoryTeams))
-        grepl(input$tradeHistoryTeams, as.character(franchise_ids))
-      else
-        TRUE
-    ) %>%
-    dplyr::filter(
-      date >= input$tradeHistoryDate[1] & date <= input$tradeHistoryDate[2]
-    ) %>%
-    dplyr::filter(
-      if(input$tradeHistoryType == "Picks")
-        !grepl("player", as.character(asset_types))
-      else
-        TRUE
-    ) %>%
-    dplyr::filter(
-      if(input$tradeHistoryType == "Spieler")
-        !grepl("pick", as.character(asset_types))
-      else
-        TRUE
-    ) %>%
-    dplyr::select(trade_id, date, trade_side, asset_names) %>%
+      dplyr::filter(
+        if(isTruthy(input$tradeHistoryTeams))
+          grepl(input$tradeHistoryTeams, as.character(franchise_ids))
+        else
+          TRUE
+      ) %>%
+      dplyr::filter(
+        date >= input$tradeHistoryDate[1] & date <= input$tradeHistoryDate[2]
+      ) %>%
+      dplyr::filter(
+        if(input$tradeHistoryType == "Picks")
+          !grepl("player", as.character(asset_types))
+        else
+          TRUE
+      ) %>%
+      dplyr::filter(
+        if(input$tradeHistoryType == "Spieler")
+          !grepl("pick", as.character(asset_types))
+        else
+          TRUE
+      ) %>%
+
+    dplyr::select(trade_id, date, trade_side, asset_names) %>% 
     tidyr::spread(trade_side, asset_names) %>%
+    
+    dplyr::filter(
+      if(isTruthy(input$tradeHistoryPositions))
+        grepl(paste0(input$tradeHistoryPositions, ","), franchise_1) | grepl(paste0(input$tradeHistoryPositions, ","), franchise_2)
+      else
+        TRUE
+    ) %>%
+    
     dplyr::arrange(dplyr::desc(trade_id)) %>%
     dplyr::select(-trade_id) %>%
     dplyr::mutate(
