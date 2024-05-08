@@ -1192,7 +1192,7 @@ selectizeInput(
 ## Row
 ### Alle Trades seit 2016 {data-width=800}
 
-```{r trade-history, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+```{r trade-history, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
 trade_history <- reactive({
   trades %>% 
     dplyr::left_join(
@@ -1259,7 +1259,7 @@ trade_history <- reactive({
 DT::renderDataTable({
   DT::datatable(
     trade_history(),
-    rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 12)
+    rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 8)
   )
 })
 
@@ -1276,7 +1276,7 @@ DT::renderDataTable({
       Trades = formattable::color_tile("#EA2027", "#009432")
     )
   ) %>% 
-  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'asc')))
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 10, order = list(1, 'asc')))
 })
 ```
 
@@ -1290,14 +1290,14 @@ DT::renderDataTable({
       Trades = formattable::color_tile("#EA2027", "#009432")
     )
   ) %>% 
-  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'asc')))
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 10, order = list(1, 'asc')))
 })
 ```
 
 ## Row
 ### Trades pro Franchise
 
-```{r trades-by-franchise, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+```{r trades-by-franchise, echo=FALSE, fig.height=12, message=FALSE, warning=FALSE}
 DT::renderDataTable({
   formattable::formattable(
     most_trades_by_franchise,
