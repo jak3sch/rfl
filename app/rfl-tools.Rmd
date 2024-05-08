@@ -30,6 +30,7 @@ runtime: shiny
   height: unset !important;
 }
 .dataTable tbody td {white-space: pre-wrap;}
+.dataTable tbody td::first-line { font-weight: bold; }
 ```
 
 ```{r setup, include=FALSE}
@@ -1132,6 +1133,8 @@ gt::render_gt({
 ## Inputs {.sidebar}
 
 ```{r inputs-trade-history, echo=FALSE, message=FALSE, warning=FALSE}
+source("R/trades/trades.R")
+
 selection <- trades %>% 
   dplyr::select(asset_id, asset_name) %>% 
   dplyr::mutate(
@@ -1141,14 +1144,13 @@ selection <- trades %>%
   dplyr::distinct() %>% 
   dplyr::arrange(asset_name)
 
-selectizeInput(
-  "tradeHistoryAssets",
-  "Filter nach Asset",
-  choices = setNames(selection$asset_id, selection$asset_name),
-  multiple= TRUE,
-  options = list(
-    placeholder = "Asset wählen..."
-  )
+selectInput(
+  "tradeHistoryType",
+  "Trades nach Typ filtern",
+  list("Alle", "Spieler", "Picks"),
+  selected = "Alle",
+  multiple = FALSE,
+  selectize = TRUE
 )
 
 dateRangeInput(
@@ -1165,44 +1167,155 @@ dateRangeInput(
   language = "de",
   autoclose = TRUE
 )
+
+selectizeInput(
+  "tradeHistoryAssets",
+  "Filter nach Asset",
+  choices = setNames(selection$asset_id, selection$asset_name),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Assets wählen"
+  )
+)
+
+selectizeInput(
+  "tradeHistoryTeams",
+  "Filter nach Teams",
+  choices = setNames(franchises$franchise_id, franchises$franchise_name),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Teams wählen"
+  )
+)
 ```
 
-> wenn ein Error angezeigt wird, wähle einfach ein Asset aus und die getätigten Trades sollten erscheinen
-
 ## Row
-### Trades mit gewähltem Asset {data-width=800}
+### Alle Trades seit 2016 {data-width=800}
 
 ```{r trade-history, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
-DT::renderDataTable({
-  table_data <- trades %>% 
+trade_history <- reactive({
+  trades %>% 
+    dplyr::left_join(
+      franchises %>% 
+        dplyr::select(franchise_id, franchise_name),
+      by = "franchise_id"
+    ) %>% 
+    dplyr::mutate(
+      asset_type = ifelse(grepl("DP_", asset_id), "pick", "player"),
+    ) %>% 
     dplyr::group_by(trade_id) %>%
     dplyr::mutate(
-      asset_ids = paste(asset_id, collapse = ",")
+      asset_name = paste0(franchise_name, " sends\n", asset_name),
+      asset_types = paste(asset_type, collapse = ","),
+      asset_ids = paste(asset_id, collapse = ","),
+      franchise_ids = paste(franchise_id, collapse = ",")
     ) %>% 
-    dplyr::group_by(trade_id, trade_side) %>%
+    dplyr::group_by(trade_id, trade_side, asset_types) %>%
     dplyr::summarise(
       date = dplyr::first(date),
       asset_ids = dplyr::first(asset_ids),
+      asset_types = dplyr::first(asset_types),
+      franchise_ids = dplyr::first(franchise_ids),
       asset_names = paste(asset_name, collapse = "\n"),
       .groups = "drop"
     ) %>% 
-    #dplyr::filter(grepl("12655", as.character(asset_ids))) %>% 
-    dplyr::filter(grepl(input$tradeHistoryAssets, as.character(asset_ids)) & date >= input$tradeHistoryDate[1] & date <= input$tradeHistoryDate[2]) %>% 
-    dplyr::select(trade_id, date, trade_side, asset_names) %>% 
-    tidyr::spread(trade_side, asset_names) %>% 
-    dplyr::arrange(dplyr::desc(trade_id)) %>% 
-    dplyr::select(-trade_id) %>% 
+    dplyr::filter(
+      if(isTruthy(input$tradeHistoryAssets))
+        grepl(input$tradeHistoryAssets, as.character(asset_ids))
+      else
+        TRUE
+    ) %>%
+    dplyr::filter(
+      if(isTruthy(input$tradeHistoryTeams))
+        grepl(input$tradeHistoryTeams, as.character(franchise_ids))
+      else
+        TRUE
+    ) %>%
+    dplyr::filter(
+      date >= input$tradeHistoryDate[1] & date <= input$tradeHistoryDate[2]
+    ) %>%
+    dplyr::filter(
+      if(input$tradeHistoryType == "Picks")
+        !grepl("player", as.character(asset_types))
+      else
+        TRUE
+    ) %>%
+    dplyr::filter(
+      if(input$tradeHistoryType == "Spieler")
+        !grepl("pick", as.character(asset_types))
+      else
+        TRUE
+    ) %>%
+    dplyr::select(trade_id, date, trade_side, asset_names) %>%
+    tidyr::spread(trade_side, asset_names) %>%
+    dplyr::arrange(dplyr::desc(trade_id)) %>%
+    dplyr::select(-trade_id) %>%
     dplyr::mutate(
       date = format(date, "%d.%m.%Y")
-    ) %>% 
+    ) %>%
     dplyr::rename(Datum = date, "Franchise 1" = franchise_1, "Franchise 2" = franchise_2)
-  
+})
+
+DT::renderDataTable({
   DT::datatable(
-    table_data,
+    trade_history(),
     rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 12)
   )
 })
 
+```
+
+## Row
+### Die am häufigsten getradeten Spieler
+
+```{r most-traded-players, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  formattable::formattable(
+    most_tradet_players,
+    list(
+      Trades = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'asc')))
+})
+```
+
+### Trades zwischen Teams
+
+```{r trades-between-teams, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  formattable::formattable(
+    most_trades_between_teams,
+    list(
+      Trades = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'asc')))
+})
+```
+
+## Row
+### Trades pro Franchise
+
+```{r trades-by-franchise, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  formattable::formattable(
+    most_trades_by_franchise,
+    list(
+      Summe = formattable::color_tile("#EA2027", "#009432"),
+      "2016" = formattable::color_tile("#EA2027", "#009432"),
+      "2017" = formattable::color_tile("#EA2027", "#009432"),
+      "2018" = formattable::color_tile("#EA2027", "#009432"),
+      "2019" = formattable::color_tile("#EA2027", "#009432"),
+      "2020" = formattable::color_tile("#EA2027", "#009432"),
+      "2021" = formattable::color_tile("#EA2027", "#009432"),
+      "2022" = formattable::color_tile("#EA2027", "#009432"),
+      "2023" = formattable::color_tile("#EA2027", "#009432"),
+      "2024" = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = FALSE, filter = "top", options = list(pageLength = 12, order = list(1, 'asc')))
+})
 ```
 
 # Trade Calculator (Beta) {data-navmenu="Trades"}
