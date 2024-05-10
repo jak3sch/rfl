@@ -2742,3 +2742,6 @@ trade_id,timestamp,date,week,franchise_id,trade_side,asset_id,asset_name
 2024009,1715104880,2024-05-07T18:01:20Z,22,0020,franchise_1,DP_7,7th Round Pick (7.4 2024)
 2024009,1715104880,2024-05-07T18:01:20Z,22,0006,franchise_2,DP_1,1st Round Pick 2025
 2024009,1715104880,2024-05-07T18:01:20Z,22,0006,franchise_2,DP_4,4th Round Pick 2025
+2024010,1715351830,2024-05-10T14:37:10Z,22,0006,franchise_1,14921,"Dugger, Kyle (S, NEP)"
+2024010,1715351830,2024-05-10T14:37:10Z,22,0006,franchise_1,DP_4,4th Round Pick (4.35 2024)
+2024010,1715351830,2024-05-10T14:37:10Z,22,0024,franchise_2,12221,"Hunter, Danielle (DE, HOU)"
