@@ -1,6 +1,5 @@
 rfl_drafts_data <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/drafts/rfl-draft.csv", col_types = "iicccccccci")
 
-
 rfl_drafts <- reactive({
   rfl_drafts <- rfl_drafts_data %>%
     dplyr::filter(
@@ -30,16 +29,16 @@ nfl_draft_rounds <- reactive({
       overall >= input$selectPicks[1] & overall <= input$selectPicks[2]
     ) %>%
     dplyr::left_join(
-      nflreadr::load_draft_picks() %>% 
-        dplyr::filter(!is.na(gsis_id), season >= 2016) %>% 
-        dplyr::select(gsis_id, season, round) %>% 
+      nflreadr::load_draft_picks() %>%
+        dplyr::filter(!is.na(gsis_id), season >= 2016) %>%
+        dplyr::select(gsis_id, season, round) %>%
         dplyr::rename(round_nfl = round),
       by = c("gsis_id", "season"),
       relationship = "many-to-many"
     ) %>%
     dplyr::mutate(
       round_nfl = ifelse(is.na(gsis_id), 8, round_nfl)
-    ) %>% 
-    dplyr::group_by(position, round, round_nfl) %>% 
+    ) %>%
+    dplyr::group_by(position, round, round_nfl) %>%
     dplyr::summarise(count = n(), .groups = "drop")
 })
