@@ -1575,6 +1575,54 @@ renderPlot({
 
 > oben links: früh im NFL Draft, spät im RFL Draft (Steal?) - oben rechts: spät im NFL Draft, spät im RFL Draft - unten rechts: spät im NFL Draft, früh im RFL Draft (Reach?) - unten links: früh im NFL Draft, früh im RFL Draft
 
+# Draft-ELO {data-navmenu="Draft"}
+
+## Inputs {.sidebar}
+
+```{r inputs-draft-elo, echo=FALSE, message=FALSE, warning=FALSE}
+sliderInput("draftEloSelectSeason", "Saison", min = 2017, max = var.season, value = c(2017, var.season), sep = "")
+
+sliderInput("draftEloSelectRounds", "Draftrunde", min = 1, max = 7, value = c(1, 7), sep = "")
+
+selectizeInput(
+  "draftEloSelectPosition",
+  "Positionen",
+  choices = players$pos,
+  multiple = TRUE,
+  options = list(
+    placeholder = "Position wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+selectizeInput(
+  "draftEloSelectTeams",
+  "RFL Teams",
+  choices = setNames(franchises$franchise_id, franchises$franchise_name),
+  multiple= TRUE,
+  options = list(
+    placeholder = "Teams wählen",
+    onInitialize = I('function() { this.setValue(""); }')
+  )
+)
+
+source("R/drafts/rfl-draft-elo.R", local = TRUE)
+```
+
+## Row
+### RFL Draftpicks nach ELO
+```{r draft-elo, echo=FALSE, fig.height=8, message=FALSE, warning=FALSE}
+DT::renderDataTable({
+  formattable::formattable(
+    rfl_draft_elo(),
+    list(
+      ELO = formattable::color_tile("#EA2027", "#009432")
+    )
+  ) %>% 
+  formattable::as.datatable(escape = FALSE, rownames = F, options = list(pageLength = 12, order = list(8, 'asc')))
+})
+```
+
 # Hit Rates {data-navmenu="Draft"}
 
 ## Inputs {.sidebar}
