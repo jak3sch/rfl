@@ -1,5 +1,3 @@
-rfl_drafts_data <- readr::read_csv("https://raw.githubusercontent.com/jak3sch/rfl/main/data/drafts/rfl-draft.csv", col_types = "iicccccccci")
-
 rfl_drafts <- reactive({
   rfl_drafts <- rfl_drafts_data %>%
     dplyr::filter(
