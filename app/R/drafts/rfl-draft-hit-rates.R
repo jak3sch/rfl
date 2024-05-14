@@ -1,5 +1,3 @@
-source("R/drafts/rfl-drafts.R")
-
 fantasy_finishes_raw <- purrr::map_df(2016:var.season, function(x) {
   readr::read_rds(
     glue::glue("https://github.com/jak3sch/rfl/raw/main/data/playerscores/rfl-playerscores-{x}.rds"),
