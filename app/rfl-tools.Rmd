@@ -1507,13 +1507,13 @@ DT::renderDataTable({
 ## Row
 ### Alle Trades während des aktuellsten Drafts
 
-```{r draft-trades, echo=FALSE, fig.height=9, message=FALSE, warning=FALSE}
+```{r draft-trades, echo=FALSE, fig.height=30, message=FALSE, warning=FALSE}
 source("R/drafts/rfl-draft-trades.R")
 
 DT::renderDataTable({
   DT::datatable(
-    rfl_draft_trades_combined,
-    rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 8)
+    draft_trades_combined,
+    rownames = FALSE, options = list(dom = "Bfrtip", pageLength = 12)
   )
 })
 
